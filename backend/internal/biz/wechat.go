@@ -73,13 +73,14 @@ func (w *wechatService) Code2Session(ctx context.Context, code string) (openid, 
 	fullURL := apiURL + "?" + params.Encode()
 
 	// 记录请求信息（不记录完整的 secret）
-	w.log.Infof("Calling WeChat API: appid=%s, code_length=%d, code_prefix=%s",
-		w.appID, len(code), func() string {
-			if len(code) > 10 {
-				return code[:10] + "..."
-			}
-			return code
-		}())
+	codePrefix := ""
+	if len(code) > 10 {
+		codePrefix = code[:10] + "..."
+	} else {
+		codePrefix = code
+	}
+	w.log.Infof("Calling WeChat API: appid=%s, code_length=%d, code_prefix=%s, secret_length=%d",
+		w.appID, len(code), codePrefix, len(w.appSecret))
 
 	// 创建请求
 	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
