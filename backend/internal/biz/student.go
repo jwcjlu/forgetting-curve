@@ -3,26 +3,25 @@ package biz
 import (
 	"context"
 	"errors"
-	"forgetting-curve/backend/internal/data"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
 
 // StudentUsecase 学生业务逻辑接口
 type StudentUsecase interface {
-	CreateStudent(ctx context.Context, name, studentNo string) (*data.Student, error)
-	GetStudent(ctx context.Context, id int64) (*data.Student, error)
-	GetStudentByNo(ctx context.Context, studentNo string) (*data.Student, error)
-	GetOrCreateStudentByOpenid(ctx context.Context, openid, name string) (*data.Student, bool, error)
+	CreateStudent(ctx context.Context, name, studentNo string) (*Student, error)
+	GetStudent(ctx context.Context, id int64) (*Student, error)
+	GetStudentByNo(ctx context.Context, studentNo string) (*Student, error)
+	GetOrCreateStudentByOpenid(ctx context.Context, openid, name string) (*Student, bool, error)
 }
 
 type studentUsecase struct {
-	repo data.StudentRepo
+	repo StudentRepo
 	log  *log.Helper
 }
 
 // NewStudentUsecase 创建学生业务逻辑
-func NewStudentUsecase(repo data.StudentRepo, logger log.Logger) StudentUsecase {
+func NewStudentUsecase(repo StudentRepo, logger log.Logger) StudentUsecase {
 	return &studentUsecase{
 		repo: repo,
 		log:  log.NewHelper(logger),
@@ -30,7 +29,7 @@ func NewStudentUsecase(repo data.StudentRepo, logger log.Logger) StudentUsecase 
 }
 
 // CreateStudent 创建学生
-func (uc *studentUsecase) CreateStudent(ctx context.Context, name, studentNo string) (*data.Student, error) {
+func (uc *studentUsecase) CreateStudent(ctx context.Context, name, studentNo string) (*Student, error) {
 	// 验证输入
 	if name == "" {
 		return nil, errors.New("student name cannot be empty")
@@ -46,7 +45,7 @@ func (uc *studentUsecase) CreateStudent(ctx context.Context, name, studentNo str
 	}
 
 	// 创建学生
-	student := &data.Student{
+	student := &Student{
 		Name:      name,
 		StudentNo: studentNo,
 	}
@@ -55,17 +54,17 @@ func (uc *studentUsecase) CreateStudent(ctx context.Context, name, studentNo str
 }
 
 // GetStudent 获取学生信息
-func (uc *studentUsecase) GetStudent(ctx context.Context, id int64) (*data.Student, error) {
+func (uc *studentUsecase) GetStudent(ctx context.Context, id int64) (*Student, error) {
 	return uc.repo.GetByID(ctx, id)
 }
 
 // GetStudentByNo 根据学号获取学生
-func (uc *studentUsecase) GetStudentByNo(ctx context.Context, studentNo string) (*data.Student, error) {
+func (uc *studentUsecase) GetStudentByNo(ctx context.Context, studentNo string) (*Student, error) {
 	return uc.repo.GetByStudentNo(ctx, studentNo)
 }
 
 // GetOrCreateStudentByOpenid 通过openid获取或创建学生
-func (uc *studentUsecase) GetOrCreateStudentByOpenid(ctx context.Context, openid, name string) (*data.Student, bool, error) {
+func (uc *studentUsecase) GetOrCreateStudentByOpenid(ctx context.Context, openid, name string) (*Student, bool, error) {
 	if openid == "" {
 		return nil, false, errors.New("openid cannot be empty")
 	}
@@ -98,7 +97,7 @@ func (uc *studentUsecase) GetOrCreateStudentByOpenid(ctx context.Context, openid
 		name = "微信用户"
 	}
 
-	student = &data.Student{
+	student = &Student{
 		Name:      name,
 		StudentNo: studentNo,
 		OpenID:    openid,

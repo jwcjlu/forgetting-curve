@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
-	"forgetting-curve/backend/internal/biz"
 	"time"
+
+	v1 "forgetting-curve/backend/api/student/v1"
+	"forgetting-curve/backend/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -30,10 +32,19 @@ func NewStudentService(studentUc biz.StudentUsecase, wordUc biz.WordUsecase, log
 func (s *StudentService) CreateStudent(ctx context.Context, req *v1.CreateStudentRequest) (*v1.CreateStudentReply, error) {
 	student, err := s.studentUc.CreateStudent(ctx, req.Name, req.StudentNo)
 	if err != nil {
-		return nil, err
+		return &v1.CreateStudentReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
 	}
 
 	return &v1.CreateStudentReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
 		Student: &v1.Student{
 			Id:        student.ID,
 			Name:      student.Name,
@@ -49,10 +60,19 @@ func (s *StudentService) CreateStudent(ctx context.Context, req *v1.CreateStuden
 func (s *StudentService) GetStudent(ctx context.Context, req *v1.GetStudentRequest) (*v1.GetStudentReply, error) {
 	student, err := s.studentUc.GetStudent(ctx, req.Id)
 	if err != nil {
-		return nil, err
+		return &v1.GetStudentReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
 	}
 
 	return &v1.GetStudentReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
 		Student: &v1.Student{
 			Id:        student.ID,
 			Name:      student.Name,
@@ -79,7 +99,12 @@ func (s *StudentService) BatchAddWords(ctx context.Context, req *v1.BatchAddWord
 	// 调用业务逻辑
 	words, err := s.wordUc.BatchAddWords(ctx, req.StudentId, wordItems)
 	if err != nil {
-		return nil, err
+		return &v1.BatchAddWordsReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
 	}
 
 	// 转换响应数据
@@ -99,6 +124,10 @@ func (s *StudentService) BatchAddWords(ctx context.Context, req *v1.BatchAddWord
 	}
 
 	return &v1.BatchAddWordsReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
 		Count: int32(len(v1Words)),
 		Words: v1Words,
 	}, nil
@@ -119,7 +148,12 @@ func (s *StudentService) GetStudentWords(ctx context.Context, req *v1.GetStudent
 	// 调用业务逻辑（已经验证了学生ID，确保只能看自己的单词）
 	words, total, err := s.wordUc.GetStudentWords(ctx, req.StudentId, page, pageSize)
 	if err != nil {
-		return nil, err
+		return &v1.GetStudentWordsReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
 	}
 
 	// 转换响应数据
@@ -139,6 +173,10 @@ func (s *StudentService) GetStudentWords(ctx context.Context, req *v1.GetStudent
 	}
 
 	return &v1.GetStudentWordsReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
 		Words:    v1Words,
 		Total:    int32(total),
 		Page:     page,
@@ -150,7 +188,12 @@ func (s *StudentService) GetStudentWords(ctx context.Context, req *v1.GetStudent
 func (s *StudentService) GetTodayWords(ctx context.Context, req *v1.GetTodayWordsRequest) (*v1.GetTodayWordsReply, error) {
 	words, err := s.wordUc.GetTodayWords(ctx, req.StudentId, req.Date)
 	if err != nil {
-		return nil, err
+		return &v1.GetTodayWordsReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
 	}
 
 	// 转换响应数据
@@ -176,6 +219,10 @@ func (s *StudentService) GetTodayWords(ctx context.Context, req *v1.GetTodayWord
 	}
 
 	return &v1.GetTodayWordsReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
 		Words: v1Words,
 		Date:  date,
 		Count: int32(len(v1Words)),
@@ -186,10 +233,19 @@ func (s *StudentService) GetTodayWords(ctx context.Context, req *v1.GetTodayWord
 func (s *StudentService) MarkWordReviewed(ctx context.Context, req *v1.MarkWordReviewedRequest) (*v1.MarkWordReviewedReply, error) {
 	word, err := s.wordUc.MarkWordReviewed(ctx, req.StudentId, req.WordId)
 	if err != nil {
-		return nil, err
+		return &v1.MarkWordReviewedReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
 	}
 
 	return &v1.MarkWordReviewedReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
 		Word: &v1.Word{
 			Id:             word.ID,
 			StudentId:      word.StudentID,
@@ -208,10 +264,19 @@ func (s *StudentService) MarkWordReviewed(ctx context.Context, req *v1.MarkWordR
 func (s *StudentService) GetOrCreateStudentByOpenid(ctx context.Context, req *v1.GetOrCreateStudentByOpenidRequest) (*v1.GetOrCreateStudentByOpenidReply, error) {
 	student, isNew, err := s.studentUc.GetOrCreateStudentByOpenid(ctx, req.Openid, req.Name)
 	if err != nil {
-		return nil, err
+		return &v1.GetOrCreateStudentByOpenidReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
 	}
 
 	return &v1.GetOrCreateStudentByOpenidReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
 		Student: &v1.Student{
 			Id:        student.ID,
 			Name:      student.Name,

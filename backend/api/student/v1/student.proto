@@ -3,8 +3,9 @@ syntax = "proto3";
 package api.student.v1;
 
 import "google/api/annotations.proto";
+import "common.proto";
 
-option go_package = "forgetting-curve/backend/api/student/v1;v1";
+option go_package = "backend/api/student/v1;v1";
 
 service StudentService {
   // 添加学生
@@ -61,6 +62,7 @@ service StudentService {
   }
 }
 
+
 message Student {
   int64 id = 1;
   string name = 2;
@@ -88,7 +90,8 @@ message CreateStudentRequest {
 }
 
 message CreateStudentReply {
-  Student student = 1;
+  BaseResponse ret =1;
+  Student student = 2;
 }
 
 message GetStudentRequest {
@@ -96,7 +99,8 @@ message GetStudentRequest {
 }
 
 message GetStudentReply {
-  Student student = 1;
+  BaseResponse ret =1;
+  Student student = 2;
 }
 
 message BatchAddWordsRequest {
@@ -111,8 +115,9 @@ message WordItem {
 }
 
 message BatchAddWordsReply {
-  int32 count = 1;
-  repeated Word words = 2;
+  BaseResponse ret =1;
+  int32 count = 2;
+  repeated Word words = 3;
 }
 
 message GetStudentWordsRequest {
@@ -122,10 +127,11 @@ message GetStudentWordsRequest {
 }
 
 message GetStudentWordsReply {
-  repeated Word words = 1;
+  BaseResponse ret =1;
   int32 total = 2;
   int32 page = 3;
   int32 page_size = 4;
+  repeated Word words = 5;
 }
 
 message GetTodayWordsRequest {
@@ -134,9 +140,10 @@ message GetTodayWordsRequest {
 }
 
 message GetTodayWordsReply {
-  repeated Word words = 1;
+  BaseResponse ret =1;
   string date = 2;
   int32 count = 3;
+  repeated Word words = 4;
 }
 
 message MarkWordReviewedRequest {
@@ -145,7 +152,8 @@ message MarkWordReviewedRequest {
 }
 
 message MarkWordReviewedReply {
-  Word word = 1;
+  BaseResponse ret =1;
+  Word word = 2;
 }
 
 message GetOrCreateStudentByOpenidRequest {
@@ -154,7 +162,8 @@ message GetOrCreateStudentByOpenidRequest {
 }
 
 message GetOrCreateStudentByOpenidReply {
-  Student student = 1;
-  bool is_new = 2; // 是否为新创建的学生
+  BaseResponse ret =1;
+  Student student = 2;
+  bool is_new = 3; // 是否为新创建的学生
 }
 

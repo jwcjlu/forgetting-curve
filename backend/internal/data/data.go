@@ -2,6 +2,7 @@ package data
 
 import (
 	"fmt"
+	"forgetting-curve/backend/internal/biz"
 	"time"
 
 	"forgetting-curve/backend/internal/conf"
@@ -31,7 +32,7 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	}
 
 	// 自动迁移
-	if err := db.AutoMigrate(&Student{}, &Word{}); err != nil {
+	if err := db.AutoMigrate(&biz.Student{}, &biz.Word{}); err != nil {
 		return nil, nil, fmt.Errorf("failed to migrate database: %w", err)
 	}
 

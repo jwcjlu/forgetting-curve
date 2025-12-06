@@ -7,6 +7,7 @@ import (
 	"forgetting-curve/backend/internal/biz"
 	"forgetting-curve/backend/internal/conf"
 	"forgetting-curve/backend/internal/data"
+	"forgetting-curve/backend/internal/server"
 	"forgetting-curve/backend/internal/service"
 
 	"github.com/go-kratos/kratos/v2"
@@ -19,6 +20,7 @@ func wireApp(*conf.Server, *conf.Data, log.Logger) (*kratos.App, func(), error) 
 	panic(wire.Build(
 		data.ProviderSet,
 		biz.ProviderSet,
+		server.ProviderSet,
 		service.ProviderSet,
 		newApp,
 	))

@@ -2,28 +2,20 @@ package data
 
 import (
 	"context"
-	"gorm.io/gorm"
+	"forgetting-curve/backend/internal/biz"
 )
-
-// WordRepo 单词数据仓库接口
-type WordRepo interface {
-	BatchCreate(ctx context.Context, words []*Word) error
-	GetByStudentID(ctx context.Context, studentID int64, page, pageSize int32) ([]*Word, int64, error)
-	GetByID(ctx context.Context, id int64) (*Word, error)
-	Update(ctx context.Context, word *Word) (*Word, error)
-}
 
 type wordRepo struct {
 	data *Data
 }
 
 // NewWordRepo 创建单词仓库
-func NewWordRepo(data *Data) WordRepo {
+func NewWordRepo(data *Data) biz.WordRepo {
 	return &wordRepo{data: data}
 }
 
 // BatchCreate 批量创建单词
-func (r *wordRepo) BatchCreate(ctx context.Context, words []*Word) error {
+func (r *wordRepo) BatchCreate(ctx context.Context, words []*biz.Word) error {
 	if len(words) == 0 {
 		return nil
 	}
@@ -31,12 +23,12 @@ func (r *wordRepo) BatchCreate(ctx context.Context, words []*Word) error {
 }
 
 // GetByStudentID 根据学生ID获取单词列表（分页）
-func (r *wordRepo) GetByStudentID(ctx context.Context, studentID int64, page, pageSize int32) ([]*Word, int64, error) {
-	var words []*Word
+func (r *wordRepo) GetByStudentID(ctx context.Context, studentID int64, page, pageSize int32) ([]*biz.Word, int64, error) {
+	var words []*biz.Word
 	var total int64
 
 	// 查询总数
-	if err := r.data.db.WithContext(ctx).Model(&Word{}).Where("student_id = ?", studentID).Count(&total).Error; err != nil {
+	if err := r.data.db.WithContext(ctx).Model(&biz.Word{}).Where("student_id = ?", studentID).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -55,8 +47,8 @@ func (r *wordRepo) GetByStudentID(ctx context.Context, studentID int64, page, pa
 }
 
 // GetByID 根据ID获取单词
-func (r *wordRepo) GetByID(ctx context.Context, id int64) (*Word, error) {
-	var word Word
+func (r *wordRepo) GetByID(ctx context.Context, id int64) (*biz.Word, error) {
+	var word biz.Word
 	if err := r.data.db.WithContext(ctx).First(&word, id).Error; err != nil {
 		return nil, err
 	}
@@ -64,7 +56,7 @@ func (r *wordRepo) GetByID(ctx context.Context, id int64) (*Word, error) {
 }
 
 // Update 更新单词
-func (r *wordRepo) Update(ctx context.Context, word *Word) (*Word, error) {
+func (r *wordRepo) Update(ctx context.Context, word *biz.Word) (*biz.Word, error) {
 	if err := r.data.db.WithContext(ctx).Save(word).Error; err != nil {
 		return nil, err
 	}

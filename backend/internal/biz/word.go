@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 	"errors"
-	"forgetting-curve/backend/internal/data"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -11,10 +10,10 @@ import (
 
 // WordUsecase 单词业务逻辑接口
 type WordUsecase interface {
-	BatchAddWords(ctx context.Context, studentID int64, words []*WordItem) ([]*data.Word, error)
-	GetStudentWords(ctx context.Context, studentID int64, page, pageSize int32) ([]*data.Word, int64, error)
-	GetTodayWords(ctx context.Context, studentID int64, date string) ([]*data.Word, error)
-	MarkWordReviewed(ctx context.Context, studentID int64, wordID int64) (*data.Word, error)
+	BatchAddWords(ctx context.Context, studentID int64, words []*WordItem) ([]*Word, error)
+	GetStudentWords(ctx context.Context, studentID int64, page, pageSize int32) ([]*Word, int64, error)
+	GetTodayWords(ctx context.Context, studentID int64, date string) ([]*Word, error)
+	MarkWordReviewed(ctx context.Context, studentID int64, wordID int64) (*Word, error)
 	ValidateStudentAccess(ctx context.Context, studentID int64, wordID int64) error
 }
 
@@ -26,13 +25,13 @@ type WordItem struct {
 }
 
 type wordUsecase struct {
-	wordRepo    data.WordRepo
-	studentRepo data.StudentRepo
+	wordRepo    WordRepo
+	studentRepo StudentRepo
 	log         *log.Helper
 }
 
 // NewWordUsecase 创建单词业务逻辑
-func NewWordUsecase(wordRepo data.WordRepo, studentRepo data.StudentRepo, logger log.Logger) WordUsecase {
+func NewWordUsecase(wordRepo WordRepo, studentRepo StudentRepo, logger log.Logger) WordUsecase {
 	return &wordUsecase{
 		wordRepo:    wordRepo,
 		studentRepo: studentRepo,
@@ -41,7 +40,7 @@ func NewWordUsecase(wordRepo data.WordRepo, studentRepo data.StudentRepo, logger
 }
 
 // BatchAddWords 批量添加单词到学生名下
-func (uc *wordUsecase) BatchAddWords(ctx context.Context, studentID int64, words []*WordItem) ([]*data.Word, error) {
+func (uc *wordUsecase) BatchAddWords(ctx context.Context, studentID int64, words []*WordItem) ([]*Word, error) {
 	// 验证学生是否存在
 	_, err := uc.studentRepo.GetByID(ctx, studentID)
 	if err != nil {
@@ -54,12 +53,12 @@ func (uc *wordUsecase) BatchAddWords(ctx context.Context, studentID int64, words
 	}
 
 	// 转换为数据模型
-	dbWords := make([]*data.Word, 0, len(words))
+	dbWords := make([]*Word, 0, len(words))
 	for _, item := range words {
 		if item.Word == "" || item.Meaning == "" {
 			continue // 跳过无效的单词
 		}
-		dbWords = append(dbWords, &data.Word{
+		dbWords = append(dbWords, &Word{
 			StudentID:      studentID,
 			Word:           item.Word,
 			Meaning:        item.Meaning,
@@ -82,7 +81,7 @@ func (uc *wordUsecase) BatchAddWords(ctx context.Context, studentID int64, words
 }
 
 // GetStudentWords 获取学生的单词列表
-func (uc *wordUsecase) GetStudentWords(ctx context.Context, studentID int64, page, pageSize int32) ([]*data.Word, int64, error) {
+func (uc *wordUsecase) GetStudentWords(ctx context.Context, studentID int64, page, pageSize int32) ([]*Word, int64, error) {
 	// 验证学生是否存在
 	_, err := uc.studentRepo.GetByID(ctx, studentID)
 	if err != nil {
@@ -104,7 +103,7 @@ func (uc *wordUsecase) GetStudentWords(ctx context.Context, studentID int64, pag
 }
 
 // GetTodayWords 获取今日需要背诵的单词（根据艾宾浩斯曲线）
-func (uc *wordUsecase) GetTodayWords(ctx context.Context, studentID int64, date string) ([]*data.Word, error) {
+func (uc *wordUsecase) GetTodayWords(ctx context.Context, studentID int64, date string) ([]*Word, error) {
 	// 验证学生是否存在
 	_, err := uc.studentRepo.GetByID(ctx, studentID)
 	if err != nil {
@@ -130,7 +129,7 @@ func (uc *wordUsecase) GetTodayWords(ctx context.Context, studentID int64, date 
 	}
 
 	// 使用艾宾浩斯算法过滤出今天需要复习的单词
-	var todayWords []*data.Word
+	var todayWords []*Word
 	for _, word := range allWords {
 		startDate, err := time.Parse("2006-01-02", word.StartDate)
 		if err != nil {
@@ -146,7 +145,7 @@ func (uc *wordUsecase) GetTodayWords(ctx context.Context, studentID int64, date 
 }
 
 // MarkWordReviewed 标记单词为已复习
-func (uc *wordUsecase) MarkWordReviewed(ctx context.Context, studentID int64, wordID int64) (*data.Word, error) {
+func (uc *wordUsecase) MarkWordReviewed(ctx context.Context, studentID int64, wordID int64) (*Word, error) {
 	// 验证学生是否有权限
 	if err := uc.ValidateStudentAccess(ctx, studentID, wordID); err != nil {
 		return nil, err

@@ -2,6 +2,7 @@ package conf
 
 import (
 	"github.com/go-kratos/kratos/v2/config"
+	"time"
 )
 
 // Bootstrap 配置结构
