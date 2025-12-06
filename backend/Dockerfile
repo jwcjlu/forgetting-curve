@@ -14,6 +14,12 @@ RUN go mod download
 # 复制源代码
 COPY . .
 
+# 安装 wire 工具并生成 wire 代码
+RUN go install github.com/google/wire/cmd/wire@latest && \
+    cd cmd/server && \
+    /go/bin/wire && \
+    cd ../..
+
 # 生成 proto 代码（如果需要）
 # RUN make api
 
