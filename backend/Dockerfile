@@ -11,17 +11,37 @@ WORKDIR /build
 COPY go.mod go.sum ./
 RUN go mod download
 
+# 安装 proto 和 wire 工具
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest && \
+    go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest && \
+    go install github.com/google/wire/cmd/wire@latest
+
+# 设置 PATH 包含 Go bin 目录
+ENV PATH=$PATH:/go/bin
+
 # 复制源代码
 COPY . .
 
-# 安装 wire 工具并生成 wire 代码
-RUN go install github.com/google/wire/cmd/wire@latest && \
-    cd cmd/server && \
-    /go/bin/wire && \
-    cd ../..
+# 生成 proto 代码
+RUN cd /build/api/student/v1 && \
+    protoc --proto_path=. \
+    --proto_path=/build/third_party \
+    --go_out=paths=source_relative:. \
+    common.proto && \
+    protoc --proto_path=. \
+    --proto_path=/build/third_party \
+    --go_out=paths=source_relative:. \
+    error.proto && \
+    protoc --proto_path=. \
+    --proto_path=/build/third_party \
+    --go_out=paths=source_relative:. \
+    --go-http_out=paths=source_relative:. \
+    --go-grpc_out=paths=source_relative:. \
+    student.proto
 
-# 生成 proto 代码（如果需要）
-# RUN make api
+# 生成 wire 代码
+RUN cd /build/cmd/server && /go/bin/wire
 
 # 构建应用
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
