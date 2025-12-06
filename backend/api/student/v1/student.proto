@@ -1,0 +1,160 @@
+syntax = "proto3";
+
+package api.student.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "forgetting-curve/backend/api/student/v1;v1";
+
+service StudentService {
+  // 添加学生
+  rpc CreateStudent (CreateStudentRequest) returns (CreateStudentReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students"
+      body: "*"
+    };
+  }
+
+  // 获取学生信息
+  rpc GetStudent (GetStudentRequest) returns (GetStudentReply) {
+    option (google.api.http) = {
+      get: "/api/v1/students/{id}"
+    };
+  }
+
+  // 批量添加单词到学生名下
+  rpc BatchAddWords (BatchAddWordsRequest) returns (BatchAddWordsReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students/{student_id}/words/batch"
+      body: "*"
+    };
+  }
+
+  // 获取学生的单词列表
+  rpc GetStudentWords (GetStudentWordsRequest) returns (GetStudentWordsReply) {
+    option (google.api.http) = {
+      get: "/api/v1/students/{student_id}/words"
+    };
+  }
+
+  // 获取今日需要背诵的单词（根据艾宾浩斯曲线）
+  rpc GetTodayWords (GetTodayWordsRequest) returns (GetTodayWordsReply) {
+    option (google.api.http) = {
+      get: "/api/v1/students/{student_id}/words/today"
+    };
+  }
+
+  // 标记单词为已复习
+  rpc MarkWordReviewed (MarkWordReviewedRequest) returns (MarkWordReviewedReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students/{student_id}/words/{word_id}/review"
+      body: "*"
+    };
+  }
+
+  // 通过openid获取或创建学生（微信登录）
+  rpc GetOrCreateStudentByOpenid (GetOrCreateStudentByOpenidRequest) returns (GetOrCreateStudentByOpenidReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students/by-openid"
+      body: "*"
+    };
+  }
+}
+
+message Student {
+  int64 id = 1;
+  string name = 2;
+  string student_no = 3;
+  string openid = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+message Word {
+  int64 id = 1;
+  int64 student_id = 2;
+  string word = 3;
+  string meaning = 4;
+  string start_date = 5;
+  int32 review_count = 6;
+  string last_review_date = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
+}
+
+message CreateStudentRequest {
+  string name = 1;
+  string student_no = 2;
+}
+
+message CreateStudentReply {
+  Student student = 1;
+}
+
+message GetStudentRequest {
+  int64 id = 1;
+}
+
+message GetStudentReply {
+  Student student = 1;
+}
+
+message BatchAddWordsRequest {
+  int64 student_id = 1;
+  repeated WordItem words = 2;
+}
+
+message WordItem {
+  string word = 1;
+  string meaning = 2;
+  string start_date = 3;
+}
+
+message BatchAddWordsReply {
+  int32 count = 1;
+  repeated Word words = 2;
+}
+
+message GetStudentWordsRequest {
+  int64 student_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message GetStudentWordsReply {
+  repeated Word words = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message GetTodayWordsRequest {
+  int64 student_id = 1;
+  string date = 2; // 可选，格式：YYYY-MM-DD，默认为今天
+}
+
+message GetTodayWordsReply {
+  repeated Word words = 1;
+  string date = 2;
+  int32 count = 3;
+}
+
+message MarkWordReviewedRequest {
+  int64 student_id = 1;
+  int64 word_id = 2;
+}
+
+message MarkWordReviewedReply {
+  Word word = 1;
+}
+
+message GetOrCreateStudentByOpenidRequest {
+  string openid = 1;
+  string name = 2; // 可选，用户昵称
+}
+
+message GetOrCreateStudentByOpenidReply {
+  Student student = 1;
+  bool is_new = 2; // 是否为新创建的学生
+}
+

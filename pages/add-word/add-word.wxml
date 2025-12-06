@@ -1,0 +1,74 @@
+<!--pages/add-word/add-word.wxml-->
+<view class="container">
+  <view class="form-card card">
+    <view class="form-item">
+      <text class="label">单词</text>
+      <input 
+        class="input" 
+        type="text" 
+        placeholder="请输入单词"
+        value="{{word}}"
+        bindinput="onWordInput"
+        maxlength="50"
+        adjust-position="{{true}}"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="label">释义</text>
+      <textarea 
+        class="textarea" 
+        placeholder="请输入单词释义"
+        value="{{meaning}}"
+        bindinput="onMeaningInput"
+        maxlength="200"
+        auto-height
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="label">开始日期</text>
+      <picker 
+        mode="date" 
+        value="{{startDate}}" 
+        start="{{minDate}}"
+        bindchange="onDateChange"
+      >
+        <view class="picker">
+          <text class="picker-text">{{startDate || '请选择开始日期'}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <button class="btn submit-btn" bindtap="submitWord">
+      添加单词
+    </button>
+  </view>
+
+  <view class="word-list-section">
+    <view class="section-header">
+      <text class="section-title">已添加的单词</text>
+      <text class="section-count">共 {{allWords.length}} 个</text>
+    </view>
+
+    <view wx:if="{{allWords.length === 0}}" class="empty-list">
+      <text>还没有添加单词</text>
+    </view>
+
+    <view wx:else class="word-list">
+      <view class="word-item card" wx:for="{{allWords}}" wx:key="id">
+        <view class="word-item-header">
+          <text class="word-item-text">{{item.word}}</text>
+          <text class="word-item-date">{{item.startDate}}</text>
+        </view>
+        <text class="word-item-meaning">{{item.meaning}}</text>
+        <view class="word-item-footer">
+          <text class="word-item-info">复习次数：{{item.reviewCount}}</text>
+          <button class="delete-item-btn" bindtap="deleteWord" data-id="{{item.id}}">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
