@@ -27,6 +27,12 @@ type wechatService struct {
 
 // NewWechatService 创建微信服务
 func NewWechatService(ac *conf.Wechat, logger log.Logger) WechatService {
+	// 如果配置为 nil 或配置为空，返回 nil（service 层会处理）
+	if ac == nil || ac.AppID == "" || ac.AppSecret == "" {
+		log.NewHelper(logger).Warn("WeChat service not configured, AppID or AppSecret is empty")
+		return nil
+	}
+
 	return &wechatService{
 		appID:     ac.AppID,
 		appSecret: ac.AppSecret,
@@ -66,7 +72,8 @@ func (w *wechatService) Code2Session(ctx context.Context, code string) (openid, 
 
 	fullURL := apiURL + "?" + params.Encode()
 
-	w.log.Infof("Calling WeChat API: %s", fullURL)
+	// 记录请求信息（不记录完整的 secret）
+	w.log.Infof("Calling WeChat API: appid=%s, code_length=%d", w.appID, len(code))
 
 	// 创建请求
 	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
@@ -97,7 +104,22 @@ func (w *wechatService) Code2Session(ctx context.Context, code string) (openid, 
 
 	// 检查错误
 	if result.ErrCode != 0 {
-		return "", "", fmt.Errorf("wechat api error: code=%d, msg=%s", result.ErrCode, result.ErrMsg)
+		// 根据错误码提供更详细的错误信息
+		var errMsg string
+		switch result.ErrCode {
+		case 40029:
+			errMsg = "code 无效或已过期（code 只能使用一次，且有时效性）"
+		case 40163:
+			errMsg = "code 已被使用（每个 code 只能使用一次）"
+		case 40013:
+			errMsg = "AppID 无效，请检查配置"
+		case 40125:
+			errMsg = "AppSecret 无效，请检查配置"
+		default:
+			errMsg = result.ErrMsg
+		}
+		w.log.Errorf("WeChat API error: code=%d, msg=%s, detail=%s", result.ErrCode, result.ErrMsg, errMsg)
+		return "", "", fmt.Errorf("wechat api error [%d]: %s", result.ErrCode, errMsg)
 	}
 
 	if result.OpenID == "" {
