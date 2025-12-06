@@ -1,0 +1,45 @@
+.PHONY: docker-build
+docker-build:
+	docker-compose build
+
+.PHONY: docker-up
+docker-up:
+	docker-compose up -d
+
+.PHONY: docker-down
+docker-down:
+	docker-compose down
+
+.PHONY: docker-logs
+docker-logs:
+	docker-compose logs -f
+
+.PHONY: docker-restart
+docker-restart:
+	docker-compose restart
+
+.PHONY: docker-clean
+docker-clean:
+	docker-compose down -v
+	docker system prune -f
+
+.PHONY: docker-dev
+docker-dev:
+	docker-compose -f docker-compose.dev.yml up -d
+
+.PHONY: docker-dev-down
+docker-dev-down:
+	docker-compose -f docker-compose.dev.yml down
+
+.PHONY: docker-ps
+docker-ps:
+	docker-compose ps
+
+.PHONY: docker-exec-backend
+docker-exec-backend:
+	docker exec -it forgetting-curve-backend sh
+
+.PHONY: docker-exec-mysql
+docker-exec-mysql:
+	docker exec -it forgetting-curve-mysql mysql -u root -prootpassword forgetting_curve
+

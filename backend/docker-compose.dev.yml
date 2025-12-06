@@ -1,0 +1,42 @@
+version: '3.8'
+
+# 开发环境配置
+# 使用: docker-compose -f docker-compose.dev.yml up
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: forgetting-curve-mysql-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: forgetting_curve
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+      TZ: Asia/Shanghai
+    ports:
+      - "3307:3306"  # 使用不同端口避免冲突
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    networks:
+      - app-network-dev
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_dev_data:
+    driver: local
+
+networks:
+  app-network-dev:
+    driver: bridge
+

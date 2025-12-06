@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Build artifacts
+bin/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test files
+*_test.go
+*.test
+*.out
+coverage.txt
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Dependencies (will be downloaded in container)
+vendor/
+
+# Generated files (will be regenerated if needed)
+api/**/*.pb.go
+api/**/*_grpc.pb.go
+api/**/*_http.pb.go
+cmd/server/wire_gen.go
+
+# Local configs (use configs in container)
+configs/*.yaml
+!configs/config.example.yaml
+

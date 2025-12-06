@@ -1,0 +1,15 @@
+server:
+  http:
+    network: tcp
+    addr: 0.0.0.0:8000
+    timeout: 5s
+  grpc:
+    network: tcp
+    addr: 0.0.0.0:9000
+    timeout: 5s
+data:
+  database:
+    driver: mysql
+    # 使用环境变量或 docker-compose 中的服务名
+    source: appuser:apppassword@tcp(mysql:3306)/forgetting_curve?charset=utf8mb4&parseTime=True&loc=Local
+
