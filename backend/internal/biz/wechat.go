@@ -79,8 +79,14 @@ func (w *wechatService) Code2Session(ctx context.Context, code string) (openid, 
 	} else {
 		codePrefix = code
 	}
-	w.log.Infof("Calling WeChat API: appid=%s, code_length=%d, code_prefix=%s, secret_length=%d",
-		w.appID, len(code), codePrefix, len(w.appSecret))
+	secretPrefix := ""
+	if len(w.appSecret) > 10 {
+		secretPrefix = w.appSecret[:10] + "..."
+	} else {
+		secretPrefix = w.appSecret
+	}
+	w.log.Infof("Calling WeChat API: appid=%s, code_length=%d, code_prefix=%s, secret_length=%d, secret_prefix=%s",
+		w.appID, len(code), codePrefix, len(w.appSecret), secretPrefix)
 
 	// 创建请求
 	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
