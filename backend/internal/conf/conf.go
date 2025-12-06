@@ -1,8 +1,9 @@
 package conf
 
 import (
-	"github.com/go-kratos/kratos/v2/config"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/config"
 )
 
 // Bootstrap 配置结构
@@ -19,16 +20,40 @@ type Server struct {
 
 // HTTP HTTP 服务器配置
 type HTTP struct {
-	Network string        `yaml:"network"`
-	Addr    string        `yaml:"addr"`
-	Timeout time.Duration `yaml:"timeout"`
+	Network string `yaml:"network"`
+	Addr    string `yaml:"addr"`
+	Timeout string `yaml:"timeout"` // 使用字符串，例如 "5s"
+}
+
+// GetTimeout 获取超时时间
+func (h *HTTP) GetTimeout() time.Duration {
+	if h.Timeout == "" {
+		return 5 * time.Second
+	}
+	d, err := time.ParseDuration(h.Timeout)
+	if err != nil {
+		return 5 * time.Second
+	}
+	return d
 }
 
 // GRPC gRPC 服务器配置
 type GRPC struct {
-	Network string        `yaml:"network"`
-	Addr    string        `yaml:"addr"`
-	Timeout time.Duration `yaml:"timeout"`
+	Network string `yaml:"network"`
+	Addr    string `yaml:"addr"`
+	Timeout string `yaml:"timeout"` // 使用字符串，例如 "5s"
+}
+
+// GetTimeout 获取超时时间
+func (g *GRPC) GetTimeout() time.Duration {
+	if g.Timeout == "" {
+		return 5 * time.Second
+	}
+	d, err := time.ParseDuration(g.Timeout)
+	if err != nil {
+		return 5 * time.Second
+	}
+	return d
 }
 
 // Data 数据配置
