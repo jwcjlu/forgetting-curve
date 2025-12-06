@@ -73,7 +73,13 @@ func (w *wechatService) Code2Session(ctx context.Context, code string) (openid, 
 	fullURL := apiURL + "?" + params.Encode()
 
 	// 记录请求信息（不记录完整的 secret）
-	w.log.Infof("Calling WeChat API: appid=%s, code_length=%d", w.appID, len(code))
+	w.log.Infof("Calling WeChat API: appid=%s, code_length=%d, code_prefix=%s",
+		w.appID, len(code), func() string {
+			if len(code) > 10 {
+				return code[:10] + "..."
+			}
+			return code
+		}())
 
 	// 创建请求
 	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
@@ -106,20 +112,27 @@ func (w *wechatService) Code2Session(ctx context.Context, code string) (openid, 
 	if result.ErrCode != 0 {
 		// 根据错误码提供更详细的错误信息
 		var errMsg string
+		var suggestion string
 		switch result.ErrCode {
 		case 40029:
 			errMsg = "code 无效或已过期（code 只能使用一次，且有时效性）"
+			suggestion = "请检查：1) code 是否被重复使用 2) code 是否过期（约5分钟）3) AppID/AppSecret 是否正确"
 		case 40163:
 			errMsg = "code 已被使用（每个 code 只能使用一次）"
+			suggestion = "请重新获取 code 并立即使用"
 		case 40013:
 			errMsg = "AppID 无效，请检查配置"
+			suggestion = "请确认配置的 app_id 与微信公众平台中的 AppID 完全一致"
 		case 40125:
 			errMsg = "AppSecret 无效，请检查配置"
+			suggestion = "请确认配置的 app_secret 与微信公众平台中的 AppSecret 完全一致"
 		default:
 			errMsg = result.ErrMsg
+			suggestion = "请检查微信 API 文档了解错误详情"
 		}
-		w.log.Errorf("WeChat API error: code=%d, msg=%s, detail=%s", result.ErrCode, result.ErrMsg, errMsg)
-		return "", "", fmt.Errorf("wechat api error [%d]: %s", result.ErrCode, errMsg)
+		w.log.Errorf("WeChat API error: code=%d, msg=%s, detail=%s, suggestion=%s, appid=%s",
+			result.ErrCode, result.ErrMsg, errMsg, suggestion, w.appID)
+		return "", "", fmt.Errorf("wechat api error [%d]: %s. %s", result.ErrCode, errMsg, suggestion)
 	}
 
 	if result.OpenID == "" {
