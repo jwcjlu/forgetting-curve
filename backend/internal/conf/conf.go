@@ -10,6 +10,7 @@ import (
 type Bootstrap struct {
 	Server *Server `yaml:"server"`
 	Data   *Data   `yaml:"data"`
+	Wechat *Wechat `yaml:"wechat"`
 }
 
 // Server 服务器配置
@@ -65,6 +66,12 @@ type Data struct {
 type Database struct {
 	Driver string `yaml:"driver"`
 	Source string `yaml:"source"`
+}
+
+// Wechat 微信配置
+type Wechat struct {
+	AppID     string `yaml:"app_id"`
+	AppSecret string `yaml:"app_secret"`
 }
 
 // Load 加载配置

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	v1 "forgetting-curve/backend/api/student/v1"
@@ -16,14 +17,16 @@ type StudentService struct {
 
 	studentUc biz.StudentUsecase
 	wordUc    biz.WordUsecase
+	wechatSvc biz.WechatService
 	log       *log.Helper
 }
 
 // NewStudentService 创建学生服务
-func NewStudentService(studentUc biz.StudentUsecase, wordUc biz.WordUsecase, logger log.Logger) *StudentService {
+func NewStudentService(studentUc biz.StudentUsecase, wordUc biz.WordUsecase, wechatSvc biz.WechatService, logger log.Logger) *StudentService {
 	return &StudentService{
 		studentUc: studentUc,
 		wordUc:    wordUc,
+		wechatSvc: wechatSvc,
 		log:       log.NewHelper(logger),
 	}
 }
@@ -260,9 +263,46 @@ func (s *StudentService) MarkWordReviewed(ctx context.Context, req *v1.MarkWordR
 	}, nil
 }
 
-// GetOrCreateStudentByOpenid 通过openid获取或创建学生
+// GetOrCreateStudentByOpenid 通过openid或code获取或创建学生
 func (s *StudentService) GetOrCreateStudentByOpenid(ctx context.Context, req *v1.GetOrCreateStudentByOpenidRequest) (*v1.GetOrCreateStudentByOpenidReply, error) {
-	student, isNew, err := s.studentUc.GetOrCreateStudentByOpenid(ctx, req.Openid, req.Name)
+	var openid string
+	var err error
+
+	// 优先使用 code，如果没有 code 则使用 openid
+	if req.Code != "" {
+		// 调用微信接口换取 openid
+		if s.wechatSvc == nil {
+			return &v1.GetOrCreateStudentByOpenidReply{
+				Ret: &v1.BaseResponse{
+					Code:    500,
+					Message: "wechat service not configured",
+				},
+			}, nil
+		}
+
+		openid, _, err = s.wechatSvc.Code2Session(ctx, req.Code)
+		if err != nil {
+			s.log.Errorf("failed to exchange code for openid: %v", err)
+			return &v1.GetOrCreateStudentByOpenidReply{
+				Ret: &v1.BaseResponse{
+					Code:    500,
+					Message: fmt.Sprintf("failed to exchange code: %v", err),
+				},
+			}, nil
+		}
+		s.log.Infof("successfully exchanged code for openid: %s", openid)
+	} else if req.Openid != "" {
+		openid = req.Openid
+	} else {
+		return &v1.GetOrCreateStudentByOpenidReply{
+			Ret: &v1.BaseResponse{
+				Code:    400,
+				Message: "openid or code is required",
+			},
+		}, nil
+	}
+
+	student, isNew, err := s.studentUc.GetOrCreateStudentByOpenid(ctx, openid, req.Name)
 	if err != nil {
 		return &v1.GetOrCreateStudentByOpenidReply{
 			Ret: &v1.BaseResponse{

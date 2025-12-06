@@ -3,8 +3,402 @@
 
 openapi: 3.0.3
 info:
-    title: ""
+    title: StudentService API
     version: 0.0.1
-paths: {}
+paths:
+    /api/v1/students:
+        post:
+            tags:
+                - StudentService
+            description: 添加学生
+            operationId: StudentService_CreateStudent
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateStudentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateStudentReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/by-openid:
+        post:
+            tags:
+                - StudentService
+            description: 通过openid获取或创建学生（微信登录）
+            operationId: StudentService_GetOrCreateStudentByOpenid
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GetOrCreateStudentByOpenidRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetOrCreateStudentByOpenidReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{id}:
+        get:
+            tags:
+                - StudentService
+            description: 获取学生信息
+            operationId: StudentService_GetStudent
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetStudentReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/words:
+        get:
+            tags:
+                - StudentService
+            description: 获取学生的单词列表
+            operationId: StudentService_GetStudentWords
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetStudentWordsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/words/batch:
+        post:
+            tags:
+                - StudentService
+            description: 批量添加单词到学生名下
+            operationId: StudentService_BatchAddWords
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/BatchAddWordsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchAddWordsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/words/today:
+        get:
+            tags:
+                - StudentService
+            description: 获取今日需要背诵的单词（根据艾宾浩斯曲线）
+            operationId: StudentService_GetTodayWords
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: date
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetTodayWordsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/words/{wordId}/review:
+        post:
+            tags:
+                - StudentService
+            description: 标记单词为已复习
+            operationId: StudentService_MarkWordReviewed
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: wordId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MarkWordReviewedRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MarkWordReviewedReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
-    schemas: {}
+    schemas:
+        BaseResponse:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+                reason:
+                    type: string
+        BatchAddWordsReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                count:
+                    type: integer
+                    format: int32
+                words:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Word'
+        BatchAddWordsRequest:
+            type: object
+            properties:
+                studentId:
+                    type: string
+                words:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/WordItem'
+        CreateStudentReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                student:
+                    $ref: '#/components/schemas/Student'
+        CreateStudentRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                studentNo:
+                    type: string
+        GetOrCreateStudentByOpenidReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                student:
+                    $ref: '#/components/schemas/Student'
+                isNew:
+                    type: boolean
+        GetOrCreateStudentByOpenidRequest:
+            type: object
+            properties:
+                openid:
+                    type: string
+                code:
+                    type: string
+                name:
+                    type: string
+        GetStudentReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                student:
+                    $ref: '#/components/schemas/Student'
+        GetStudentWordsReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                total:
+                    type: integer
+                    format: int32
+                page:
+                    type: integer
+                    format: int32
+                pageSize:
+                    type: integer
+                    format: int32
+                words:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Word'
+        GetTodayWordsReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                date:
+                    type: string
+                count:
+                    type: integer
+                    format: int32
+                words:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Word'
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        MarkWordReviewedReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                word:
+                    $ref: '#/components/schemas/Word'
+        MarkWordReviewedRequest:
+            type: object
+            properties:
+                studentId:
+                    type: string
+                wordId:
+                    type: string
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        Student:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                studentNo:
+                    type: string
+                openid:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        Word:
+            type: object
+            properties:
+                id:
+                    type: string
+                studentId:
+                    type: string
+                word:
+                    type: string
+                meaning:
+                    type: string
+                startDate:
+                    type: string
+                reviewCount:
+                    type: integer
+                    format: int32
+                lastReviewDate:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        WordItem:
+            type: object
+            properties:
+                word:
+                    type: string
+                meaning:
+                    type: string
+                startDate:
+                    type: string
+tags:
+    - name: StudentService

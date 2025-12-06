@@ -157,8 +157,9 @@ message MarkWordReviewedReply {
 }
 
 message GetOrCreateStudentByOpenidRequest {
-  string openid = 1;
-  string name = 2; // 可选，用户昵称
+  string openid = 1;  // openid（如果直接提供）
+  string code = 2;     // 微信登录code（优先使用，后端会转换为openid）
+  string name = 3;     // 可选，用户昵称
 }
 
 message GetOrCreateStudentByOpenidReply {
