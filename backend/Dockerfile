@@ -63,9 +63,12 @@ WORKDIR /app
 COPY --from=builder /build/server .
 COPY --from=builder /build/configs ./configs
 
-# 如果存在 docker 配置文件，使用它
+# 使用 docker 配置文件覆盖默认配置
 RUN if [ -f configs/config.docker.yaml ]; then \
-        cp configs/config.docker.yaml configs/config.yaml; \
+        cp configs/config.docker.yaml configs/config.yaml && \
+        echo "Using config.docker.yaml"; \
+    else \
+        echo "Warning: config.docker.yaml not found, using default config.yaml"; \
     fi
 
 # 创建非 root 用户

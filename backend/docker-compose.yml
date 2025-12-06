@@ -46,8 +46,9 @@ services:
       - DB_USER=appuser
       - DB_PASSWORD=apppassword
       - DB_NAME=forgetting_curve
-    volumes:
-      - ./configs:/app/configs:ro
+    # 不挂载 configs，使用容器内构建时生成的配置
+    # volumes:
+    #   - ./configs:/app/configs:ro
     command: ["./server", "-conf", "configs"]
     depends_on:
       mysql:

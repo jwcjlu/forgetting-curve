@@ -53,4 +53,5 @@ cmd/server/wire_gen.go
 # Local configs (use configs in container)
 configs/*.yaml
 !configs/config.example.yaml
+!configs/config.docker.yaml
 
