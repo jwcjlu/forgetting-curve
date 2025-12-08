@@ -38,6 +38,7 @@ configs/*.yaml
 
 # Logs
 *.log
+nginx/logs/
 
 # OS
 .DS_Store

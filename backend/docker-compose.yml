@@ -76,6 +76,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/certs:/etc/nginx/certs
       - ./nginx/docker-entrypoint.sh:/docker-entrypoint-custom.sh:ro
+      - ./nginx/logs:/var/log/nginx
     entrypoint: ["/bin/sh", "/docker-entrypoint-custom.sh"]
     command: ["nginx", "-g", "daemon off;"]
     depends_on:
