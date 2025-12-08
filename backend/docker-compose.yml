@@ -83,6 +83,12 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    # 启用日志输出
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health || exit 1"]
       interval: 30s
