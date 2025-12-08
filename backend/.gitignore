@@ -43,3 +43,10 @@ configs/*.yaml
 .DS_Store
 Thumbs.db
 
+# SSL Certificates
+nginx/certs/*.pem
+nginx/certs/*.key
+nginx/certs/*.csr
+nginx/certs/*.conf
+!nginx/certs/.gitkeep
+
