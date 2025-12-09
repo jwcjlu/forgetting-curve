@@ -15,19 +15,27 @@ import (
 type StudentService struct {
 	v1.UnimplementedStudentServiceServer
 
-	studentUc biz.StudentUsecase
-	wordUc    biz.WordUsecase
-	wechatSvc biz.WechatService
-	log       *log.Helper
+	studentUc      biz.StudentUsecase
+	wordUc         biz.WordUsecase
+	confusedWordUc biz.ConfusedWordUsecase
+	wechatSvc      biz.WechatService
+	log            *log.Helper
 }
 
 // NewStudentService 创建学生服务
-func NewStudentService(studentUc biz.StudentUsecase, wordUc biz.WordUsecase, wechatSvc biz.WechatService, logger log.Logger) *StudentService {
+func NewStudentService(
+	studentUc biz.StudentUsecase,
+	wordUc biz.WordUsecase,
+	confusedWordUc biz.ConfusedWordUsecase,
+	wechatSvc biz.WechatService,
+	logger log.Logger,
+) *StudentService {
 	return &StudentService{
-		studentUc: studentUc,
-		wordUc:    wordUc,
-		wechatSvc: wechatSvc,
-		log:       log.NewHelper(logger),
+		studentUc:      studentUc,
+		wordUc:         wordUc,
+		confusedWordUc: confusedWordUc,
+		wechatSvc:      wechatSvc,
+		log:            log.NewHelper(logger),
 	}
 }
 
@@ -113,17 +121,7 @@ func (s *StudentService) BatchAddWords(ctx context.Context, req *v1.BatchAddWord
 	// 转换响应数据
 	v1Words := make([]*v1.Word, 0, len(words))
 	for _, word := range words {
-		v1Words = append(v1Words, &v1.Word{
-			Id:             word.ID,
-			StudentId:      word.StudentID,
-			Word:           word.Word,
-			Meaning:        word.Meaning,
-			StartDate:      word.StartDate,
-			ReviewCount:    word.ReviewCount,
-			LastReviewDate: word.LastReviewDate,
-			CreatedAt:      word.CreatedAt.Unix(),
-			UpdatedAt:      word.UpdatedAt.Unix(),
-		})
+		v1Words = append(v1Words, convertWordToV1(word))
 	}
 
 	return &v1.BatchAddWordsReply{
@@ -249,17 +247,7 @@ func (s *StudentService) MarkWordReviewed(ctx context.Context, req *v1.MarkWordR
 			Code:    0,
 			Message: "success",
 		},
-		Word: &v1.Word{
-			Id:             word.ID,
-			StudentId:      word.StudentID,
-			Word:           word.Word,
-			Meaning:        word.Meaning,
-			StartDate:      word.StartDate,
-			ReviewCount:    word.ReviewCount,
-			LastReviewDate: word.LastReviewDate,
-			CreatedAt:      word.CreatedAt.Unix(),
-			UpdatedAt:      word.UpdatedAt.Unix(),
-		},
+		Word: convertWordToV1(word),
 	}, nil
 }
 
@@ -327,4 +315,183 @@ func (s *StudentService) GetOrCreateStudentByOpenid(ctx context.Context, req *v1
 		},
 		IsNew: isNew,
 	}, nil
+}
+
+// AddConfusedWord 添加混淆词
+func (s *StudentService) AddConfusedWord(ctx context.Context, req *v1.AddConfusedWordRequest) (*v1.AddConfusedWordReply, error) {
+	err := s.confusedWordUc.AddConfusedWord(ctx, req.StudentId, req.WordId, req.ConfusedWordId)
+	if err != nil {
+		return &v1.AddConfusedWordReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	// 获取更新后的单词
+	word, err := s.wordUc.GetWord(ctx, req.StudentId, req.WordId)
+	if err != nil {
+		return &v1.AddConfusedWordReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	// 获取混淆词列表
+	confusedWords, err := s.confusedWordUc.GetConfusedWords(ctx, req.StudentId, req.WordId)
+	if err != nil {
+		s.log.Warnf("failed to get confused words: %v", err)
+	}
+
+	v1Word := convertWordToV1(word)
+	if len(confusedWords) > 0 {
+		v1Word.ConfusedWords = make([]*v1.Word, 0, len(confusedWords))
+		for _, cw := range confusedWords {
+			v1Word.ConfusedWords = append(v1Word.ConfusedWords, convertWordToV1(cw))
+		}
+	}
+
+	return &v1.AddConfusedWordReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Word: v1Word,
+	}, nil
+}
+
+// GetConfusedWords 获取单词的混淆词列表
+func (s *StudentService) GetConfusedWords(ctx context.Context, req *v1.GetConfusedWordsRequest) (*v1.GetConfusedWordsReply, error) {
+	confusedWords, err := s.confusedWordUc.GetConfusedWords(ctx, req.StudentId, req.WordId)
+	if err != nil {
+		return &v1.GetConfusedWordsReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	v1Words := make([]*v1.Word, 0, len(confusedWords))
+	for _, word := range confusedWords {
+		v1Words = append(v1Words, convertWordToV1(word))
+	}
+
+	return &v1.GetConfusedWordsReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		ConfusedWords: v1Words,
+	}, nil
+}
+
+// RemoveConfusedWord 删除混淆词
+func (s *StudentService) RemoveConfusedWord(ctx context.Context, req *v1.RemoveConfusedWordRequest) (*v1.RemoveConfusedWordReply, error) {
+	err := s.confusedWordUc.RemoveConfusedWord(ctx, req.StudentId, req.WordId, req.ConfusedWordId)
+	if err != nil {
+		return &v1.RemoveConfusedWordReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return &v1.RemoveConfusedWordReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+	}, nil
+}
+
+// SearchWords 搜索单词（支持正则表达式）
+func (s *StudentService) SearchWords(ctx context.Context, req *v1.SearchWordsRequest) (*v1.SearchWordsReply, error) {
+	words, err := s.confusedWordUc.SearchWords(ctx, req.StudentId, req.Keyword, req.Limit)
+	if err != nil {
+		return &v1.SearchWordsReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	v1Words := make([]*v1.Word, 0, len(words))
+	for _, word := range words {
+		v1Words = append(v1Words, convertWordToV1(word))
+	}
+
+	return &v1.SearchWordsReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Words: v1Words,
+	}, nil
+}
+
+// MarkWordForgotten 标记单词为未记住
+func (s *StudentService) MarkWordForgotten(ctx context.Context, req *v1.MarkWordForgottenRequest) (*v1.MarkWordForgottenReply, error) {
+	word, err := s.wordUc.MarkWordForgotten(ctx, req.StudentId, req.WordId)
+	if err != nil {
+		return &v1.MarkWordForgottenReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return &v1.MarkWordForgottenReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Word: convertWordToV1(word),
+	}, nil
+}
+
+// UpdateWordReviewData 更新单词复习数据
+func (s *StudentService) UpdateWordReviewData(ctx context.Context, req *v1.UpdateWordReviewDataRequest) (*v1.UpdateWordReviewDataReply, error) {
+	word, err := s.wordUc.UpdateWordReviewData(ctx, req.StudentId, req.WordId, req.ThinkTime, req.Difficulty, req.IsRemembered)
+	if err != nil {
+		return &v1.UpdateWordReviewDataReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return &v1.UpdateWordReviewDataReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Word: convertWordToV1(word),
+	}, nil
+}
+
+// convertWordToV1 转换 biz.Word 到 v1.Word
+func convertWordToV1(word *biz.Word) *v1.Word {
+	return &v1.Word{
+		Id:             word.ID,
+		StudentId:      word.StudentID,
+		Word:           word.Word,
+		Meaning:        word.Meaning,
+		StartDate:      word.StartDate,
+		ReviewCount:    word.ReviewCount,
+		LastReviewDate: word.LastReviewDate,
+		Difficulty:     word.Difficulty,
+		ThinkTime:      word.ThinkTime,
+		IsRemembered:   word.IsRemembered,
+		ForgetCount:    word.ForgetCount,
+		CreatedAt:      word.CreatedAt.Unix(),
+		UpdatedAt:      word.UpdatedAt.Unix(),
+	}
 }

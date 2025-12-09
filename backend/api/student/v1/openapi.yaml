@@ -147,6 +147,40 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/words/search:
+        get:
+            tags:
+                - StudentService
+            description: 搜索单词（用于添加混淆词）
+            operationId: StudentService_SearchWords
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SearchWordsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/v1/students/{studentId}/words/today:
         get:
             tags:
@@ -170,6 +204,142 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/GetTodayWordsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/words/{wordId}/confused:
+        get:
+            tags:
+                - StudentService
+            description: 获取单词的混淆词列表
+            operationId: StudentService_GetConfusedWords
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: wordId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetConfusedWordsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - StudentService
+            description: 添加混淆词
+            operationId: StudentService_AddConfusedWord
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: wordId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AddConfusedWordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AddConfusedWordReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/words/{wordId}/confused/{confusedWordId}:
+        delete:
+            tags:
+                - StudentService
+            description: 删除混淆词
+            operationId: StudentService_RemoveConfusedWord
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: wordId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: confusedWordId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RemoveConfusedWordReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/words/{wordId}/forget:
+        post:
+            tags:
+                - StudentService
+            description: 标记单词为未记住
+            operationId: StudentService_MarkWordForgotten
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: wordId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MarkWordForgottenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MarkWordForgottenReply'
                 default:
                     description: Default error response
                     content:
@@ -212,8 +382,60 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/words/{wordId}/review-data:
+        post:
+            tags:
+                - StudentService
+            description: 更新单词复习数据（思考时间、难度等）
+            operationId: StudentService_UpdateWordReviewData
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: wordId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateWordReviewDataRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateWordReviewDataReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
     schemas:
+        AddConfusedWordReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                word:
+                    $ref: '#/components/schemas/Word'
+        AddConfusedWordRequest:
+            type: object
+            properties:
+                studentId:
+                    type: string
+                wordId:
+                    type: string
+                confusedWordId:
+                    type: string
         BaseResponse:
             type: object
             properties:
@@ -259,6 +481,15 @@ components:
                     type: string
                 studentNo:
                     type: string
+        GetConfusedWordsReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                confusedWords:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Word'
         GetOrCreateStudentByOpenidReply:
             type: object
             properties:
@@ -324,6 +555,20 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        MarkWordForgottenReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                word:
+                    $ref: '#/components/schemas/Word'
+        MarkWordForgottenRequest:
+            type: object
+            properties:
+                studentId:
+                    type: string
+                wordId:
+                    type: string
         MarkWordReviewedReply:
             type: object
             properties:
@@ -338,6 +583,20 @@ components:
                     type: string
                 wordId:
                     type: string
+        RemoveConfusedWordReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+        SearchWordsReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                words:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Word'
         Status:
             type: object
             properties:
@@ -369,6 +628,28 @@ components:
                     type: string
                 updatedAt:
                     type: string
+        UpdateWordReviewDataReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                word:
+                    $ref: '#/components/schemas/Word'
+        UpdateWordReviewDataRequest:
+            type: object
+            properties:
+                studentId:
+                    type: string
+                wordId:
+                    type: string
+                thinkTime:
+                    type: integer
+                    format: int32
+                difficulty:
+                    type: integer
+                    format: int32
+                isRemembered:
+                    type: boolean
         Word:
             type: object
             properties:
@@ -387,6 +668,22 @@ components:
                     format: int32
                 lastReviewDate:
                     type: string
+                difficulty:
+                    type: integer
+                    description: 多维度数据
+                    format: int32
+                thinkTime:
+                    type: integer
+                    format: int32
+                isRemembered:
+                    type: boolean
+                forgetCount:
+                    type: integer
+                    format: int32
+                confusedWords:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Word'
                 createdAt:
                     type: string
                 updatedAt:

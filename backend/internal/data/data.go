@@ -32,7 +32,7 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	}
 
 	// 自动迁移
-	if err := db.AutoMigrate(&biz.Student{}, &biz.Word{}); err != nil {
+	if err := db.AutoMigrate(&biz.Student{}, &biz.Word{}, &biz.ConfusedWord{}); err != nil {
 		return nil, nil, fmt.Errorf("failed to migrate database: %w", err)
 	}
 

@@ -7,4 +7,5 @@ var ProviderSet = wire.NewSet(
 	NewData,
 	NewStudentRepo,
 	NewWordRepo,
+	NewConfusedWordRepo,
 )

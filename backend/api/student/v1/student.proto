@@ -60,6 +60,51 @@ service StudentService {
       body: "*"
     };
   }
+
+  // 添加混淆词
+  rpc AddConfusedWord (AddConfusedWordRequest) returns (AddConfusedWordReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students/{student_id}/words/{word_id}/confused"
+      body: "*"
+    };
+  }
+
+  // 获取单词的混淆词列表
+  rpc GetConfusedWords (GetConfusedWordsRequest) returns (GetConfusedWordsReply) {
+    option (google.api.http) = {
+      get: "/api/v1/students/{student_id}/words/{word_id}/confused"
+    };
+  }
+
+  // 删除混淆词
+  rpc RemoveConfusedWord (RemoveConfusedWordRequest) returns (RemoveConfusedWordReply) {
+    option (google.api.http) = {
+      delete: "/api/v1/students/{student_id}/words/{word_id}/confused/{confused_word_id}"
+    };
+  }
+
+  // 搜索单词（用于添加混淆词）
+  rpc SearchWords (SearchWordsRequest) returns (SearchWordsReply) {
+    option (google.api.http) = {
+      get: "/api/v1/students/{student_id}/words/search"
+    };
+  }
+
+  // 标记单词为未记住
+  rpc MarkWordForgotten (MarkWordForgottenRequest) returns (MarkWordForgottenReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students/{student_id}/words/{word_id}/forget"
+      body: "*"
+    };
+  }
+
+  // 更新单词复习数据（思考时间、难度等）
+  rpc UpdateWordReviewData (UpdateWordReviewDataRequest) returns (UpdateWordReviewDataReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students/{student_id}/words/{word_id}/review-data"
+      body: "*"
+    };
+  }
 }
 
 
@@ -80,6 +125,12 @@ message Word {
   string start_date = 5;
   int32 review_count = 6;
   string last_review_date = 7;
+  // 多维度数据
+  int32 difficulty = 10;      // 学习难度 (0-10)
+  int32 think_time = 11;       // 思考时间（秒）
+  bool is_remembered = 12;    // 是否记住
+  int32 forget_count = 13;    // 忘记次数
+  repeated Word confused_words = 14; // 混淆词列表
   int64 created_at = 8;
   int64 updated_at = 9;
 }
@@ -166,5 +217,70 @@ message GetOrCreateStudentByOpenidReply {
   BaseResponse ret =1;
   Student student = 2;
   bool is_new = 3; // 是否为新创建的学生
+}
+
+message AddConfusedWordRequest {
+  int64 student_id = 1;
+  int64 word_id = 2;
+  int64 confused_word_id = 3; // 混淆词的ID
+}
+
+message AddConfusedWordReply {
+  BaseResponse ret = 1;
+  Word word = 2;
+}
+
+message GetConfusedWordsRequest {
+  int64 student_id = 1;
+  int64 word_id = 2;
+}
+
+message GetConfusedWordsReply {
+  BaseResponse ret = 1;
+  repeated Word confused_words = 2;
+}
+
+message RemoveConfusedWordRequest {
+  int64 student_id = 1;
+  int64 word_id = 2;
+  int64 confused_word_id = 3;
+}
+
+message RemoveConfusedWordReply {
+  BaseResponse ret = 1;
+}
+
+message SearchWordsRequest {
+  int64 student_id = 1;
+  string keyword = 2; // 搜索关键词（支持正则表达式）
+  int32 limit = 3;    // 返回数量限制，默认20
+}
+
+message SearchWordsReply {
+  BaseResponse ret = 1;
+  repeated Word words = 2;
+}
+
+message MarkWordForgottenRequest {
+  int64 student_id = 1;
+  int64 word_id = 2;
+}
+
+message MarkWordForgottenReply {
+  BaseResponse ret = 1;
+  Word word = 2;
+}
+
+message UpdateWordReviewDataRequest {
+  int64 student_id = 1;
+  int64 word_id = 2;
+  int32 think_time = 3;     // 思考时间（秒）
+  int32 difficulty = 4;     // 学习难度 (0-10)
+  bool is_remembered = 5;   // 是否记住
+}
+
+message UpdateWordReviewDataReply {
+  BaseResponse ret = 1;
+  Word word = 2;
 }
 
