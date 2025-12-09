@@ -28,8 +28,10 @@ func wireApp(confServer *conf.Server, confData *conf.Data, wechat *conf.Wechat, 
 	studentUsecase := biz.NewStudentUsecase(studentRepo, logger)
 	wordRepo := data.NewWordRepo(dataData)
 	wordUsecase := biz.NewWordUsecase(wordRepo, studentRepo, logger)
+	confusedWordRepo := data.NewConfusedWordRepo(dataData)
+	confusedWordUsecase := biz.NewConfusedWordUsecase(confusedWordRepo, wordRepo, studentRepo, logger)
 	wechatService := biz.NewWechatService(wechat, logger)
-	studentService := service.NewStudentService(studentUsecase, wordUsecase, wechatService, logger)
+	studentService := service.NewStudentService(studentUsecase, wordUsecase, confusedWordUsecase, wechatService, logger)
 	httpServer := server.NewHTTPServer(confServer, studentService, logger)
 	app := newApp(logger, httpServer)
 	return app, func() {
