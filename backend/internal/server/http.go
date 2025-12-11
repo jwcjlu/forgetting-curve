@@ -2,6 +2,7 @@ package server
 
 import (
 	"forgetting-curve/backend/api/student/v1"
+	"forgetting-curve/backend/internal/biz"
 	"forgetting-curve/backend/internal/conf"
 	"forgetting-curve/backend/internal/server/middleware"
 	"forgetting-curve/backend/internal/service"
@@ -21,7 +22,7 @@ import (
 )
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *conf.Server, studentService *service.StudentService, logger log.Logger) *httptransport.Server {
+func NewHTTPServer(c *conf.Server, studentService *service.StudentService, ocrService biz.OCRService, logger log.Logger) *httptransport.Server {
 	addr := ":0"
 	if c != nil && c.HTTP != nil && c.HTTP.Addr != "" {
 		addr = c.HTTP.Addr
@@ -50,6 +51,16 @@ func NewHTTPServer(c *conf.Server, studentService *service.StudentService, logge
 
 	srv := httptransport.NewServer(opts...)
 	v1.RegisterStudentServiceHTTPServer(srv, studentService)
+
+	// 注册 OCR 路由
+	if ocrService != nil {
+		ocrHandler := NewOCRHandler(ocrService, logger)
+		srv.Route("/api/ocr").POST("", func(ctx httptransport.Context) error {
+			ocrHandler.HandleOCR(ctx.Response(), ctx.Request())
+			return nil
+		})
+	}
+
 	return srv
 }
 

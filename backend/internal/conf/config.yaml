@@ -10,3 +10,4 @@ data:
     driver: mysql
     source: root:password@tcp(localhost:3306)/forgetting_curve?charset=utf8mb4&parseTime=True&loc=Local
 
+

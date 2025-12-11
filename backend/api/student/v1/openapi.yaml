@@ -684,6 +684,10 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/Word'
+                audioUrls:
+                    type: array
+                    items:
+                        type: string
                 createdAt:
                     type: string
                 updatedAt:

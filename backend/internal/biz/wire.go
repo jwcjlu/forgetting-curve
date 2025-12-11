@@ -10,4 +10,5 @@ var ProviderSet = wire.NewSet(
 	NewWordUsecase,
 	NewWechatService,
 	NewConfusedWordUsecase,
+	NewPronunciationService,
 )

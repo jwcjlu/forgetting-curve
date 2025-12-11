@@ -62,6 +62,8 @@ WORKDIR /app
 # 从构建阶段复制二进制文件
 COPY --from=builder /build/server .
 COPY --from=builder /build/configs ./configs
+# 复制发音字典文件
+COPY --from=builder /build/ultimate.json ./ultimate.json
 
 # 使用 docker 配置文件覆盖默认配置
 RUN if [ -f configs/config.docker.yaml ]; then \

@@ -19,7 +19,7 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, wechat *conf.Wechat, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, wechat *conf.Wechat, ocr *conf.OCR, logger log.Logger) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confData, logger)
 	if err != nil {
 		return nil, nil, err
@@ -31,8 +31,10 @@ func wireApp(confServer *conf.Server, confData *conf.Data, wechat *conf.Wechat, 
 	confusedWordRepo := data.NewConfusedWordRepo(dataData)
 	confusedWordUsecase := biz.NewConfusedWordUsecase(confusedWordRepo, wordRepo, studentRepo, logger)
 	wechatService := biz.NewWechatService(wechat, logger)
-	studentService := service.NewStudentService(studentUsecase, wordUsecase, confusedWordUsecase, wechatService, logger)
-	httpServer := server.NewHTTPServer(confServer, studentService, logger)
+	ocrService := data.NewUmiOCRClient()
+	pronunciationService := biz.NewPronunciationService(logger)
+	studentService := service.NewStudentService(studentUsecase, wordUsecase, confusedWordUsecase, wechatService, ocrService, pronunciationService, logger)
+	httpServer := server.NewHTTPServer(confServer, studentService, ocrService, logger)
 	app := newApp(logger, httpServer)
 	return app, func() {
 		cleanup()

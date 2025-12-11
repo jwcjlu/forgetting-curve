@@ -8,9 +8,11 @@ import (
 
 // Bootstrap 配置结构
 type Bootstrap struct {
-	Server *Server `yaml:"server"`
-	Data   *Data   `yaml:"data"`
-	Wechat *Wechat `yaml:"wechat"`
+	Server        *Server        `yaml:"server"`
+	Data          *Data          `yaml:"data"`
+	Wechat        *Wechat        `yaml:"wechat"`
+	OCR           *OCR           `yaml:"ocr"`           // OCR配置
+	Pronunciation *Pronunciation `yaml:"pronunciation"` // 发音配置
 }
 
 // Server 服务器配置
@@ -72,6 +74,19 @@ type Database struct {
 type Wechat struct {
 	AppID     string `yaml:"app_id"`
 	AppSecret string `yaml:"app_secret"`
+}
+
+// OCR OCR配置
+type OCR struct {
+	BaiduAPIKey    string `yaml:"baidu_api_key"`    // 百度 OCR API Key（可选）
+	BaiduSecretKey string `yaml:"baidu_secret_key"` // 百度 OCR Secret Key（可选）
+	UseTesseract   bool   `yaml:"use_tesseract"`    // 是否使用 Tesseract OCR（免费）
+	TesseractPath  string `yaml:"tesseract_path"`   // Tesseract 可执行文件路径（可选，自动检测）
+}
+
+// Pronunciation 发音配置
+type Pronunciation struct {
+	DictionaryPath string `yaml:"dictionary_path"` // 发音字典文件路径（ultimate.json）
 }
 
 // Load 加载配置

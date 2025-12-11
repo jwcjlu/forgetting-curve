@@ -161,5 +161,7 @@ echo "=========================================="
 
 # 执行原始的 nginx 启动命令
 echo "启动 Nginx 服务..."
-exec /docker-entrypoint.sh "$@"
+# nginx:alpine 的默认 entrypoint 是 /docker-entrypoint.sh，但我们已经覆盖了
+# 直接执行 nginx 命令
+exec nginx -g "daemon off;"
 

@@ -131,6 +131,7 @@ message Word {
   bool is_remembered = 12;    // 是否记住
   int32 forget_count = 13;    // 忘记次数
   repeated Word confused_words = 14; // 混淆词列表
+  repeated string audio_urls = 15;   // 发音音频 URL 列表
   int64 created_at = 8;
   int64 updated_at = 9;
 }
@@ -282,5 +283,23 @@ message UpdateWordReviewDataRequest {
 message UpdateWordReviewDataReply {
   BaseResponse ret = 1;
   Word word = 2;
+}
+message RecognizeWordsFromImageRequest {
+  int64 student_id = 1;
+  string image_base64 = 2; // base64编码的图片数据（data:image/jpeg;base64,xxx 格式）
+  string start_date = 3;    // 开始日期，格式：YYYY-MM-DD
+}
+
+message RecognizeWordsFromImageReply {
+  BaseResponse ret = 1;
+  repeated RecognizedWord recognized_words = 2; // 识别到的单词列表
+  int32 total_count = 3;                        // 识别到的单词总数
+}
+
+message RecognizedWord {
+  string word = 1;        // 识别的单词
+  string meaning = 2;     // 识别的释义（如果有，可能为空）
+  float confidence = 3;   // 识别置信度（0-1）
+  bool auto_added = 4;    // 是否已自动添加到单词列表
 }
 

@@ -18,3 +18,34 @@ type WordRepo interface {
 	GetByID(ctx context.Context, id int64) (*Word, error)
 	Update(ctx context.Context, word *Word) (*Word, error)
 }
+
+// OCRService OCR识别服务接口
+type OCRService interface {
+	RecognizeText(ctx context.Context, req *OCRRequest) (*OCRResult, error)
+}
+
+// RecognizedWord OCR识别的单词
+type RecognizedWord struct {
+	Word       string
+	Meaning    string
+	Confidence float64
+}
+type OCRRequest struct {
+	Base64  string                 `json:"base64"`
+	Options map[string]interface{} `json:"options,omitempty"`
+}
+
+// OCRResult 定义 OCR 识别结果结构
+type OCRResult struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message,omitempty"`
+	Data    interface{} `json:"data"` // 可能是 []OCRTextData (dict格式) 或 string (text格式)
+}
+
+// OCRTextData OCR文本数据（当 data.format 为 dict 时使用）
+type OCRTextData struct {
+	Box   [][]int `json:"box"`   // 文本框顺时针四个角的xy坐标：[左上,右上,右下,左下]
+	Score float64 `json:"score"` // 置信度 (0~1)
+	Text  string  `json:"text"`  // 文本
+	End   string  `json:"end"`   // 表示本行文字结尾的结束符，可能为空、空格或换行\n
+}

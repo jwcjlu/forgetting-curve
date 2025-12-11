@@ -12,3 +12,4 @@ USE forgetting_curve;
 -- CREATE INDEX IF NOT EXISTS idx_words_student_id ON words(student_id);
 -- CREATE INDEX IF NOT EXISTS idx_words_start_date ON words(start_date);
 
+
