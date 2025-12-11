@@ -30,10 +30,10 @@ func NewPronunciationService(logger log.Logger) PronunciationService {
 		dict: make(map[string][]string),
 		log:  log.NewHelper(logger),
 	}
-	/*	if err := service.LoadDictionary("/build/ultimate.json"); err != nil {
+	if err := service.LoadDictionary("/app/ultimate.json"); err != nil {
 		panic(err)
 
-	}*/
+	}
 	return service
 }
 
