@@ -124,6 +124,7 @@ Page({
             currentQuestionIndex: 0,
             userAnswers: [],
             showAnswers: [],
+            canSubmit: false,
             userAnswer: '',
             showAnswer: false,
             isCorrect: false
@@ -190,6 +191,7 @@ Page({
         words[index].currentQuestionIndex = 0;
         words[index].userAnswers = [];
         words[index].showAnswers = [];
+        words[index].canSubmit = true; // 可以提交答案
         
         this.setData({
           todayWords: words
@@ -220,6 +222,9 @@ Page({
     }
     words[index].userAnswers[qIndex] = value;
     
+    // 更新是否可以提交的状态
+    this.updateCanSubmitStatus(words, index);
+    
     this.setData({
       todayWords: words
     });
@@ -244,9 +249,33 @@ Page({
     }
     words[index].userAnswers[qIndex] = option;
     
+    // 更新是否可以提交的状态
+    this.updateCanSubmitStatus(words, index);
+    
     this.setData({
       todayWords: words
     });
+  },
+
+  /**
+   * 更新是否可以提交的状态
+   */
+  updateCanSubmitStatus(words, index) {
+    const word = words[index];
+    if (!word.questions || word.questions.length === 0) {
+      word.canSubmit = false;
+      return;
+    }
+    
+    // 检查是否所有题目都已作答
+    const allAnswered = word.questions.every((q, qIndex) => {
+      return word.userAnswers && word.userAnswers[qIndex] && word.userAnswers[qIndex].trim() !== '';
+    });
+    
+    // 检查是否已经显示答案（如果已经提交，就不能再提交）
+    const hasShownAnswers = word.showAnswers && word.showAnswers.some(show => show === true);
+    
+    word.canSubmit = allAnswered && !hasShownAnswers;
   },
 
   /**
@@ -278,6 +307,9 @@ Page({
     word.questions.forEach((q, qIndex) => {
       word.showAnswers[qIndex] = true;
     });
+    
+    // 设置为不能提交（已提交）
+    word.canSubmit = false;
     
     // 计算正确数量
     const correctCount = word.questions.filter((q, qIndex) => {
@@ -368,6 +400,7 @@ Page({
     words[index].currentQuestionIndex = 0;
     words[index].userAnswers = [];
     words[index].showAnswers = [];
+    words[index].canSubmit = false;
     words[index].userAnswer = '';
     words[index].showAnswer = false;
     words[index].isCorrect = false;

@@ -134,7 +134,7 @@
 
           <view class="word-actions">
             <button 
-              wx:if="{{!wordItem.showAnswers || wordItem.showAnswers.every(function(show) { return !show })}}" 
+              wx:if="{{wordItem.canSubmit}}" 
               class="action-btn check-btn" 
               bindtap="checkAllAnswers" 
               data-index="{{index}}"

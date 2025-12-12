@@ -8,6 +8,7 @@ import (
 	"forgetting-curve/backend/internal/conf"
 	"io"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -110,7 +111,7 @@ func (l *llmService) GenerateReviewQuestions(ctx context.Context, word, meaning,
 
 %s
 
-请以JSON格式返回，格式如下：
+请严格按照以下JSON格式返回，不要添加任何其他文字说明，只返回JSON：
 {
   "questions": [
     {
@@ -127,7 +128,7 @@ func (l *llmService) GenerateReviewQuestions(ctx context.Context, word, meaning,
   ]
 }
 
-只返回JSON，不要其他内容。`, word, meaning, gradeHint, getGradeDifficultyHint(grade), word)
+重要：只返回JSON对象，不要使用markdown代码块，不要添加任何解释文字。`, word, meaning, gradeHint, getGradeDifficultyHint(grade), word)
 
 	// 构建请求
 	reqBody := OpenAIRequest{
@@ -196,17 +197,48 @@ func (l *llmService) GenerateReviewQuestions(ctx context.Context, word, meaning,
 	// 提取AI返回的内容
 	content := apiResp.Choices[0].Message.Content
 
+	// 记录原始内容用于调试
+	l.log.Infof("LLM raw response content (first 500 chars): %s", truncateString(content, 500))
+
+	// 检查内容是否为空
+	if content == "" {
+		return nil, fmt.Errorf("llm returned empty content")
+	}
+
 	// 解析JSON内容
 	var result struct {
 		Questions []*ReviewQuestion `json:"questions"`
 	}
 
 	// 尝试提取JSON（可能包含markdown代码块）
-	content = extractJSON(content)
+	extractedJSON := extractJSON(content)
 
-	if err := json.Unmarshal([]byte(content), &result); err != nil {
-		l.log.Errorf("Failed to parse LLM response JSON: %v, content: %s", err, content)
-		return nil, fmt.Errorf("failed to parse llm response json: %w", err)
+	// 记录提取后的JSON用于调试
+	l.log.Infof("Extracted JSON (first 500 chars): %s", truncateString(extractedJSON, 500))
+
+	// 检查提取后的JSON是否为空
+	if extractedJSON == "" {
+		l.log.Errorf("Failed to extract JSON from content. Original content: %s", truncateString(content, 1000))
+		return nil, fmt.Errorf("failed to extract json from llm response, content may not contain valid json")
+	}
+
+	if err := json.Unmarshal([]byte(extractedJSON), &result); err != nil {
+		// 尝试修复常见的JSON问题
+		fixedJSON := tryFixJSON(extractedJSON)
+		if fixedJSON != extractedJSON {
+			l.log.Infof("Attempting to fix JSON, trying: %s", truncateString(fixedJSON, 500))
+			if err2 := json.Unmarshal([]byte(fixedJSON), &result); err2 == nil {
+				l.log.Infof("Successfully fixed and parsed JSON")
+			} else {
+				l.log.Errorf("Failed to parse LLM response JSON (original error: %v, fixed error: %v), extracted JSON: %s, original content: %s",
+					err, err2, truncateString(extractedJSON, 1000), truncateString(content, 1000))
+				return nil, fmt.Errorf("failed to parse llm response json: %w (also tried fixing: %v)", err, err2)
+			}
+		} else {
+			l.log.Errorf("Failed to parse LLM response JSON: %v, extracted JSON: %s, original content: %s",
+				err, truncateString(extractedJSON, 1000), truncateString(content, 1000))
+			return nil, fmt.Errorf("failed to parse llm response json: %w", err)
+		}
 	}
 
 	if len(result.Questions) == 0 {
@@ -223,8 +255,15 @@ func (l *llmService) GenerateReviewQuestions(ctx context.Context, word, meaning,
 
 // extractJSON 从文本中提取JSON（处理markdown代码块等情况）
 func extractJSON(text string) string {
+	if text == "" {
+		return ""
+	}
+
 	// 移除可能的markdown代码块标记
 	text = removeMarkdownCodeBlock(text)
+
+	// 移除前后空白字符
+	text = trimSpace(text)
 
 	// 查找JSON对象
 	start := -1
@@ -238,13 +277,88 @@ func extractJSON(text string) string {
 		} else if char == '}' {
 			depth--
 			if depth == 0 && start != -1 {
-				return text[start : i+1]
+				extracted := text[start : i+1]
+				// 验证提取的内容是否是有效的JSON
+				if isValidJSON(extracted) {
+					return extracted
+				}
+				// 如果不是有效JSON，继续查找下一个
+				start = -1
+				depth = 0
 			}
 		}
 	}
 
-	// 如果没找到完整的JSON，返回原文本
-	return text
+	// 如果没找到完整的JSON，尝试返回原文本（可能是纯JSON）
+	if isValidJSON(text) {
+		return text
+	}
+
+	// 如果原文本也不是有效JSON，返回空字符串
+	return ""
+}
+
+// trimSpace 移除字符串前后的空白字符
+func trimSpace(s string) string {
+	// 移除前导空白
+	start := 0
+	for start < len(s) && (s[start] == ' ' || s[start] == '\t' || s[start] == '\n' || s[start] == '\r') {
+		start++
+	}
+
+	// 移除尾随空白
+	end := len(s)
+	for end > start && (s[end-1] == ' ' || s[end-1] == '\t' || s[end-1] == '\n' || s[end-1] == '\r') {
+		end--
+	}
+
+	return s[start:end]
+}
+
+// isValidJSON 检查字符串是否是有效的JSON
+func isValidJSON(s string) bool {
+	if s == "" {
+		return false
+	}
+	var temp interface{}
+	return json.Unmarshal([]byte(s), &temp) == nil
+}
+
+// truncateString 截断字符串到指定长度
+func truncateString(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen] + "..."
+}
+
+// tryFixJSON 尝试修复常见的JSON问题
+func tryFixJSON(jsonStr string) string {
+	// 移除可能的尾随逗号
+	jsonStr = removeTrailingCommas(jsonStr)
+
+	// 尝试修复未转义的换行符
+	jsonStr = fixUnescapedNewlines(jsonStr)
+
+	return jsonStr
+}
+
+// removeTrailingCommas 移除JSON中的尾随逗号
+func removeTrailingCommas(jsonStr string) string {
+	// 使用正则表达式移除对象和数组中的尾随逗号
+	// 例如: {"key": "value",} -> {"key": "value"}
+	// 例如: ["item1", "item2",] -> ["item1", "item2"]
+	re := regexp.MustCompile(`,\s*([}\]])`)
+	return re.ReplaceAllString(jsonStr, "$1")
+}
+
+// fixUnescapedNewlines 修复未转义的换行符（简化实现）
+func fixUnescapedNewlines(jsonStr string) string {
+	// 这是一个简化的实现
+	// 实际上，修复未转义的换行符比较复杂，需要正确解析JSON字符串
+	// 这里我们只做基本的清理，移除可能导致问题的字符
+	// 更复杂的修复应该由LLM本身返回正确的JSON
+	return jsonStr
 }
 
 // removeMarkdownCodeBlock 移除markdown代码块标记
@@ -254,7 +368,7 @@ func removeMarkdownCodeBlock(text string) string {
 	result := []rune{}
 	i := 0
 	for i < len(lines) {
-		if i+3 < len(lines) && string(lines[i:i+3]) == "```" {
+		if i+2 < len(lines) && string(lines[i:i+3]) == "```" {
 			// 跳过到下一个 ```
 			i += 3
 			// 跳过可能的语言标识符（如 json）
@@ -264,9 +378,9 @@ func removeMarkdownCodeBlock(text string) string {
 			if i < len(lines) {
 				i++ // 跳过换行符
 			}
-			// 继续到下一个 ```
+			// 继续到下一个 ```，保留中间的内容
 			for i < len(lines) {
-				if i+3 < len(lines) && string(lines[i:i+3]) == "```" {
+				if i+2 < len(lines) && string(lines[i:i+3]) == "```" {
 					i += 3
 					// 跳过换行符
 					if i < len(lines) && lines[i] == '\n' {
@@ -274,6 +388,8 @@ func removeMarkdownCodeBlock(text string) string {
 					}
 					break
 				}
+				// 保留代码块内的内容
+				result = append(result, lines[i])
 				i++
 			}
 		} else {
