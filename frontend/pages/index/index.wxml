@@ -21,7 +21,7 @@
     <view class="word-list">
       <view class="word-card card" wx:for="{{todayWords}}" wx:key="id" wx:for-item="wordItem">
         <!-- 浏览模式 -->
-        <view wx:if="{{!wordItem.spellingMode}}">
+        <view wx:if="{{!wordItem.spellingMode && !wordItem.reviewMode}}">
           <view class="word-header">
             <view class="word-text-container">
               <text class="word-text">{{wordItem.word}}</text>
@@ -67,7 +67,7 @@
         </view>
 
         <!-- 复习模式 -->
-        <view wx:else>
+        <view wx:if="{{wordItem.reviewMode}}">
           <view class="spelling-header">
             <text class="review-count">第{{wordItem.review_count + 1}}次复习</text>
             <text class="spelling-hint">完成以下题目来复习单词</text>
@@ -75,7 +75,7 @@
           
           <!-- 题目列表 -->
           <view wx:if="{{wordItem.questions && wordItem.questions.length > 0}}" class="questions-section">
-            <view class="question-item" wx:for="{{wordItem.questions}}" wx:key="index" wx:for-item="question" wx:for-index="qIndex">
+            <view class="question-item" wx:for="{{wordItem.questions}}" wx:key="*this" wx:for-item="question" wx:for-index="qIndex">
               <view class="question-header">
                 <text class="question-number">题目 {{qIndex + 1}}：</text>
                 <text class="question-type">{{question.type === 'multiple_choice' ? '选择题' : '填空题'}}</text>

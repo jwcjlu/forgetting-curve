@@ -185,16 +185,57 @@ Page({
       .then(res => {
         wx.hideLoading();
         
+        console.log('生成题目API响应:', res);
+        console.log('题目数据:', res.questions);
+        
         const words = this.data.todayWords;
         words[index].reviewMode = true;
-        words[index].questions = res.questions || [];
+        
+        // 处理题目数据，确保字段名正确
+        const questions = (res.questions || []).map((q, idx) => {
+          const question = {
+            type: q.type || q.Type || '',
+            question: q.question || q.Question || '',
+            options: q.options || q.Options || [],
+            correct_answer: q.correct_answer || q.correctAnswer || q.CorrectAnswer || ''
+          };
+          console.log(`题目 ${idx + 1}:`, question);
+          return question;
+        });
+        
+        if (questions.length === 0) {
+          console.error('没有获取到题目数据，原始响应:', res);
+          wx.showToast({
+            title: '未获取到题目',
+            icon: 'none',
+            duration: 2000
+          });
+          return;
+        }
+        
+        words[index].questions = questions;
         words[index].currentQuestionIndex = 0;
         words[index].userAnswers = [];
         words[index].showAnswers = [];
         words[index].canSubmit = true; // 可以提交答案
+        words[index].spellingMode = false; // 确保spellingMode为false
+        
+        console.log('处理后的题目:', questions);
+        console.log('设置reviewMode为true, spellingMode为false');
+        console.log('wordItem状态:', {
+          reviewMode: words[index].reviewMode,
+          spellingMode: words[index].spellingMode,
+          questionsCount: words[index].questions.length
+        });
         
         this.setData({
           todayWords: words
+        }, () => {
+          console.log('setData完成后的状态:', {
+            reviewMode: this.data.todayWords[index].reviewMode,
+            spellingMode: this.data.todayWords[index].spellingMode,
+            questionsCount: this.data.todayWords[index].questions ? this.data.todayWords[index].questions.length : 0
+          });
         });
       })
       .catch(err => {

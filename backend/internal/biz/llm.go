@@ -108,6 +108,7 @@ func (l *llmService) GenerateReviewQuestions(ctx context.Context, word, meaning,
 	prompt := fmt.Sprintf(`请为单词 "%s"（中文释义：%s）%s生成2道复习题目，要求：
 1. 第一道题：选择题（multiple_choice），包含4个选项，其中只有1个正确答案
 2. 第二道题：填空题（fill_blank），要求填入该单词
+3. 要求二道题都用英文
 
 %s
 
