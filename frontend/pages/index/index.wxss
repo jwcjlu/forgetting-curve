@@ -1,0 +1,564 @@
+/* pages/index/index.wxss */
+.container {
+  padding: 20rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+  padding: 40rpx 30rpx;
+  border-radius: 12rpx;
+  margin-bottom: 30rpx;
+  color: white;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.settings-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  border-radius: 6rpx;
+  padding: 10rpx 20rpx;
+  font-size: 24rpx;
+}
+
+.date-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.count-text {
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 40rpx;
+  text-align: center;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: #BBB;
+}
+
+.word-list {
+  margin-top: 20rpx;
+}
+
+.word-card {
+  margin-bottom: 20rpx;
+}
+
+.word-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.word-text-container {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  flex: 1;
+}
+
+.word-text {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.audio-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #F0F0F0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.audio-btn:active {
+  background-color: #E0E0E0;
+  transform: scale(0.95);
+}
+
+.audio-btn.audio-playing {
+  background-color: #4A90E2;
+}
+
+.audio-icon {
+  font-size: 32rpx;
+  line-height: 1;
+}
+
+.review-count {
+  font-size: 24rpx;
+  color: #4A90E2;
+  background-color: #E8F4FD;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.word-meaning {
+  font-size: 32rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20rpx;
+  padding: 20rpx;
+  background-color: #F8F9FA;
+  border-radius: 8rpx;
+}
+
+.word-info {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20rpx;
+}
+
+.info-text {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.word-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+.review-btn {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.review-btn:active {
+  background-color: #357ABD;
+}
+
+.spelling-btn {
+  background-color: #52C41A;
+  color: white;
+}
+
+.spelling-btn:active {
+  background-color: #389E0D;
+}
+
+/* 拼写模式样式 */
+.spelling-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.spelling-hint {
+  font-size: 26rpx;
+  color: #666;
+  margin-top: 10rpx;
+  text-align: center;
+}
+
+.spelling-meaning {
+  margin-bottom: 30rpx;
+  padding: 30rpx;
+  background: linear-gradient(135deg, #FFF7E6 0%, #FFE7BA 100%);
+  border-radius: 12rpx;
+  border-left: 6rpx solid #FAAD14;
+}
+
+.meaning-label {
+  font-size: 28rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 15rpx;
+}
+
+.meaning-text {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.spelling-input-section {
+  margin-bottom: 30rpx;
+  width: 100vw;
+  margin-left: calc(-30rpx - 20rpx);
+  margin-right: calc(-30rpx - 20rpx);
+  box-sizing: border-box;
+  padding: 0 20rpx;
+  position: relative;
+  overflow-x: visible;
+}
+
+.spelling-input {
+  width: 100%;
+  padding: 35rpx 5rpx;
+  border: 3rpx solid #E0E0E0;
+  border-radius: 12rpx;
+  font-size: 40rpx;
+  text-align: left;
+  box-sizing: border-box;
+  background-color: white;
+  min-height: 120rpx;
+  line-height: 2;
+  letter-spacing: 0.2rpx;
+  word-wrap: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+  display: block;
+  -webkit-overflow-scrolling: touch;
+}
+
+.spelling-input:focus {
+  border-color: #4A90E2;
+}
+
+.input-correct {
+  border-color: #52C41A;
+  background-color: #F6FFED;
+}
+
+.input-wrong {
+  border-color: #FF4D4F;
+  background-color: #FFF1F0;
+}
+
+.answer-feedback {
+  margin-bottom: 30rpx;
+  padding: 20rpx;
+  border-radius: 12rpx;
+}
+
+.feedback-result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+}
+
+.feedback-correct {
+  background-color: #F6FFED;
+  border: 2rpx solid #52C41A;
+}
+
+.feedback-wrong {
+  background-color: #FFF1F0;
+  border: 2rpx solid #FF4D4F;
+}
+
+.feedback-icon {
+  font-size: 40rpx;
+  margin-right: 15rpx;
+  font-weight: bold;
+}
+
+.feedback-correct .feedback-icon {
+  color: #52C41A;
+}
+
+.feedback-wrong .feedback-icon {
+  color: #FF4D4F;
+}
+
+.feedback-text {
+  font-size: 32rpx;
+  font-weight: 500;
+}
+
+.feedback-correct .feedback-text {
+  color: #389E0D;
+}
+
+.feedback-wrong .feedback-text {
+  color: #CF1322;
+}
+
+.correct-answer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx;
+  background-color: #F8F9FA;
+  border-radius: 8rpx;
+}
+
+.answer-label {
+  font-size: 28rpx;
+  color: #666;
+  margin-right: 15rpx;
+}
+
+.answer-word {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+}
+
+.check-btn {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.check-btn:active {
+  background-color: #357ABD;
+}
+
+.check-btn[disabled] {
+  background-color: #CCCCCC;
+  color: #999;
+}
+
+.next-btn {
+  background-color: #52C41A;
+  color: white;
+}
+
+.next-btn:active {
+  background-color: #389E0D;
+}
+
+.back-btn {
+  background-color: #999;
+  color: white;
+}
+
+.back-btn:active {
+  background-color: #777;
+}
+
+/* 混淆词样式 */
+.confused-words-section {
+  margin-bottom: 20rpx;
+  padding: 20rpx;
+  background-color: #FFF7E6;
+  border-radius: 8rpx;
+  border-left: 4rpx solid #FAAD14;
+}
+
+.confused-words-title {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 15rpx;
+  font-weight: 500;
+}
+
+.confused-words-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.confused-word-tag {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 10rpx 15rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid #FAAD14;
+  font-size: 24rpx;
+}
+
+.confused-word-text {
+  color: #333;
+  font-weight: 500;
+  margin-right: 8rpx;
+}
+
+.confused-word-meaning {
+  color: #666;
+  font-size: 22rpx;
+  margin-right: 8rpx;
+  max-width: 200rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.confused-word-remove {
+  color: #FF4D4F;
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-left: 5rpx;
+  width: 30rpx;
+  height: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.confused-btn {
+  background-color: #FAAD14;
+  color: white;
+}
+
+.confused-btn:active {
+  background-color: #D48806;
+}
+
+/* 添加混淆词弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 600rpx;
+  background-color: white;
+  border-radius: 16rpx;
+  overflow: hidden;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #E0E0E0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 30rpx;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.search-section {
+  display: flex;
+  gap: 15rpx;
+  margin-bottom: 30rpx;
+}
+
+.search-input {
+  flex: 1;
+  padding: 25rpx 20rpx;
+  border: 2rpx solid #E0E0E0;
+  border-radius: 8rpx;
+  font-size: 32rpx;
+  min-height: 70rpx;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.search-btn {
+  background-color: #4A90E2;
+  color: white;
+  padding: 0 30rpx;
+}
+
+.search-results {
+  max-height: 500rpx;
+  overflow-y: auto;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+  gap: 15rpx;
+}
+
+.result-word {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  min-width: 150rpx;
+}
+
+.result-meaning {
+  flex: 1;
+  font-size: 24rpx;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-add-btn {
+  background-color: #52C41A;
+  color: white;
+  padding: 0 20rpx;
+}
+
+.empty-results {
+  text-align: center;
+  padding: 60rpx 20rpx;
+  color: #999;
+  font-size: 28rpx;
+}

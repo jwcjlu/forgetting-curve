@@ -1,0 +1,139 @@
+<!--pages/add-word/add-word.wxml-->
+<view class="container">
+  <view class="form-card card">
+    <view class="form-item">
+      <text class="label">单词</text>
+      <input 
+        class="input" 
+        type="text" 
+        placeholder="请输入单词"
+        value="{{word}}"
+        bindinput="onWordInput"
+        maxlength="50"
+        adjust-position="{{true}}"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="label">释义</text>
+      <textarea 
+        class="textarea" 
+        placeholder="请输入单词释义"
+        value="{{meaning}}"
+        bindinput="onMeaningInput"
+        maxlength="200"
+        auto-height
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="label">开始日期</text>
+      <picker 
+        mode="date" 
+        value="{{startDate}}" 
+        start="{{minDate}}"
+        bindchange="onDateChange"
+      >
+        <view class="picker">
+          <text class="picker-text">{{startDate || '请选择开始日期'}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <button class="btn submit-btn" bindtap="submitWord" loading="{{submitting}}">
+      添加单词
+    </button>
+
+    <view class="divider">
+      <text class="divider-text">或</text>
+    </view>
+
+    <view class="ocr-section">
+      <button class="btn ocr-btn" bindtap="chooseImage" loading="{{recognizing}}">
+        📷 拍照识别单词
+      </button>
+      <text class="ocr-hint">支持拍照或从相册选择图片，自动识别单词</text>
+    </view>
+  </view>
+
+  <!-- OCR识别结果弹窗 -->
+  <view wx:if="{{showOCRResult}}" class="modal-overlay" bindtap="hideOCRResult">
+    <view class="modal-content ocr-modal" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">识别结果</text>
+        <text class="modal-close" bindtap="hideOCRResult">×</text>
+      </view>
+      <view class="modal-body">
+        <view wx:if="{{recognizedWords.length > 0}}" class="ocr-results">
+          <view class="ocr-result-item" wx:for="{{recognizedWords}}" wx:key="word" wx:for-item="item">
+            <view class="ocr-word-row">
+              <text class="ocr-word-text">{{item.word}}</text>
+              <text class="ocr-confidence" wx:if="{{item.confidence_text}}">置信度: {{item.confidence_text}}</text>
+            </view>
+            <input 
+              class="ocr-meaning-input" 
+              type="text" 
+              placeholder="请输入释义（可选）"
+              value="{{item.meaning}}"
+              bindinput="onOCRMeaningInput"
+              data-index="{{index}}"
+            />
+          </view>
+        </view>
+        <view wx:else class="empty-results">
+          <text>未识别到单词</text>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn cancel-btn" bindtap="hideOCRResult">取消</button>
+        <button class="modal-btn confirm-btn" bindtap="addRecognizedWords" disabled="{{recognizedWords.length === 0}}">
+          添加 {{recognizedWords.length}} 个单词
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <view class="word-list-section">
+    <view class="section-header">
+      <text class="section-title">已添加的单词</text>
+      <text class="section-count">共 {{totalWords}} 个</text>
+    </view>
+
+    <view wx:if="{{words.length === 0 && !loading}}" class="empty-list">
+      <text>还没有添加单词</text>
+    </view>
+
+    <view wx:if="{{loading}}" class="loading-state">
+      <text>加载中...</text>
+    </view>
+
+    <view wx:else class="word-list">
+      <view class="word-item card" wx:for="{{words}}" wx:key="id" wx:for-item="wordItem">
+        <view class="word-item-header">
+          <view class="word-item-text-container">
+            <text class="word-item-text">{{wordItem.word}}</text>
+            <view wx:if="{{wordItem.audio_urls && wordItem.audio_urls.length > 0}}" 
+                  class="audio-btn {{playingWordId === wordItem.id ? 'audio-playing' : ''}}"
+                  bindtap="playAudio" 
+                  data-word-id="{{wordItem.id}}" 
+                  data-index="{{index}}">
+              <text class="audio-icon">{{playingWordId === wordItem.id ? '⏸' : '🔊'}}</text>
+            </view>
+          </view>
+          <text class="word-item-date">{{wordItem.start_date}}</text>
+        </view>
+        <text class="word-item-meaning">{{wordItem.meaning}}</text>
+        <view class="word-item-footer">
+          <text class="word-item-info">复习次数：{{wordItem.review_count}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{hasMore}}" class="load-more">
+      <button class="load-more-btn" bindtap="loadMoreWords" loading="{{loadingMore}}">
+        加载更多
+      </button>
+    </view>
+  </view>
+</view>

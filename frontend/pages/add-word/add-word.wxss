@@ -1,0 +1,416 @@
+/* pages/add-word/add-word.wxss */
+.container {
+  padding: 20rpx;
+  box-sizing: border-box;
+}
+
+.form-card {
+  margin-bottom: 30rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 15rpx;
+}
+
+.input {
+  width: 100%;
+  padding: 30rpx 25rpx;
+  border: 2rpx solid #E0E0E0;
+  border-radius: 8rpx;
+  font-size: 40rpx;
+  box-sizing: border-box;
+  min-height: 100rpx;
+  line-height: 1.6;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.input:focus {
+  border-color: #4A90E2;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 150rpx;
+  padding: 25rpx;
+  border: 2rpx solid #E0E0E0;
+  border-radius: 8rpx;
+  font-size: 36rpx;
+  box-sizing: border-box;
+  line-height: 1.8;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.textarea:focus {
+  border-color: #4A90E2;
+}
+
+.picker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  border: 2rpx solid #E0E0E0;
+  border-radius: 8rpx;
+  background-color: white;
+}
+
+.picker-text {
+  font-size: 32rpx;
+  color: #333;
+}
+
+.picker-text:empty::before {
+  content: '请选择开始日期';
+  color: #999;
+}
+
+.picker-arrow {
+  font-size: 32rpx;
+  color: #999;
+}
+
+.submit-btn {
+  margin-top: 40rpx;
+  background-color: #4A90E2;
+  color: white;
+  border-radius: 8rpx;
+  padding: 24rpx;
+  font-size: 32rpx;
+}
+
+.submit-btn:active {
+  background-color: #357ABD;
+}
+
+.word-list-section {
+  margin-top: 20rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 0 10rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.section-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.empty-list {
+  text-align: center;
+  padding: 60rpx 20rpx;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40rpx 20rpx;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.word-list {
+  margin-top: 10rpx;
+}
+
+.word-item {
+  margin-bottom: 20rpx;
+}
+
+.word-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.word-item-text-container {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  flex: 1;
+}
+
+.word-item-text {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.audio-btn {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #F0F0F0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.audio-btn:active {
+  background-color: #E0E0E0;
+  transform: scale(0.95);
+}
+
+.audio-btn.audio-playing {
+  background-color: #4A90E2;
+}
+
+.audio-icon {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.word-item-date {
+  font-size: 24rpx;
+  color: #999;
+  background-color: #F0F0F0;
+  padding: 6rpx 12rpx;
+  border-radius: 4rpx;
+}
+
+.word-item-meaning {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 15rpx;
+}
+
+.word-item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15rpx;
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.word-item-info {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.load-more {
+  margin-top: 20rpx;
+  text-align: center;
+}
+
+.load-more-btn {
+  background-color: #F0F0F0;
+  color: #666;
+  border: none;
+  padding: 20rpx 40rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+}
+
+.load-more-btn:active {
+  background-color: #E0E0E0;
+}
+
+/* OCR相关样式 */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 40rpx 0;
+  text-align: center;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1rpx;
+  background-color: #E0E0E0;
+}
+
+.divider-text {
+  padding: 0 20rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.ocr-section {
+  text-align: center;
+  padding: 20rpx 0;
+}
+
+.ocr-btn {
+  background-color: #52C41A;
+  color: white;
+  margin-bottom: 15rpx;
+}
+
+.ocr-btn:active {
+  background-color: #389E0D;
+}
+
+.ocr-hint {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+  margin-top: 10rpx;
+}
+
+/* OCR结果弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.ocr-modal {
+  width: 90%;
+  max-width: 600rpx;
+  max-height: 80vh;
+  background-color: white;
+  border-radius: 16rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #E0E0E0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 30rpx;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ocr-results {
+  max-height: 500rpx;
+  overflow-y: auto;
+}
+
+.ocr-result-item {
+  margin-bottom: 25rpx;
+  padding: 20rpx;
+  background-color: #F8F9FA;
+  border-radius: 8rpx;
+  border-left: 4rpx solid #4A90E2;
+}
+
+.ocr-word-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.ocr-word-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.ocr-confidence {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.ocr-meaning-input {
+  width: 100%;
+  padding: 15rpx;
+  border: 1rpx solid #E0E0E0;
+  border-radius: 6rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx 30rpx;
+  border-top: 1rpx solid #E0E0E0;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+.cancel-btn {
+  background-color: #F0F0F0;
+  color: #666;
+}
+
+.cancel-btn:active {
+  background-color: #E0E0E0;
+}
+
+.confirm-btn {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.confirm-btn:active {
+  background-color: #357ABD;
+}
+
+.confirm-btn[disabled] {
+  background-color: #CCCCCC;
+  color: #999;
+}
+
+.empty-results {
+  text-align: center;
+  padding: 60rpx 20rpx;
+  color: #999;
+  font-size: 28rpx;
+}

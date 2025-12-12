@@ -1,0 +1,170 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="header-content">
+      <view class="header-left">
+        <text class="date-title">{{todayDate}}</text>
+        <text class="count-text">今日需背诵：{{todayWords.length}} 个单词</text>
+      </view>
+      <view class="header-right">
+        <button class="settings-btn" bindtap="goToSettings" size="mini">设置</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{todayWords.length === 0}}" class="empty-state">
+    <text class="empty-text">今天没有需要背诵的单词</text>
+    <text class="empty-hint">去添加单词开始学习吧！</text>
+  </view>
+
+  <view wx:else>
+    <view class="word-list">
+      <view class="word-card card" wx:for="{{todayWords}}" wx:key="id" wx:for-item="wordItem">
+        <!-- 浏览模式 -->
+        <view wx:if="{{!wordItem.spellingMode}}">
+          <view class="word-header">
+            <view class="word-text-container">
+              <text class="word-text">{{wordItem.word}}</text>
+              <view wx:if="{{wordItem.audio_urls && wordItem.audio_urls.length > 0}}"
+                    class="audio-btn {{playingWordId === wordItem.id ? 'audio-playing' : ''}}"
+                    bindtap="playAudio" 
+                    data-word-id="{{wordItem.id}}" 
+                    data-index="{{index}}">
+                <text class="audio-icon">{{playingWordId === wordItem.id ? '⏸' : '🔊'}}</text>
+              </view>
+            </view>
+            <text class="review-count">第{{wordItem.review_count + 1}}次复习</text>
+          </view>
+          <view class="word-meaning">{{wordItem.meaning}}</view>
+          
+          <!-- 混淆词列表 -->
+          <view wx:if="{{wordItem.confused_words && wordItem.confused_words.length > 0}}" class="confused-words-section">
+            <view class="confused-words-title">混淆词：</view>
+            <view class="confused-words-list">
+              <view class="confused-word-tag" wx:for="{{wordItem.confused_words}}" wx:key="id" wx:for-item="confusedWord">
+                <text class="confused-word-text">{{confusedWord.word}}</text>
+                <text class="confused-word-meaning">{{confusedWord.meaning}}</text>
+                <text class="confused-word-remove" bindtap="removeConfusedWord" data-word-id="{{wordItem.id}}" data-confused-word-id="{{confusedWord.id}}" data-index="{{index}}">×</text>
+              </view>
+            </view>
+          </view>
+          
+          <view class="word-info">
+            <text class="info-text">开始日期：{{wordItem.start_date}}</text>
+            <text class="info-text" wx:if="{{wordItem.last_review_date}}">上次复习：{{wordItem.last_review_date}}</text>
+          </view>
+          <view class="word-actions">
+            <button class="action-btn confused-btn" bindtap="showAddConfusedWord" data-index="{{index}}" data-word-id="{{wordItem.id}}" size="mini">
+              添加混淆词
+            </button>
+            <button class="action-btn spelling-btn" bindtap="startSpelling" data-index="{{index}}">
+              开始拼写
+            </button>
+            <button class="action-btn review-btn" bindtap="markAsReviewed" data-id="{{wordItem.id}}">
+              已复习
+            </button>
+          </view>
+        </view>
+
+        <!-- 拼写模式 -->
+        <view wx:else>
+          <view class="spelling-header">
+            <text class="review-count">第{{wordItem.review_count + 1}}次复习</text>
+            <text class="spelling-hint">根据中文意思，拼写英文单词</text>
+          </view>
+          
+          <view class="spelling-meaning">
+            <text class="meaning-label">中文释义：</text>
+            <text class="meaning-text">{{wordItem.meaning}}</text>
+          </view>
+
+          <view class="spelling-input-section">
+            <input 
+              class="spelling-input {{wordItem.showAnswer ? (wordItem.isCorrect ? 'input-correct' : 'input-wrong') : ''}}"
+              type="text" 
+              placeholder="请输入英文单词"
+              value="{{wordItem.userAnswer}}"
+              bindinput="onSpellingInput"
+              data-index="{{index}}"
+              disabled="{{wordItem.showAnswer}}"
+              adjust-position="{{true}}"
+              maxlength="50"
+              confirm-type="done"
+              hold-keyboard="{{true}}"
+            />
+          </view>
+
+          <!-- 答案反馈 -->
+          <view wx:if="{{wordItem.showAnswer}}" class="answer-feedback">
+            <view class="feedback-result {{wordItem.isCorrect ? 'feedback-correct' : 'feedback-wrong'}}">
+              <text class="feedback-icon">{{wordItem.isCorrect ? '✓' : '✗'}}</text>
+              <text class="feedback-text">{{wordItem.isCorrect ? '拼写正确！' : '拼写错误'}}</text>
+            </view>
+            <view class="correct-answer">
+              <text class="answer-label">正确答案：</text>
+              <text class="answer-word">{{wordItem.word}}</text>
+            </view>
+          </view>
+
+          <view class="word-actions">
+            <button 
+              wx:if="{{!wordItem.showAnswer}}" 
+              class="action-btn check-btn" 
+              bindtap="checkAnswer" 
+              data-index="{{index}}"
+              disabled="{{!wordItem.userAnswer || wordItem.userAnswer.trim() === ''}}"
+            >
+              检查答案
+            </button>
+            <button 
+              wx:else
+              class="action-btn next-btn" 
+              bindtap="nextWord" 
+              data-index="{{index}}"
+            >
+              下一个
+            </button>
+            <button class="action-btn back-btn" bindtap="backToView" data-index="{{index}}">
+              返回查看
+            </button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加混淆词弹窗 -->
+  <view wx:if="{{showConfusedWordModal}}" class="modal-overlay" bindtap="hideAddConfusedWord">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">添加混淆词</text>
+        <text class="modal-close" bindtap="hideAddConfusedWord">×</text>
+      </view>
+      <view class="modal-body">
+        <view class="search-section">
+          <input 
+            class="search-input" 
+            type="text" 
+            placeholder="搜索单词（支持正则表达式）"
+            value="{{confusedWordKeyword}}"
+            bindinput="onConfusedWordSearch"
+            adjust-position="{{true}}"
+          />
+          <button class="search-btn" bindtap="searchConfusedWords" size="mini">搜索</button>
+        </view>
+        
+        <view wx:if="{{confusedWordSearchResults.length > 0}}" class="search-results">
+          <view class="result-item" wx:for="{{confusedWordSearchResults}}" wx:key="id" wx:for-item="resultWord">
+            <view class="result-word">{{resultWord.word}}</view>
+            <view class="result-meaning">{{resultWord.meaning}}</view>
+            <button class="result-add-btn" bindtap="addConfusedWord" data-confused-word-id="{{resultWord.id}}" size="mini">添加</button>
+          </view>
+        </view>
+        
+        <view wx:if="{{confusedWordSearchResults.length === 0 && confusedWordKeyword}}" class="empty-results">
+          <text>未找到匹配的单词</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
