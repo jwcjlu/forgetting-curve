@@ -147,7 +147,7 @@ func (l *llmService) GenerateReviewQuestions(ctx context.Context, word, meaning,
 
 	// 创建HTTP请求
 	url := l.baseURL + "/chat/completions"
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequestWithContext(context.WithoutCancel(ctx), "POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
