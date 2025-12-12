@@ -184,6 +184,115 @@
   background-color: #389E0D;
 }
 
+/* 复习模式样式 */
+.questions-section {
+  margin-bottom: 30rpx;
+}
+
+.question-item {
+  margin-bottom: 40rpx;
+  padding: 30rpx;
+  background-color: #F8F9FA;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #4A90E2;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.question-number {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.question-type {
+  font-size: 24rpx;
+  color: #4A90E2;
+  background-color: #E8F4FD;
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+}
+
+.question-content {
+  margin-bottom: 20rpx;
+}
+
+.question-text {
+  font-size: 30rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.options-section {
+  margin-top: 20rpx;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  margin-bottom: 15rpx;
+  background-color: white;
+  border: 2rpx solid #E0E0E0;
+  border-radius: 8rpx;
+  transition: all 0.3s;
+}
+
+.option-item:active {
+  background-color: #F0F0F0;
+}
+
+.option-correct {
+  background-color: #F6FFED;
+  border-color: #52C41A;
+}
+
+.option-wrong {
+  background-color: #FFF1F0;
+  border-color: #FF4D4F;
+}
+
+.option-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #4A90E2;
+  margin-right: 10rpx;
+}
+
+.option-text {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.fill-blank-section {
+  margin-top: 20rpx;
+}
+
+.fill-blank-input {
+  width: 100%;
+  padding: 25rpx;
+  border: 2rpx solid #E0E0E0;
+  border-radius: 8rpx;
+  font-size: 32rpx;
+  background-color: white;
+  box-sizing: border-box;
+}
+
+.input-correct {
+  background-color: #F6FFED;
+  border-color: #52C41A;
+}
+
+.input-wrong {
+  background-color: #FFF1F0;
+  border-color: #FF4D4F;
+}
+
 /* 拼写模式样式 */
 .spelling-header {
   display: flex;

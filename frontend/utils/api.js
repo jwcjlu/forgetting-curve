@@ -353,6 +353,30 @@ function recognizeWordsFromImage(imageBase64, startDate) {
   });
 }
 
+/**
+ * 生成复习题目
+ * 对应: GenerateReviewQuestions
+ * @param {number} wordId - 单词ID
+ * @param {string} grade - 年级（可选）
+ */
+function generateReviewQuestions(wordId, grade) {
+  const studentId = getStudentId();
+  if (!studentId) {
+    return Promise.reject(new Error('请先登录'));
+  }
+
+  const data = {};
+  if (grade && grade.trim() !== '') {
+    data.grade = grade.trim();
+  }
+
+  return request({
+    url: `/api/v1/students/${studentId}/words/${wordId}/review-questions`,
+    method: 'POST',
+    data: data
+  });
+}
+
 module.exports = {
   getStudentId,
   setStudentId,
@@ -370,5 +394,6 @@ module.exports = {
   markWordForgotten,
   updateWordReviewData,
   recognizeWordsFromImage,
+  generateReviewQuestions,
   API_BASE_URL
 };

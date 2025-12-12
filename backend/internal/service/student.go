@@ -463,6 +463,43 @@ func (s *StudentService) UpdateWordReviewData(ctx context.Context, req *v1.Updat
 	}, nil
 }
 
+// GenerateReviewQuestions 生成复习题目
+func (s *StudentService) GenerateReviewQuestions(ctx context.Context, req *v1.GenerateReviewQuestionsRequest) (*v1.GenerateReviewQuestionsReply, error) {
+	grade := ""
+	if req.Grade != "" {
+		grade = req.Grade
+	}
+
+	questions, err := s.wordUc.GenerateReviewQuestions(ctx, req.StudentId, req.WordId, grade)
+	if err != nil {
+		return &v1.GenerateReviewQuestionsReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	// 转换题目
+	v1Questions := make([]*v1.ReviewQuestion, 0, len(questions))
+	for _, q := range questions {
+		v1Questions = append(v1Questions, &v1.ReviewQuestion{
+			Type:          q.Type,
+			Question:      q.Question,
+			Options:       q.Options,
+			CorrectAnswer: q.CorrectAnswer,
+		})
+	}
+
+	return &v1.GenerateReviewQuestionsReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Questions: v1Questions,
+	}, nil
+}
+
 // convertWordToV1 转换 biz.Word 到 v1.Word
 func (s *StudentService) convertWordToV1(word *biz.Word) *v1.Word {
 	v1Word := &v1.Word{

@@ -10,4 +10,8 @@ data:
     driver: mysql
     source: root:password@tcp(localhost:3306)/forgetting_curve?charset=utf8mb4&parseTime=True&loc=Local
 
+llm:
+  api_key: "your-llm-api-key"  # 大模型API Key（如OpenAI API Key）
+  base_url: "https://api.openai.com/v1"  # 可选，默认使用OpenAI格式
+  model: "gpt-3.5-turbo"  # 可选，默认gpt-3.5-turbo
 

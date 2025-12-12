@@ -13,3 +13,4 @@ USE forgetting_curve;
 -- CREATE INDEX IF NOT EXISTS idx_words_start_date ON words(start_date);
 
 
+

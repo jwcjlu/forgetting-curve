@@ -13,6 +13,7 @@ type Bootstrap struct {
 	Wechat        *Wechat        `yaml:"wechat"`
 	OCR           *OCR           `yaml:"ocr"`           // OCR配置
 	Pronunciation *Pronunciation `yaml:"pronunciation"` // 发音配置
+	LLM           *LLM           `yaml:"llm"`           // 大模型配置
 }
 
 // Server 服务器配置
@@ -87,6 +88,13 @@ type OCR struct {
 // Pronunciation 发音配置
 type Pronunciation struct {
 	DictionaryPath string `yaml:"dictionary_path"` // 发音字典文件路径（ultimate.json）
+}
+
+// LLM 大模型配置
+type LLM struct {
+	APIKey  string `yaml:"api_key"`  // 大模型API Key
+	BaseURL string `yaml:"base_url"` // 大模型API Base URL（可选，默认使用OpenAI格式）
+	Model   string `yaml:"model"`    // 模型名称（可选，默认gpt-3.5-turbo）
 }
 
 // Load 加载配置

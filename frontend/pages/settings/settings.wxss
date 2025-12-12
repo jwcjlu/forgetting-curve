@@ -68,6 +68,41 @@
   border-top: 1rpx solid #F0F0F0;
 }
 
+.grade-section {
+  margin-top: 30rpx;
+  padding-top: 30rpx;
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.picker-view {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 30rpx 25rpx;
+  border: 2rpx solid #E0E0E0;
+  border-radius: 8rpx;
+  background-color: white;
+  min-height: 90rpx;
+  box-sizing: border-box;
+}
+
+.picker-text {
+  font-size: 36rpx;
+  color: #333;
+  flex: 1;
+}
+
+.picker-placeholder {
+  color: #999;
+}
+
+.picker-arrow {
+  font-size: 40rpx;
+  color: #999;
+  margin-left: 20rpx;
+}
+
 .api-config-section {
   margin-top: 30rpx;
   padding-top: 30rpx;

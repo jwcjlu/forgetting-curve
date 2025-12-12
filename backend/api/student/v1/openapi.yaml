@@ -418,6 +418,42 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/words/{wordId}/review-questions:
+        post:
+            tags:
+                - StudentService
+            description: 生成复习题目
+            operationId: StudentService_GenerateReviewQuestions
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: wordId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GenerateReviewQuestionsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GenerateReviewQuestionsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
     schemas:
         AddConfusedWordReply:
@@ -480,6 +516,24 @@ components:
                 name:
                     type: string
                 studentNo:
+                    type: string
+        GenerateReviewQuestionsReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                questions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ReviewQuestion'
+        GenerateReviewQuestionsRequest:
+            type: object
+            properties:
+                studentId:
+                    type: string
+                wordId:
+                    type: string
+                grade:
                     type: string
         GetConfusedWordsReply:
             type: object
@@ -588,6 +642,19 @@ components:
             properties:
                 ret:
                     $ref: '#/components/schemas/BaseResponse'
+        ReviewQuestion:
+            type: object
+            properties:
+                type:
+                    type: string
+                question:
+                    type: string
+                options:
+                    type: array
+                    items:
+                        type: string
+                correctAnswer:
+                    type: string
         SearchWordsReply:
             type: object
             properties:

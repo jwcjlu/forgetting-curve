@@ -9,22 +9,48 @@ Page({
     studentNo: '',
     apiUrl: '',
     loading: false,
-    isAutoLogin: false
+    isAutoLogin: false,
+    grade: '',
+    gradeIndex: 0,
+    gradeOptions: [
+      { value: '小学一年级', label: '小学一年级' },
+      { value: '小学二年级', label: '小学二年级' },
+      { value: '小学三年级', label: '小学三年级' },
+      { value: '小学四年级', label: '小学四年级' },
+      { value: '小学五年级', label: '小学五年级' },
+      { value: '小学六年级', label: '小学六年级' },
+      { value: '初中一年级', label: '初中一年级' },
+      { value: '初中二年级', label: '初中二年级' },
+      { value: '初中三年级', label: '初中三年级' },
+      { value: '高中一年级', label: '高中一年级' },
+      { value: '高中二年级', label: '高中二年级' },
+      { value: '高中三年级', label: '高中三年级' },
+      { value: '大学', label: '大学' },
+      { value: '其他', label: '其他' }
+    ]
   },
 
   onLoad() {
     const studentId = api.getStudentId();
     const apiUrl = wx.getStorageSync('apiUrl') || api.API_BASE_URL;
+    const grade = wx.getStorageSync('grade') || '';
+    
+    // 计算年级索引
+    const gradeIndex = this.data.gradeOptions.findIndex(opt => opt.value === grade);
     
     if (studentId) {
       this.setData({
         studentId: studentId,
-        apiUrl: apiUrl
+        apiUrl: apiUrl,
+        grade: grade,
+        gradeIndex: gradeIndex >= 0 ? gradeIndex : 0
       });
       this.loadStudentInfo();
     } else {
       this.setData({
-        apiUrl: apiUrl
+        apiUrl: apiUrl,
+        grade: grade,
+        gradeIndex: gradeIndex >= 0 ? gradeIndex : 0
       });
       // 尝试自动登录
       this.tryAutoLogin();
@@ -177,5 +203,23 @@ Page({
         showCancel: false
       });
     }, 1000);
+  },
+
+  /**
+   * 选择年级
+   */
+  onGradeChange(e) {
+    const index = parseInt(e.detail.value);
+    const grade = this.data.gradeOptions[index].value;
+    this.setData({
+      grade: grade,
+      gradeIndex: index
+    });
+    wx.setStorageSync('grade', grade);
+    wx.showToast({
+      title: '年级已保存',
+      icon: 'success',
+      duration: 1500
+    });
   }
 });

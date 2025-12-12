@@ -105,6 +105,14 @@ service StudentService {
       body: "*"
     };
   }
+
+  // 生成复习题目
+  rpc GenerateReviewQuestions (GenerateReviewQuestionsRequest) returns (GenerateReviewQuestionsReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students/{student_id}/words/{word_id}/review-questions"
+      body: "*"
+    };
+  }
 }
 
 
@@ -284,6 +292,25 @@ message UpdateWordReviewDataReply {
   BaseResponse ret = 1;
   Word word = 2;
 }
+
+message GenerateReviewQuestionsRequest {
+  int64 student_id = 1;
+  int64 word_id = 2;
+  string grade = 3;  // 年级（可选）
+}
+
+message GenerateReviewQuestionsReply {
+  BaseResponse ret = 1;
+  repeated ReviewQuestion questions = 2;
+}
+
+message ReviewQuestion {
+  string type = 1;              // 题目类型: "multiple_choice" 或 "fill_blank"
+  string question = 2;           // 题目内容
+  repeated string options = 3;   // 选择题选项（仅选择题有）
+  string correct_answer = 4;     // 正确答案
+}
+
 message RecognizeWordsFromImageRequest {
   int64 student_id = 1;
   string image_base64 = 2; // base64编码的图片数据（data:image/jpeg;base64,xxx 格式）

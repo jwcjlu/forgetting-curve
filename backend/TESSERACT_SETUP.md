@@ -122,3 +122,4 @@ go run test_ocr.go test.jpg
 对于单词识别场景，**Tesseract OCR 完全够用**，推荐使用免费方案！
 
 
+

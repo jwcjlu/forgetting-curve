@@ -24,6 +24,11 @@ type OCRService interface {
 	RecognizeText(ctx context.Context, req *OCRRequest) (*OCRResult, error)
 }
 
+// LLMService 大模型服务接口（已在llm.go中定义，这里只是引用）
+// type LLMService interface {
+// 	GenerateReviewQuestions(ctx context.Context, word, meaning string) ([]*ReviewQuestion, error)
+// }
+
 // RecognizedWord OCR识别的单词
 type RecognizedWord struct {
 	Word       string

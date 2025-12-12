@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -18,6 +19,7 @@ type WordUsecase interface {
 	MarkWordForgotten(ctx context.Context, studentID int64, wordID int64) (*Word, error)
 	UpdateWordReviewData(ctx context.Context, studentID int64, wordID int64, thinkTime, difficulty int32, isRemembered bool) (*Word, error)
 	ValidateStudentAccess(ctx context.Context, studentID int64, wordID int64) error
+	GenerateReviewQuestions(ctx context.Context, studentID int64, wordID int64, grade string) ([]*ReviewQuestion, error)
 }
 
 // WordItem 单词项
@@ -30,14 +32,16 @@ type WordItem struct {
 type wordUsecase struct {
 	wordRepo    WordRepo
 	studentRepo StudentRepo
+	llmService  LLMService
 	log         *log.Helper
 }
 
 // NewWordUsecase 创建单词业务逻辑
-func NewWordUsecase(wordRepo WordRepo, studentRepo StudentRepo, logger log.Logger) WordUsecase {
+func NewWordUsecase(wordRepo WordRepo, studentRepo StudentRepo, llmService LLMService, logger log.Logger) WordUsecase {
 	return &wordUsecase{
 		wordRepo:    wordRepo,
 		studentRepo: studentRepo,
+		llmService:  llmService,
 		log:         log.NewHelper(logger),
 	}
 }
@@ -263,4 +267,32 @@ func (uc *wordUsecase) ValidateStudentAccess(ctx context.Context, studentID int6
 	}
 
 	return nil
+}
+
+// GenerateReviewQuestions 生成复习题目
+func (uc *wordUsecase) GenerateReviewQuestions(ctx context.Context, studentID int64, wordID int64, grade string) ([]*ReviewQuestion, error) {
+	// 验证权限
+	if err := uc.ValidateStudentAccess(ctx, studentID, wordID); err != nil {
+		return nil, err
+	}
+
+	// 获取单词
+	word, err := uc.wordRepo.GetByID(ctx, wordID)
+	if err != nil {
+		return nil, errors.New("word not found")
+	}
+
+	// 检查LLM服务是否可用
+	if uc.llmService == nil {
+		return nil, errors.New("llm service not configured")
+	}
+
+	// 调用LLM服务生成题目
+	questions, err := uc.llmService.GenerateReviewQuestions(ctx, word.Word, word.Meaning, grade)
+	if err != nil {
+		uc.log.Errorf("failed to generate review questions: %v", err)
+		return nil, fmt.Errorf("failed to generate review questions: %w", err)
+	}
+
+	return questions, nil
 }

@@ -119,6 +119,11 @@ Page({
             confused_words: word.confused_words || [], // 混淆词列表（如果后端已返回）
             audio_urls: audioUrls, // 音频 URL 列表（统一使用下划线命名）
             spellingMode: false,
+            reviewMode: false,
+            questions: [],
+            currentQuestionIndex: 0,
+            userAnswers: [],
+            showAnswers: [],
             userAnswer: '',
             showAnswer: false,
             isCorrect: false
@@ -160,15 +165,60 @@ Page({
   },
 
   /**
-   * 开始拼写模式
+   * 开始复习模式
    */
-  startSpelling(e) {
+  startReview(e) {
     const index = e.currentTarget.dataset.index;
+    const word = this.data.todayWords[index];
+    
+    // 获取年级信息
+    const grade = wx.getStorageSync('grade') || '';
+    
+    wx.showLoading({
+      title: '生成题目中...',
+      mask: true
+    });
+
+    // 调用后端API生成题目
+    api.generateReviewQuestions(word.id, grade)
+      .then(res => {
+        wx.hideLoading();
+        
+        const words = this.data.todayWords;
+        words[index].reviewMode = true;
+        words[index].questions = res.questions || [];
+        words[index].currentQuestionIndex = 0;
+        words[index].userAnswers = [];
+        words[index].showAnswers = [];
+        
+        this.setData({
+          todayWords: words
+        });
+      })
+      .catch(err => {
+        wx.hideLoading();
+        console.error('生成题目失败:', err);
+        wx.showToast({
+          title: err.message || '生成题目失败',
+          icon: 'none',
+          duration: 2000
+        });
+      });
+  },
+
+  /**
+   * 填空题输入
+   */
+  onFillBlankInput(e) {
+    const index = e.currentTarget.dataset.index;
+    const qIndex = e.currentTarget.dataset.qIndex;
+    const value = e.detail.value;
     const words = this.data.todayWords;
-    words[index].spellingMode = true;
-    words[index].userAnswer = '';
-    words[index].showAnswer = false;
-    words[index].isCorrect = false;
+    
+    if (!words[index].userAnswers) {
+      words[index].userAnswers = [];
+    }
+    words[index].userAnswers[qIndex] = value;
     
     this.setData({
       todayWords: words
@@ -176,16 +226,73 @@ Page({
   },
 
   /**
-   * 拼写输入
+   * 选择题选择选项
    */
-  onSpellingInput(e) {
+  selectOption(e) {
     const index = e.currentTarget.dataset.index;
-    const value = e.detail.value;
+    const qIndex = e.currentTarget.dataset.qIndex;
+    const option = e.currentTarget.dataset.option;
     const words = this.data.todayWords;
-    words[index].userAnswer = value;
+    
+    // 如果已经显示答案，不允许修改
+    if (words[index].showAnswers && words[index].showAnswers[qIndex]) {
+      return;
+    }
+    
+    if (!words[index].userAnswers) {
+      words[index].userAnswers = [];
+    }
+    words[index].userAnswers[qIndex] = option;
     
     this.setData({
       todayWords: words
+    });
+  },
+
+  /**
+   * 检查所有答案
+   */
+  checkAllAnswers(e) {
+    const index = e.currentTarget.dataset.index;
+    const words = this.data.todayWords;
+    const word = words[index];
+    
+    // 检查是否所有题目都已作答
+    const allAnswered = word.questions.every((q, qIndex) => {
+      return word.userAnswers && word.userAnswers[qIndex] && word.userAnswers[qIndex].trim() !== '';
+    });
+    
+    if (!allAnswered) {
+      wx.showToast({
+        title: '请完成所有题目',
+        icon: 'none',
+        duration: 1500
+      });
+      return;
+    }
+    
+    // 显示所有答案
+    if (!word.showAnswers) {
+      word.showAnswers = [];
+    }
+    word.questions.forEach((q, qIndex) => {
+      word.showAnswers[qIndex] = true;
+    });
+    
+    // 计算正确数量
+    const correctCount = word.questions.filter((q, qIndex) => {
+      return word.userAnswers[qIndex] === q.correct_answer;
+    }).length;
+    
+    this.setData({
+      todayWords: words
+    });
+    
+    // 显示结果
+    wx.showToast({
+      title: `答对 ${correctCount}/${word.questions.length} 题`,
+      icon: correctCount === word.questions.length ? 'success' : 'none',
+      duration: 2000
     });
   },
 
@@ -256,6 +363,11 @@ Page({
     const index = e.currentTarget.dataset.index;
     const words = this.data.todayWords;
     words[index].spellingMode = false;
+    words[index].reviewMode = false;
+    words[index].questions = [];
+    words[index].currentQuestionIndex = 0;
+    words[index].userAnswers = [];
+    words[index].showAnswers = [];
     words[index].userAnswer = '';
     words[index].showAnswer = false;
     words[index].isCorrect = false;

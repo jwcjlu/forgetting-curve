@@ -41,6 +41,27 @@
       </button>
     </view>
 
+    <view class="grade-section">
+      <view class="form-item">
+        <text class="label">年级选择</text>
+        <picker 
+          mode="selector" 
+          range="{{gradeOptions}}" 
+          range-key="label"
+          value="{{gradeIndex}}"
+          bindchange="onGradeChange"
+        >
+          <view class="picker-view">
+            <text class="picker-text {{grade ? '' : 'picker-placeholder'}}">
+              {{grade || '请选择年级'}}
+            </text>
+            <text class="picker-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+      <text class="hint-text">选择年级后，生成的题目会更符合您的学习水平</text>
+    </view>
+
     <view class="api-config-section">
       <view class="form-item">
         <text class="label">API地址</text>
