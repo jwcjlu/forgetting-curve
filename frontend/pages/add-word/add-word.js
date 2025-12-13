@@ -167,9 +167,15 @@ Page({
    * 加载所有单词
    */
   loadAllWords() {
+    // 检查是否有激活的计划
+    if (!this.data.hasActivePlan) {
+      this.setData({ loading: false });
+      return;
+    }
+
     this.setData({ loading: true, page: 1 });
     
-    api.getStudentWords(1, this.data.pageSize)
+    api.getPlanWords(this.data.activePlanId, 1, this.data.pageSize)
       .then(res => {
         // 处理单词列表，兼容 audio_urls 和 audioUrls 两种字段名
         const words = (res.words || []).map(word => {
@@ -217,7 +223,7 @@ Page({
     this.setData({ loadingMore: true });
     const nextPage = this.data.page + 1;
 
-    api.getStudentWords(nextPage, this.data.pageSize)
+    api.getPlanWords(this.data.activePlanId, nextPage, this.data.pageSize)
       .then(res => {
         const newWords = res.words || [];
         this.setData({
@@ -319,26 +325,13 @@ Page({
 
     this.setData({ submitting: true });
 
-    // 调用后端API批量添加单词
-    api.batchAddWords([{
+    // 调用后端API批量添加单词到计划
+    api.batchAddWords(this.data.activePlanId, [{
       word: word,
       meaning: meaning,
       start_date: startDate
     }])
       .then(res => {
-        // 添加单词成功后，将单词添加到当前激活的计划中
-        const wordIds = (res.words || []).map(w => w.id);
-        if (wordIds.length > 0 && this.data.activePlanId) {
-          return api.addWordsToPlan(this.data.activePlanId, wordIds)
-            .then(() => {
-              return res;
-            })
-            .catch(err => {
-              console.error('添加到计划失败:', err);
-              // 即使添加到计划失败，也认为添加单词成功
-              return res;
-            });
-        }
         return res;
       })
       .then(res => {
@@ -513,8 +506,8 @@ Page({
       start_date: this.data.startDate
     }));
 
-    // 批量添加单词
-    api.batchAddWords(wordItems)
+    // 批量添加单词到计划
+    api.batchAddWords(this.data.activePlanId, wordItems)
       .then(res => {
         wx.showToast({
           title: `成功添加 ${words.length} 个单词`,

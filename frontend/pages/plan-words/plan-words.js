@@ -59,7 +59,8 @@ Page({
    * 加载计划中已有的单词
    */
   loadPlanWords() {
-    api.getPlanWords(this.data.planId)
+    // 使用分页接口获取计划中的单词
+    api.getPlanWords(this.data.planId, 1, 1000)
       .then(res => {
         const planWordIds = (res.words || []).map(w => w.id);
         this.setData({ 
@@ -78,7 +79,8 @@ Page({
   loadWords() {
     this.setData({ loading: true });
 
-    api.getStudentWords(1, this.data.pageSize)
+    // 使用计划的单词列表接口
+    api.getPlanWords(this.data.planId, 1, this.data.pageSize)
       .then(res => {
         const words = res.words || [];
         this.setData({
@@ -109,7 +111,7 @@ Page({
     this.setData({ loadingMore: true });
     const nextPage = this.data.page + 1;
 
-    api.getStudentWords(nextPage, this.data.pageSize)
+    api.getPlanWords(this.data.planId, nextPage, this.data.pageSize)
       .then(res => {
         const newWords = res.words || [];
         this.setData({

@@ -11,6 +11,7 @@
         <view class="plan-info">
           <text class="plan-name">{{item.name}}</text>
           <text class="plan-grade" wx:if="{{item.grade}}">{{item.grade}}</text>
+          <text class="plan-word-count">单词数：{{item.wordCount || 0}}</text>
           <view class="active-badge" wx:if="{{item.is_active}}">
             <text>当前计划</text>
           </view>

@@ -87,6 +87,15 @@ Page({
   },
 
   /**
+   * 跳转到计划管理页面
+   */
+  goToPlans() {
+    wx.navigateTo({
+      url: '/pages/plan/plan'
+    });
+  },
+
+  /**
    * 检查并加载激活的计划信息
    */
   checkActivePlan() {
@@ -138,6 +147,10 @@ Page({
    * 加载今天需要背诵的单词
    */
   loadTodayWords() {
+    // 先定义 todayStr，确保在所有地方都能访问
+    const today = new Date();
+    const todayStr = ebbinghaus.formatDate(today);
+    
     const studentId = api.getStudentId();
     if (!studentId) {
       // 尝试自动登录
@@ -176,8 +189,6 @@ Page({
         // 有激活的计划，加载单词
         this.setData({ loading: true });
 
-        const today = new Date();
-        const todayStr = ebbinghaus.formatDate(today);
         const activePlanId = this.data.activePlanId;
         
         // 使用计划的今日单词API
@@ -261,12 +272,6 @@ Page({
             loading: false
           });
         }
-
-        this.setData({
-          todayWords: wordsWithState,
-          todayDate: res.date || todayStr,
-          loading: false
-        });
       })
       .catch(err => {
         console.error('加载单词失败:', err);
@@ -299,7 +304,7 @@ Page({
     });
 
     // 调用后端API生成题目
-    api.generateReviewQuestions(word.id, grade)
+    api.generateReviewQuestions(this.data.activePlanId, word.id, grade)
       .then(res => {
         wx.hideLoading();
         
@@ -668,7 +673,7 @@ Page({
     });
 
     // 调用后端API重新生成题目
-    api.generateReviewQuestions(word.id, grade)
+    api.generateReviewQuestions(this.data.activePlanId, word.id, grade)
       .then(res => {
         wx.hideLoading();
         
@@ -740,7 +745,7 @@ Page({
       mask: true
     });
 
-    api.markWordReviewed(wordId)
+      api.markWordReviewed(this.data.activePlanId, wordId)
       .then(res => {
         wx.hideLoading();
         wx.showToast({
@@ -895,7 +900,7 @@ Page({
     });
 
     // 调用后端API标记为已复习
-    api.markWordReviewed(wordId)
+      api.markWordReviewed(this.data.activePlanId, wordId)
       .then(res => {
         wx.showToast({
           title: '已标记为复习',
@@ -930,7 +935,7 @@ Page({
         return Promise.resolve(word);
       }
       
-      return api.getConfusedWords(word.id)
+      return api.getConfusedWords(this.data.activePlanId, word.id)
         .then(res => {
           words[index].confused_words = res.confused_words || [];
           return words[index];
@@ -1013,7 +1018,7 @@ Page({
       mask: true
     });
 
-    api.searchWords(keyword, 20)
+    api.searchWords(this.data.activePlanId, keyword, 20)
       .then(res => {
         // 过滤掉当前单词本身
         const currentWordId = this.data.currentWordId;
@@ -1055,7 +1060,7 @@ Page({
       mask: true
     });
 
-    api.addConfusedWord(wordId, confusedWordId)
+    api.addConfusedWord(this.data.activePlanId, wordId, confusedWordId)
       .then(res => {
         wx.showToast({
           title: '添加成功',
@@ -1066,7 +1071,7 @@ Page({
         const words = this.data.todayWords;
         if (words[index]) {
           // 重新加载混淆词列表
-          api.getConfusedWords(wordId)
+          api.getConfusedWords(this.data.activePlanId, wordId)
             .then(confusedRes => {
               words[index].confused_words = confusedRes.confused_words || [];
               this.setData({
@@ -1116,23 +1121,45 @@ Page({
 
     // 确保 audioContext 已初始化
     if (!this.data.audioContext) {
-      this.data.audioContext = wx.createInnerAudioContext();
-      this.data.audioContext.onEnded(() => {
-        this.setData({
-          playingWordId: null
+      try {
+        this.data.audioContext = wx.createInnerAudioContext();
+        if (!this.data.audioContext) {
+          console.error('创建音频上下文失败: 返回 null');
+          wx.showToast({
+            title: '音频初始化失败',
+            icon: 'none',
+            duration: 1500
+          });
+          return;
+        }
+        // 设置事件监听器
+        this.data.audioContext.onEnded(() => {
+          this.setData({
+            playingWordId: null
+          });
         });
-      });
-      this.data.audioContext.onError((err) => {
-        console.error('音频播放失败:', err);
+        this.data.audioContext.onError((err) => {
+          console.error('音频播放失败:', err);
+          wx.showToast({
+            title: '播放失败',
+            icon: 'none',
+            duration: 1500
+          });
+          this.setData({
+            playingWordId: null
+          });
+        });
+        console.log('音频上下文已创建并初始化');
+      } catch (err) {
+        console.error('创建音频上下文异常:', err);
+        this.data.audioContext = null;
         wx.showToast({
-          title: '播放失败',
+          title: '音频初始化失败',
           icon: 'none',
           duration: 1500
         });
-        this.setData({
-          playingWordId: null
-        });
-      });
+        return;
+      }
     }
 
     // 如果正在播放同一个单词，则停止播放
@@ -1179,7 +1206,7 @@ Page({
       return;
     }
     
-    // 再次确保 audioContext 存在
+    // 再次确保 audioContext 存在且有效
     if (!this.data.audioContext) {
       console.error('audioContext 未初始化');
       wx.showToast({
@@ -1192,14 +1219,89 @@ Page({
     
     // 设置音频源并播放
     try {
-      this.data.audioContext.src = audioUrl;
-      this.data.audioContext.play();
+      // 再次验证 audioContext 存在且有效
+      if (!this.data.audioContext) {
+        console.error('audioContext 在播放前变为 null，尝试重新创建');
+        try {
+          this.data.audioContext = wx.createInnerAudioContext();
+          if (!this.data.audioContext) {
+            throw new Error('创建音频上下文失败');
+          }
+          this.data.audioContext.onEnded(() => {
+            this.setData({
+              playingWordId: null
+            });
+          });
+          this.data.audioContext.onError((err) => {
+            console.error('音频播放失败:', err);
+            this.setData({
+              playingWordId: null
+            });
+          });
+        } catch (createErr) {
+          console.error('重新创建音频上下文失败:', createErr);
+          wx.showToast({
+            title: '音频初始化失败',
+            icon: 'none',
+            duration: 1500
+          });
+          return;
+        }
+      }
       
+      // 先停止之前的播放（如果有）
+      if (this.data.audioContext.src) {
+        try {
+          this.data.audioContext.stop();
+        } catch (stopErr) {
+          console.warn('停止之前的音频失败:', stopErr);
+        }
+      }
+      
+      // 设置新的音频源
+      this.data.audioContext.src = audioUrl;
+      
+      // 设置播放状态
       this.setData({
         playingWordId: wordId
       });
+      
+      // 延迟播放，确保音频源设置完成
+      setTimeout(() => {
+        try {
+          // 再次验证 audioContext 仍然有效
+          if (!this.data.audioContext) {
+            console.error('audioContext 在延迟播放时变为 null');
+            this.setData({
+              playingWordId: null
+            });
+            return;
+          }
+          
+          // 验证音频源是否正确设置
+          if (this.data.audioContext.src !== audioUrl) {
+            console.warn('音频源不匹配，重新设置');
+            this.data.audioContext.src = audioUrl;
+          }
+          
+          // 播放音频
+          this.data.audioContext.play();
+          console.log('开始播放音频:', audioUrl);
+        } catch (playErr) {
+          console.error('播放音频异常:', playErr);
+          wx.showToast({
+            title: '播放失败',
+            icon: 'none',
+            duration: 1500
+          });
+          this.setData({
+            playingWordId: null
+          });
+        }
+      }, 100); // 延迟100ms确保音频源设置完成
+      
     } catch (err) {
-      console.error('播放音频失败:', err);
+      console.error('设置音频源失败:', err);
       wx.showToast({
         title: '播放失败',
         icon: 'none',

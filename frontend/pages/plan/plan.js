@@ -31,8 +31,32 @@ Page({
     api.getPlans()
       .then(res => {
         console.log('获取计划列表成功:', res);
+        const plans = res.plans || [];
+        
+        // 获取当前激活的计划ID
+        const activePlanId = wx.getStorageSync('activePlanId');
+        
+        // 为每个计划加载单词数量
+        const planPromises = plans.map(plan => {
+          return api.getPlanWords(plan.id, 1, 1)
+            .then(wordRes => {
+              plan.wordCount = wordRes.total || 0;
+              plan.is_active = (plan.id == activePlanId) || plan.is_active;
+              return plan;
+            })
+            .catch(err => {
+              console.warn(`获取计划 ${plan.id} 的单词数量失败:`, err);
+              plan.wordCount = 0;
+              plan.is_active = (plan.id == activePlanId) || plan.is_active;
+              return plan;
+            });
+        });
+        
+        return Promise.all(planPromises);
+      })
+      .then(plans => {
         this.setData({
-          plans: res.plans || [],
+          plans: plans,
           loading: false
         });
       })
@@ -314,6 +338,17 @@ Page({
   managePlanWords(e) {
     const planId = e.currentTarget.dataset.planId;
     // 跳转到计划单词管理页面
+    wx.navigateTo({
+      url: `/pages/plan-words/plan-words?planId=${planId}`
+    });
+  },
+
+  /**
+   * 查看计划中的单词
+   */
+  viewPlanWords(e) {
+    const planId = e.currentTarget.dataset.planId;
+    // 跳转到计划单词管理页面（查看模式）
     wx.navigateTo({
       url: `/pages/plan-words/plan-words?planId=${planId}`
     });

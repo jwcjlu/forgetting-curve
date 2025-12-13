@@ -141,22 +141,16 @@ function createStudent(name, studentNo) {
 /**
  * 获取今日需要背诵的单词（根据艾宾浩斯曲线）
  * 对应: GetTodayWords
+ * @param {string} date - 日期（可选，格式：YYYY-MM-DD）
+ * @deprecated 已废弃，请使用 getPlanTodayWords(planId, date)
  */
 function getTodayWords(date) {
-  const studentId = getStudentId();
-  if (!studentId) {
-    return Promise.reject(new Error('请先登录'));
+  // 尝试从本地存储获取激活的计划ID
+  const activePlanId = wx.getStorageSync('activePlanId');
+  if (!activePlanId) {
+    return Promise.reject(new Error('请先选择复习计划'));
   }
-
-  let url = `/api/v1/students/${studentId}/words/today`;
-  if (date) {
-    url += `?date=${date}`;
-  }
-
-  return request({
-    url: url,
-    method: 'GET'
-  });
+  return getPlanTodayWords(activePlanId, date);
 }
 
 /**
@@ -176,17 +170,23 @@ function markWordReviewed(wordId) {
 }
 
 /**
- * 批量添加单词到学生名下
+ * 批量添加单词到计划
  * 对应: BatchAddWords
+ * @param {number} planId - 计划ID
+ * @param {Array} words - 单词列表
  */
-function batchAddWords(words) {
+function batchAddWords(planId, words) {
   const studentId = getStudentId();
   if (!studentId) {
     return Promise.reject(new Error('请先登录'));
   }
 
+  if (!planId) {
+    return Promise.reject(new Error('请先选择复习计划'));
+  }
+
   return request({
-    url: `/api/v1/students/${studentId}/words/batch`,
+    url: `/api/v1/students/${studentId}/plans/${planId}/words/batch`,
     method: 'POST',
     data: {
       words: words
@@ -195,19 +195,39 @@ function batchAddWords(words) {
 }
 
 /**
- * 获取学生的单词列表（分页）
- * 对应: GetStudentWords
+ * 获取计划的单词列表（分页）
+ * 对应: GetPlanWords
+ * @param {number} planId - 计划ID
+ * @param {number} page - 页码，默认1
+ * @param {number} pageSize - 每页数量，默认20
  */
-function getStudentWords(page = 1, pageSize = 20) {
+function getPlanWords(planId, page = 1, pageSize = 20) {
   const studentId = getStudentId();
   if (!studentId) {
     return Promise.reject(new Error('请先登录'));
   }
 
+  if (!planId) {
+    return Promise.reject(new Error('请先选择复习计划'));
+  }
+
   return request({
-    url: `/api/v1/students/${studentId}/words?page=${page}&page_size=${pageSize}`,
+    url: `/api/v1/students/${studentId}/plans/${planId}/words?page=${page}&page_size=${pageSize}`,
     method: 'GET'
   });
+}
+
+/**
+ * @deprecated 已废弃，请使用 getPlanWords(planId, page, pageSize)
+ * 获取学生的单词列表（分页）- 保留用于兼容，实际会调用 getPlanWords
+ */
+function getStudentWords(page = 1, pageSize = 20) {
+  // 尝试从本地存储获取激活的计划ID
+  const activePlanId = wx.getStorageSync('activePlanId');
+  if (!activePlanId) {
+    return Promise.reject(new Error('请先选择复习计划'));
+  }
+  return getPlanWords(activePlanId, page, pageSize);
 }
 
 /**
@@ -234,16 +254,21 @@ function addConfusedWord(wordId, confusedWordId) {
 /**
  * 获取单词的混淆词列表
  * 对应: GetConfusedWords
+ * @param {number} planId - 计划ID
  * @param {number} wordId - 单词ID
  */
-function getConfusedWords(wordId) {
+function getConfusedWords(planId, wordId) {
   const studentId = getStudentId();
   if (!studentId) {
     return Promise.reject(new Error('请先登录'));
   }
 
+  if (!planId) {
+    return Promise.reject(new Error('请先选择复习计划'));
+  }
+
   return request({
-    url: `/api/v1/students/${studentId}/words/${wordId}/confused`,
+    url: `/api/v1/students/${studentId}/plans/${planId}/words/${wordId}/confused`,
     method: 'GET'
   });
 }
@@ -251,17 +276,22 @@ function getConfusedWords(wordId) {
 /**
  * 删除混淆词
  * 对应: RemoveConfusedWord
+ * @param {number} planId - 计划ID
  * @param {number} wordId - 主单词ID
  * @param {number} confusedWordId - 混淆词ID
  */
-function removeConfusedWord(wordId, confusedWordId) {
+function removeConfusedWord(planId, wordId, confusedWordId) {
   const studentId = getStudentId();
   if (!studentId) {
     return Promise.reject(new Error('请先登录'));
   }
 
+  if (!planId) {
+    return Promise.reject(new Error('请先选择复习计划'));
+  }
+
   return request({
-    url: `/api/v1/students/${studentId}/words/${wordId}/confused/${confusedWordId}`,
+    url: `/api/v1/students/${studentId}/plans/${planId}/words/${wordId}/confused/${confusedWordId}`,
     method: 'DELETE'
   });
 }
@@ -269,16 +299,21 @@ function removeConfusedWord(wordId, confusedWordId) {
 /**
  * 搜索单词（用于添加混淆词）
  * 对应: SearchWords
+ * @param {number} planId - 计划ID
  * @param {string} keyword - 搜索关键词（支持正则表达式）
  * @param {number} limit - 返回数量限制，默认20
  */
-function searchWords(keyword, limit = 20) {
+function searchWords(planId, keyword, limit = 20) {
   const studentId = getStudentId();
   if (!studentId) {
     return Promise.reject(new Error('请先登录'));
   }
 
-  let url = `/api/v1/students/${studentId}/words/search?keyword=${encodeURIComponent(keyword)}`;
+  if (!planId) {
+    return Promise.reject(new Error('请先选择复习计划'));
+  }
+
+  let url = `/api/v1/students/${studentId}/plans/${planId}/words/search?keyword=${encodeURIComponent(keyword)}`;
   if (limit) {
     url += `&limit=${limit}`;
   }
@@ -292,16 +327,21 @@ function searchWords(keyword, limit = 20) {
 /**
  * 标记单词为未记住
  * 对应: MarkWordForgotten
+ * @param {number} planId - 计划ID
  * @param {number} wordId - 单词ID
  */
-function markWordForgotten(wordId) {
+function markWordForgotten(planId, wordId) {
   const studentId = getStudentId();
   if (!studentId) {
     return Promise.reject(new Error('请先登录'));
   }
 
+  if (!planId) {
+    return Promise.reject(new Error('请先选择复习计划'));
+  }
+
   return request({
-    url: `/api/v1/students/${studentId}/words/${wordId}/forget`,
+    url: `/api/v1/students/${studentId}/plans/${planId}/words/${wordId}/forget`,
     method: 'POST'
   });
 }
@@ -309,19 +349,24 @@ function markWordForgotten(wordId) {
 /**
  * 更新单词复习数据（思考时间、难度等）
  * 对应: UpdateWordReviewData
+ * @param {number} planId - 计划ID
  * @param {number} wordId - 单词ID
  * @param {number} thinkTime - 思考时间（秒）
  * @param {number} difficulty - 学习难度 (0-10)
  * @param {boolean} isRemembered - 是否记住
  */
-function updateWordReviewData(wordId, thinkTime, difficulty, isRemembered) {
+function updateWordReviewData(planId, wordId, thinkTime, difficulty, isRemembered) {
   const studentId = getStudentId();
   if (!studentId) {
     return Promise.reject(new Error('请先登录'));
   }
 
+  if (!planId) {
+    return Promise.reject(new Error('请先选择复习计划'));
+  }
+
   return request({
-    url: `/api/v1/students/${studentId}/words/${wordId}/review-data`,
+    url: `/api/v1/students/${studentId}/plans/${planId}/words/${wordId}/review-data`,
     method: 'POST',
     data: {
       think_time: thinkTime,
@@ -356,13 +401,18 @@ function recognizeWordsFromImage(imageBase64, startDate) {
 /**
  * 生成复习题目
  * 对应: GenerateReviewQuestions
+ * @param {number} planId - 计划ID
  * @param {number} wordId - 单词ID
- * @param {string} grade - 年级（可选）
+ * @param {string} grade - 年级（可选，可以从计划中获取）
  */
-function generateReviewQuestions(wordId, grade) {
+function generateReviewQuestions(planId, wordId, grade) {
   const studentId = getStudentId();
   if (!studentId) {
     return Promise.reject(new Error('请先登录'));
+  }
+
+  if (!planId) {
+    return Promise.reject(new Error('请先选择复习计划'));
   }
 
   const data = {};
@@ -371,7 +421,7 @@ function generateReviewQuestions(wordId, grade) {
   }
 
   return request({
-    url: `/api/v1/students/${studentId}/words/${wordId}/review-questions`,
+    url: `/api/v1/students/${studentId}/plans/${planId}/words/${wordId}/review-questions`,
     method: 'POST',
     data: data
   });
@@ -466,21 +516,6 @@ function removeWordsFromPlan(planId, wordId) {
   });
 }
 
-/**
- * 获取计划中的单词列表
- * @param {number} planId - 计划ID
- */
-function getPlanWords(planId) {
-  const studentId = getStudentId();
-  if (!studentId) {
-    return Promise.reject(new Error('请先登录'));
-  }
-
-  return request({
-    url: `/api/v1/students/${studentId}/plans/${planId}/words`,
-    method: 'GET'
-  });
-}
 
 /**
  * 更新计划

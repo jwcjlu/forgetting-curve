@@ -6,19 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="0cab91bd-f818-42fe-b944-d38fc3d86d15" name="Changes" comment="添加复习计划，背诵和单词都是计划下面">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/api/student/v1/openapi.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/api/student/v1/openapi.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/api/student/v1/student.proto" beforeDir="false" afterPath="$PROJECT_DIR$/backend/api/student/v1/student.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/cmd/server/wire_gen.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/cmd/server/wire_gen.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/biz/api.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/biz/confused_word.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/confused_word.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/biz/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/biz/plan.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/plan.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/biz/word.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/word.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/data/data.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/data/data.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/data/plan.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/data/plan.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/data/wire.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/data/wire.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/data/word.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/data/word.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/service/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/service/student.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/add-word/add-word.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/add-word/add-word.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.wxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/plan-words/plan-words.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/plan-words/plan-words.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/plan/plan.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/plan/plan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/plan/plan.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/plan/plan.wxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/utils/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/utils/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/utils/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/utils/auth.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

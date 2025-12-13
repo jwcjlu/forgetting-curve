@@ -10,6 +10,7 @@
         <text class="count-text" wx:else>请先选择复习计划</text>
       </view>
       <view class="header-right">
+        <button class="plan-btn" bindtap="goToPlans" size="mini" wx:if="{{hasActivePlan}}">切换计划</button>
         <button class="settings-btn" bindtap="goToSettings" size="mini">设置</button>
       </view>
     </view>
