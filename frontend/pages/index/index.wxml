@@ -137,9 +137,9 @@
               <!-- 填空题输入 -->
               <view wx:if="{{question.type === 'fill_blank'}}" class="fill-blank-section">
                 <input 
-                  class="fill-blank-input {{wordItem.showAnswers[qIndex] ? (wordItem.userAnswers[qIndex].toLowerCase() === question.correct_answer.toLowerCase() ? 'input-correct' : 'input-wrong') : ''}}"
+                  class="fill-blank-input {{wordItem.showAnswers[qIndex] ? (wordItem.questionCorrect[qIndex] ? 'input-correct' : 'input-wrong') : ''}}"
                   type="text" 
-                  placeholder="Enter the word (English letters only)"
+                  placeholder="Enter the word (English letters only, case-insensitive)"
                   value="{{wordItem.userAnswers[qIndex]}}"
                   bindinput="onFillBlankInput"
                   bindblur="onFillBlankBlur"
@@ -160,9 +160,9 @@
 
               <!-- 答案反馈 -->
               <view wx:if="{{wordItem.showAnswers[qIndex]}}" class="answer-feedback">
-                <view class="feedback-result {{(wordItem.userAnswers[qIndex] || '').toLowerCase() === (question.correct_answer || '').toLowerCase() ? 'feedback-correct' : 'feedback-wrong'}}">
-                  <text class="feedback-icon">{{(wordItem.userAnswers[qIndex] || '').toLowerCase() === (question.correct_answer || '').toLowerCase() ? '✓' : '✗'}}</text>
-                  <text class="feedback-text">{{(wordItem.userAnswers[qIndex] || '').toLowerCase() === (question.correct_answer || '').toLowerCase() ? '回答正确！' : '回答错误'}}</text>
+                <view class="feedback-result {{wordItem.questionCorrect[qIndex] ? 'feedback-correct' : 'feedback-wrong'}}">
+                  <text class="feedback-icon">{{wordItem.questionCorrect[qIndex] ? '✓' : '✗'}}</text>
+                  <text class="feedback-text">{{wordItem.questionCorrect[qIndex] ? '回答正确！' : '回答错误'}}</text>
                 </view>
                 <view class="correct-answer">
                   <text class="answer-label">正确答案：</text>

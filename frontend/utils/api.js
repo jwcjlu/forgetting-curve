@@ -156,15 +156,21 @@ function getTodayWords(date) {
 /**
  * 标记单词为已复习
  * 对应: MarkWordReviewed
+ * @param {number} planId - 计划ID
+ * @param {number} wordId - 单词ID
  */
-function markWordReviewed(wordId) {
+function markWordReviewed(planId, wordId) {
   const studentId = getStudentId();
   if (!studentId) {
     return Promise.reject(new Error('请先登录'));
   }
 
+  if (!planId) {
+    return Promise.reject(new Error('请先选择复习计划'));
+  }
+
   return request({
-    url: `/api/v1/students/${studentId}/words/${wordId}/review`,
+    url: `/api/v1/students/${studentId}/plans/${planId}/words/${wordId}/review`,
     method: 'POST'
   });
 }

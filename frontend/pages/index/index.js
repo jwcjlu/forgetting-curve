@@ -244,6 +244,7 @@ Page({
             currentQuestionIndex: 0,
             userAnswers: [],
             showAnswers: [],
+            questionCorrect: [], // 每道题是否正确（用于 WXML 显示）
             canSubmit: false,
             userAnswer: '',
             showAnswer: false,
@@ -361,6 +362,7 @@ Page({
         words[index].currentQuestionIndex = 0;
         words[index].userAnswers = [];
         words[index].showAnswers = [];
+        words[index].questionCorrect = []; // 每道题是否正确（用于 WXML 显示）
         words[index].canSubmit = true; // 可以提交答案
         words[index].spellingMode = false; // 确保spellingMode为false
         words[index].hasAnswered = false; // 重置答题状态
@@ -587,9 +589,9 @@ Page({
     if (!word.showAnswers) {
       word.showAnswers = [];
     }
-    word.questions.forEach((q, qIndex) => {
-      word.showAnswers[qIndex] = true;
-    });
+    if (!word.questionCorrect) {
+      word.questionCorrect = [];
+    }
     
     // 设置为不能提交（已提交）
     word.canSubmit = false;
@@ -604,6 +606,10 @@ Page({
       let correctAnswer = (q.correct_answer || '').trim().replace(/[^a-zA-Z]/g, '').toLowerCase();
       
       const isCorrect = userAnswer === correctAnswer;
+      
+      // 保存每道题的正确性，用于 WXML 显示
+      word.showAnswers[qIndex] = true;
+      word.questionCorrect[qIndex] = isCorrect;
       
       // 如果任何一题错误，则不是全部正确
       if (!isCorrect) {
@@ -710,6 +716,7 @@ Page({
         words[index].currentQuestionIndex = 0;
         words[index].userAnswers = [];
         words[index].showAnswers = [];
+        words[index].questionCorrect = []; // 每道题是否正确（用于 WXML 显示）
         words[index].canSubmit = true; // 可以提交答案
         words[index].hasAnswered = false; // 重置答题状态
         words[index].allCorrect = false; // 重置正确状态
