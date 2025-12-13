@@ -4,10 +4,41 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0cab91bd-f818-42fe-b944-d38fc3d86d15" name="Changes" comment="修复解析问题并要时打印日志排查问题">
+    <list default="true" id="0cab91bd-f818-42fe-b944-d38fc3d86d15" name="Changes" comment="英文提问，并且避免输入法联想的影响">
+      <change afterPath="$PROJECT_DIR$/backend/internal/biz/README_TEST.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/internal/biz/confused_word_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/internal/biz/ebbinghaus_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/internal/biz/llm_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/internal/biz/plan.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/internal/biz/word_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/internal/data/plan.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/pages/plan-words/plan-words.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/pages/plan-words/plan-words.wxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/pages/plan-words/plan-words.wxss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/pages/plan/plan.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/pages/plan/plan.wxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/pages/plan/plan.wxss" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/biz/llm.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/llm.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/api/student/v1/openapi.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/api/student/v1/openapi.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/api/student/v1/student.proto" beforeDir="false" afterPath="$PROJECT_DIR$/backend/api/student/v1/student.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/biz/api.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/biz/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/biz/wire.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/wire.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/biz/word.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/word.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/data/wire.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/data/wire.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/data/word.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/data/word.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/service/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/service/student.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/add-word/add-word.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/add-word/add-word.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/add-word/add-word.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/add-word/add-word.wxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/add-word/add-word.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/add-word/add-word.wxss" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.wxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.wxss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/settings/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/settings/settings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/settings/settings.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/settings/settings.wxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/settings/settings.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/settings/settings.wxss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/utils/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/utils/api.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -183,7 +214,8 @@
     <MESSAGE value="复习添加大模型生成复习题" />
     <MESSAGE value="上下设置WithoutCancel" />
     <MESSAGE value="修复解析问题并要时打印日志排查问题" />
-    <option name="LAST_COMMIT_MESSAGE" value="修复解析问题并要时打印日志排查问题" />
+    <MESSAGE value="英文提问，并且避免输入法联想的影响" />
+    <option name="LAST_COMMIT_MESSAGE" value="英文提问，并且避免输入法联想的影响" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

@@ -77,5 +77,15 @@
         保存API地址
       </button>
     </view>
+
+    <view class="plan-section">
+      <view class="form-item">
+        <text class="label">复习计划管理</text>
+        <text class="hint-text">创建和管理复习计划，选择计划后只显示该计划的单词</text>
+      </view>
+      <button class="btn plan-btn" bindtap="goToPlans">
+        管理计划
+      </button>
+    </view>
   </view>
 </view>

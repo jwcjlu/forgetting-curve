@@ -17,6 +17,9 @@ Page({
     loading: false,
     loadingMore: false,
     submitting: false,
+    activePlanId: null,
+    activePlanName: '',
+    hasActivePlan: false,
     // OCR相关
     recognizing: false,
     showOCRResult: false,
@@ -56,6 +59,8 @@ Page({
       });
     });
     
+    // 检查是否有激活的计划
+    this.checkActivePlan();
     this.checkLoginAndLoadWords();
   },
 
@@ -68,8 +73,66 @@ Page({
   },
 
   onShow() {
-    // 每次显示页面时重新加载单词列表
+    // 每次显示页面时检查计划状态并重新加载单词列表
+    this.checkActivePlan();
     this.checkLoginAndLoadWords();
+  },
+
+  /**
+   * 检查并加载激活的计划信息
+   */
+  checkActivePlan() {
+    const activePlanId = wx.getStorageSync('activePlanId');
+    
+    if (!activePlanId) {
+      this.setData({
+        hasActivePlan: false,
+        activePlanId: null,
+        activePlanName: ''
+      });
+      return Promise.resolve(false);
+    }
+
+    // 获取计划列表，找到激活的计划
+    return api.getPlans()
+      .then(res => {
+        const activePlan = (res.plans || []).find(p => p.id === activePlanId || p.is_active);
+        if (activePlan) {
+          this.setData({
+            hasActivePlan: true,
+            activePlanId: activePlan.id,
+            activePlanName: activePlan.name
+          });
+          return true;
+        } else {
+          // 计划不存在，清除本地存储
+          wx.removeStorageSync('activePlanId');
+          this.setData({
+            hasActivePlan: false,
+            activePlanId: null,
+            activePlanName: ''
+          });
+          return false;
+        }
+      })
+      .catch(err => {
+        console.error('获取计划列表失败:', err);
+        this.setData({
+          hasActivePlan: false,
+          activePlanId: null,
+          activePlanName: ''
+        });
+        return false;
+      });
+  },
+
+  /**
+   * 跳转到计划管理页面
+   */
+  goToPlans() {
+    wx.navigateTo({
+      url: '/pages/plan/plan'
+    });
   },
 
   /**
@@ -208,6 +271,23 @@ Page({
    * 提交单词
    */
   submitWord() {
+    // 检查是否有激活的计划
+    if (!this.data.hasActivePlan) {
+      wx.showModal({
+        title: '提示',
+        content: '请先选择复习计划才能添加单词',
+        showCancel: true,
+        cancelText: '取消',
+        confirmText: '去选择',
+        success: (res) => {
+          if (res.confirm) {
+            this.goToPlans();
+          }
+        }
+      });
+      return;
+    }
+
     let word = this.data.word.trim();
     let meaning = this.data.meaning.trim();
     const startDate = this.data.startDate;
@@ -245,6 +325,22 @@ Page({
       meaning: meaning,
       start_date: startDate
     }])
+      .then(res => {
+        // 添加单词成功后，将单词添加到当前激活的计划中
+        const wordIds = (res.words || []).map(w => w.id);
+        if (wordIds.length > 0 && this.data.activePlanId) {
+          return api.addWordsToPlan(this.data.activePlanId, wordIds)
+            .then(() => {
+              return res;
+            })
+            .catch(err => {
+              console.error('添加到计划失败:', err);
+              // 即使添加到计划失败，也认为添加单词成功
+              return res;
+            });
+        }
+        return res;
+      })
       .then(res => {
         wx.showToast({
           title: '添加成功',
@@ -382,6 +478,23 @@ Page({
    * 添加识别到的单词
    */
   addRecognizedWords() {
+    // 检查是否有激活的计划
+    if (!this.data.hasActivePlan) {
+      wx.showModal({
+        title: '提示',
+        content: '请先选择复习计划才能添加单词',
+        showCancel: true,
+        cancelText: '取消',
+        confirmText: '去选择',
+        success: (res) => {
+          if (res.confirm) {
+            this.goToPlans();
+          }
+        }
+      });
+      return;
+    }
+
     const words = this.data.recognizedWords.filter(w => w.word.trim() !== '');
     if (words.length === 0) {
       wx.showToast({

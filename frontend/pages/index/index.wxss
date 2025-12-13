@@ -67,6 +67,24 @@
 .empty-hint {
   font-size: 26rpx;
   color: #BBB;
+  margin-top: 10rpx;
+}
+
+.no-plan-state {
+  background-color: #FFFBE6;
+  border: 2rpx solid #FFE58F;
+  border-radius: 12rpx;
+  padding: 60rpx 40rpx;
+}
+
+.go-plan-btn {
+  margin-top: 30rpx;
+  padding: 20rpx 60rpx;
+  background-color: #4A90E2;
+  color: white;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  border: none;
 }
 
 .word-list {

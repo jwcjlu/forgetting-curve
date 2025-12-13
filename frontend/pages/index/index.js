@@ -8,6 +8,9 @@ Page({
     todayWords: [],
     todayDate: '',
     loading: false,
+    activePlanId: null,
+    activePlanName: '',
+    hasActivePlan: false,
     // 混淆词相关
     showConfusedWordModal: false,
     currentWordIndex: -1,
@@ -20,7 +23,10 @@ Page({
   },
 
   onLoad() {
-    this.loadTodayWords();
+    // 先检查计划，再加载单词
+    this.checkActivePlan().then(() => {
+      this.loadTodayWords();
+    });
     // 创建音频上下文
     try {
       this.data.audioContext = wx.createInnerAudioContext();
@@ -65,7 +71,10 @@ Page({
 
   onShow() {
     // 每次显示页面时重新加载，确保数据是最新的
-    this.loadTodayWords();
+    // 先检查计划，再加载单词
+    this.checkActivePlan().then(() => {
+      this.loadTodayWords();
+    });
   },
 
   /**
@@ -75,6 +84,54 @@ Page({
     wx.navigateTo({
       url: '/pages/settings/settings'
     });
+  },
+
+  /**
+   * 检查并加载激活的计划信息
+   */
+  checkActivePlan() {
+    const activePlanId = wx.getStorageSync('activePlanId');
+    
+    if (!activePlanId) {
+      this.setData({
+        hasActivePlan: false,
+        activePlanId: null,
+        activePlanName: ''
+      });
+      return Promise.resolve(false);
+    }
+
+    // 获取计划列表，找到激活的计划
+    return api.getPlans()
+      .then(res => {
+        const activePlan = (res.plans || []).find(p => p.id === activePlanId || p.is_active);
+        if (activePlan) {
+          this.setData({
+            hasActivePlan: true,
+            activePlanId: activePlan.id,
+            activePlanName: activePlan.name
+          });
+          return true;
+        } else {
+          // 计划不存在，清除本地存储
+          wx.removeStorageSync('activePlanId');
+          this.setData({
+            hasActivePlan: false,
+            activePlanId: null,
+            activePlanName: ''
+          });
+          return false;
+        }
+      })
+      .catch(err => {
+        console.error('获取计划列表失败:', err);
+        this.setData({
+          hasActivePlan: false,
+          activePlanId: null,
+          activePlanName: ''
+        });
+        return false;
+      });
   },
 
   /**
@@ -104,14 +161,32 @@ Page({
       return;
     }
 
-    this.setData({ loading: true });
+    // 先检查是否有激活的计划
+    this.checkActivePlan()
+      .then(hasPlan => {
+        if (!hasPlan) {
+          // 没有激活的计划，显示提示
+          this.setData({ 
+            loading: false,
+            todayWords: []
+          });
+          return;
+        }
 
-    const today = new Date();
-    const todayStr = ebbinghaus.formatDate(today);
+        // 有激活的计划，加载单词
+        this.setData({ loading: true });
 
-    // 从后端获取今日单词
-    api.getTodayWords(todayStr)
+        const today = new Date();
+        const todayStr = ebbinghaus.formatDate(today);
+        const activePlanId = this.data.activePlanId;
+        
+        // 使用计划的今日单词API
+        return api.getPlanTodayWords(activePlanId, todayStr);
+      })
       .then(res => {
+        if (!res) {
+          return; // 没有激活的计划，已处理
+        }
         // 为每个单词添加拼写模式相关状态
         const wordsWithState = (res.words || []).map(word => {
           // 检查当天是否已复习

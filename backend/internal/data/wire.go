@@ -8,5 +8,7 @@ var ProviderSet = wire.NewSet(
 	NewStudentRepo,
 	NewWordRepo,
 	NewConfusedWordRepo,
+	NewPlanRepo,
+	NewPlanWordRepo,
 	NewUmiOCRClient,
 )

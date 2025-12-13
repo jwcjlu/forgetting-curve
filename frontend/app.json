@@ -2,7 +2,9 @@
   "pages": [
     "pages/index/index",
     "pages/add-word/add-word",
-    "pages/settings/settings"
+    "pages/settings/settings",
+    "pages/plan/plan",
+    "pages/plan-words/plan-words"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -33,6 +35,7 @@
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
+  "subPackages": [],
   "permission": {
     "scope.userInfo": {
       "desc": "用于完善用户资料"

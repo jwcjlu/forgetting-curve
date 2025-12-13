@@ -1,6 +1,19 @@
 <!--pages/add-word/add-word.wxml-->
 <view class="container">
-  <view class="form-card card">
+  <!-- 没有激活计划的提示 -->
+  <view wx:if="{{!hasActivePlan}}" class="no-plan-card card">
+    <view class="no-plan-content">
+      <text class="no-plan-title">请先选择复习计划</text>
+      <text class="no-plan-hint">只有选择了复习计划才能添加单词</text>
+      <button class="go-plan-btn" bindtap="goToPlans">去选择计划</button>
+    </view>
+  </view>
+
+  <view wx:if="{{hasActivePlan}}" class="plan-info-card card">
+    <text class="plan-info-text">当前计划：{{activePlanName}}</text>
+  </view>
+
+  <view class="form-card card" wx:if="{{hasActivePlan}}">
     <view class="form-item">
       <text class="label">单词</text>
       <input 

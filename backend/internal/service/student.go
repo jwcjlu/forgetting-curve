@@ -18,6 +18,7 @@ type StudentService struct {
 	studentUc        biz.StudentUsecase
 	wordUc           biz.WordUsecase
 	confusedWordUc   biz.ConfusedWordUsecase
+	planUc           biz.PlanUsecase
 	wechatSvc        biz.WechatService
 	ocrSvc           biz.OCRService
 	pronunciationSvc biz.PronunciationService
@@ -29,6 +30,7 @@ func NewStudentService(
 	studentUc biz.StudentUsecase,
 	wordUc biz.WordUsecase,
 	confusedWordUc biz.ConfusedWordUsecase,
+	planUc biz.PlanUsecase,
 	wechatSvc biz.WechatService,
 	ocrSvc biz.OCRService,
 	pronunciationSvc biz.PronunciationService,
@@ -38,6 +40,7 @@ func NewStudentService(
 		studentUc:        studentUc,
 		wordUc:           wordUc,
 		confusedWordUc:   confusedWordUc,
+		planUc:           planUc,
 		wechatSvc:        wechatSvc,
 		ocrSvc:           ocrSvc,
 		pronunciationSvc: pronunciationSvc,
@@ -183,7 +186,13 @@ func (s *StudentService) GetStudentWords(ctx context.Context, req *v1.GetStudent
 
 // GetTodayWords 获取今日需要背诵的单词（根据艾宾浩斯曲线）
 func (s *StudentService) GetTodayWords(ctx context.Context, req *v1.GetTodayWordsRequest) (*v1.GetTodayWordsReply, error) {
-	words, err := s.wordUc.GetTodayWords(ctx, req.StudentId, req.Date)
+	var planID *int64
+	// 注意：proto字段名是plan_id，生成的Go代码中应该是PlanId
+	// 如果编译错误，需要先运行 make api 重新生成proto代码
+	if req.PlanId > 0 {
+		planID = &req.PlanId
+	}
+	words, err := s.wordUc.GetTodayWords(ctx, req.StudentId, req.Date, planID)
 	if err != nil {
 		return &v1.GetTodayWordsReply{
 			Ret: &v1.BaseResponse{
@@ -527,4 +536,248 @@ func (s *StudentService) convertWordToV1(word *biz.Word) *v1.Word {
 	}
 
 	return v1Word
+}
+
+// CreatePlan 创建复习计划
+func (s *StudentService) CreatePlan(ctx context.Context, req *v1.CreatePlanRequest) (*v1.CreatePlanReply, error) {
+	plan, err := s.planUc.CreatePlan(ctx, req.StudentId, req.Name, req.Grade)
+	if err != nil {
+		return &v1.CreatePlanReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return &v1.CreatePlanReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Plan: &v1.Plan{
+			Id:        plan.ID,
+			StudentId: plan.StudentID,
+			Name:      plan.Name,
+			Grade:     plan.Grade,
+			IsActive:  plan.IsActive,
+			CreatedAt: plan.CreatedAt.Unix(),
+			UpdatedAt: plan.UpdatedAt.Unix(),
+		},
+	}, nil
+}
+
+// GetPlans 获取学生的所有计划
+func (s *StudentService) GetPlans(ctx context.Context, req *v1.GetPlansRequest) (*v1.GetPlansReply, error) {
+	plans, err := s.planUc.GetPlans(ctx, req.StudentId)
+	if err != nil {
+		return &v1.GetPlansReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	v1Plans := make([]*v1.Plan, 0, len(plans))
+	for _, plan := range plans {
+		v1Plans = append(v1Plans, &v1.Plan{
+			Id:        plan.ID,
+			StudentId: plan.StudentID,
+			Name:      plan.Name,
+			Grade:     plan.Grade,
+			IsActive:  plan.IsActive,
+			CreatedAt: plan.CreatedAt.Unix(),
+			UpdatedAt: plan.UpdatedAt.Unix(),
+		})
+	}
+
+	return &v1.GetPlansReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Plans: v1Plans,
+	}, nil
+}
+
+// SelectPlan 选择计划
+func (s *StudentService) SelectPlan(ctx context.Context, req *v1.SelectPlanRequest) (*v1.SelectPlanReply, error) {
+	plan, err := s.planUc.SelectPlan(ctx, req.StudentId, req.PlanId)
+	if err != nil {
+		return &v1.SelectPlanReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return &v1.SelectPlanReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Plan: &v1.Plan{
+			Id:        plan.ID,
+			StudentId: plan.StudentID,
+			Name:      plan.Name,
+			Grade:     plan.Grade,
+			IsActive:  plan.IsActive,
+			CreatedAt: plan.CreatedAt.Unix(),
+			UpdatedAt: plan.UpdatedAt.Unix(),
+		},
+	}, nil
+}
+
+// AddWordsToPlan 添加单词到计划
+func (s *StudentService) AddWordsToPlan(ctx context.Context, req *v1.AddWordsToPlanRequest) (*v1.AddWordsToPlanReply, error) {
+	addedCount, err := s.planUc.AddWordsToPlan(ctx, req.StudentId, req.PlanId, req.WordIds)
+	if err != nil {
+		return &v1.AddWordsToPlanReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return &v1.AddWordsToPlanReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		AddedCount: addedCount,
+	}, nil
+}
+
+// RemoveWordsFromPlan 从计划中移除单词
+func (s *StudentService) RemoveWordsFromPlan(ctx context.Context, req *v1.RemoveWordsFromPlanRequest) (*v1.RemoveWordsFromPlanReply, error) {
+	err := s.planUc.RemoveWordsFromPlan(ctx, req.StudentId, req.PlanId, req.WordId)
+	if err != nil {
+		return &v1.RemoveWordsFromPlanReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return &v1.RemoveWordsFromPlanReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+	}, nil
+}
+
+// GetPlanWords 获取计划中的单词列表
+func (s *StudentService) GetPlanWords(ctx context.Context, req *v1.GetPlanWordsRequest) (*v1.GetPlanWordsReply, error) {
+	words, err := s.planUc.GetPlanWords(ctx, req.StudentId, req.PlanId)
+	if err != nil {
+		return &v1.GetPlanWordsReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	v1Words := make([]*v1.Word, 0, len(words))
+	for _, word := range words {
+		v1Words = append(v1Words, s.convertWordToV1(word))
+	}
+
+	return &v1.GetPlanWordsReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Words: v1Words,
+	}, nil
+}
+
+// UpdatePlan 更新计划
+func (s *StudentService) UpdatePlan(ctx context.Context, req *v1.UpdatePlanRequest) (*v1.UpdatePlanReply, error) {
+	plan, err := s.planUc.UpdatePlan(ctx, req.StudentId, req.PlanId, req.Name, req.Grade)
+	if err != nil {
+		return &v1.UpdatePlanReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return &v1.UpdatePlanReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Plan: &v1.Plan{
+			Id:        plan.ID,
+			StudentId: plan.StudentID,
+			Name:      plan.Name,
+			Grade:     plan.Grade,
+			IsActive:  plan.IsActive,
+			CreatedAt: plan.CreatedAt.Unix(),
+			UpdatedAt: plan.UpdatedAt.Unix(),
+		},
+	}, nil
+}
+
+// DeletePlan 删除计划
+func (s *StudentService) DeletePlan(ctx context.Context, req *v1.DeletePlanRequest) (*v1.DeletePlanReply, error) {
+	err := s.planUc.DeletePlan(ctx, req.StudentId, req.PlanId)
+	if err != nil {
+		return &v1.DeletePlanReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return &v1.DeletePlanReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+	}, nil
+}
+
+// GetPlanTodayWords 获取计划的今日需要背诵的单词
+func (s *StudentService) GetPlanTodayWords(ctx context.Context, req *v1.GetPlanTodayWordsRequest) (*v1.GetPlanTodayWordsReply, error) {
+	planID := req.PlanId
+	words, err := s.wordUc.GetTodayWords(ctx, req.StudentId, req.Date, &planID)
+	if err != nil {
+		return &v1.GetPlanTodayWordsReply{
+			Ret: &v1.BaseResponse{
+				Code:    500,
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	// 转换响应数据
+	v1Words := make([]*v1.Word, 0, len(words))
+	for _, word := range words {
+		v1Words = append(v1Words, s.convertWordToV1(word))
+	}
+
+	// 确定日期
+	date := req.Date
+	if date == "" {
+		date = time.Now().Format("2006-01-02")
+	}
+
+	return &v1.GetPlanTodayWordsReply{
+		Ret: &v1.BaseResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Words: v1Words,
+		Date:  date,
+		Count: int32(len(v1Words)),
+	}, nil
 }

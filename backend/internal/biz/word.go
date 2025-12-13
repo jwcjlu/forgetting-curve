@@ -13,7 +13,7 @@ import (
 type WordUsecase interface {
 	BatchAddWords(ctx context.Context, studentID int64, words []*WordItem) ([]*Word, error)
 	GetStudentWords(ctx context.Context, studentID int64, page, pageSize int32) ([]*Word, int64, error)
-	GetTodayWords(ctx context.Context, studentID int64, date string) ([]*Word, error)
+	GetTodayWords(ctx context.Context, studentID int64, date string, planID *int64) ([]*Word, error)
 	GetWord(ctx context.Context, studentID int64, wordID int64) (*Word, error)
 	MarkWordReviewed(ctx context.Context, studentID int64, wordID int64) (*Word, error)
 	MarkWordForgotten(ctx context.Context, studentID int64, wordID int64) (*Word, error)
@@ -30,19 +30,21 @@ type WordItem struct {
 }
 
 type wordUsecase struct {
-	wordRepo    WordRepo
-	studentRepo StudentRepo
-	llmService  LLMService
-	log         *log.Helper
+	wordRepo     WordRepo
+	studentRepo  StudentRepo
+	planWordRepo PlanWordRepo
+	llmService   LLMService
+	log          *log.Helper
 }
 
 // NewWordUsecase 创建单词业务逻辑
-func NewWordUsecase(wordRepo WordRepo, studentRepo StudentRepo, llmService LLMService, logger log.Logger) WordUsecase {
+func NewWordUsecase(wordRepo WordRepo, studentRepo StudentRepo, planWordRepo PlanWordRepo, llmService LLMService, logger log.Logger) WordUsecase {
 	return &wordUsecase{
-		wordRepo:    wordRepo,
-		studentRepo: studentRepo,
-		llmService:  llmService,
-		log:         log.NewHelper(logger),
+		wordRepo:     wordRepo,
+		studentRepo:  studentRepo,
+		planWordRepo: planWordRepo,
+		llmService:   llmService,
+		log:          log.NewHelper(logger),
 	}
 }
 
@@ -110,7 +112,7 @@ func (uc *wordUsecase) GetStudentWords(ctx context.Context, studentID int64, pag
 }
 
 // GetTodayWords 获取今日需要背诵的单词（根据艾宾浩斯曲线）
-func (uc *wordUsecase) GetTodayWords(ctx context.Context, studentID int64, date string) ([]*Word, error) {
+func (uc *wordUsecase) GetTodayWords(ctx context.Context, studentID int64, date string, planID *int64) ([]*Word, error) {
 	// 验证学生是否存在
 	_, err := uc.studentRepo.GetByID(ctx, studentID)
 	if err != nil {
@@ -129,10 +131,34 @@ func (uc *wordUsecase) GetTodayWords(ctx context.Context, studentID int64, date 
 		today = parsedDate
 	}
 
-	// 获取该学生的所有单词（分页获取，最多10000条）
-	allWords, _, err := uc.wordRepo.GetByStudentID(ctx, studentID, 1, 10000)
-	if err != nil {
-		return nil, err
+	// 如果指定了计划ID，只获取计划中的单词
+	var allWords []*Word
+	if planID != nil && *planID > 0 {
+		wordIDs, err := uc.planWordRepo.GetWordIDsByPlanID(ctx, *planID)
+		if err != nil {
+			return nil, err
+		}
+		if len(wordIDs) == 0 {
+			return []*Word{}, nil
+		}
+		allWords, err = uc.wordRepo.GetByIDs(ctx, wordIDs)
+		if err != nil {
+			return nil, err
+		}
+		// 过滤出属于该学生的单词
+		var filteredWords []*Word
+		for _, word := range allWords {
+			if word.StudentID == studentID {
+				filteredWords = append(filteredWords, word)
+			}
+		}
+		allWords = filteredWords
+	} else {
+		// 获取该学生的所有单词（分页获取，最多10000条）
+		allWords, _, err = uc.wordRepo.GetByStudentID(ctx, studentID, 1, 10000)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 使用艾宾浩斯算法过滤出今天需要复习的单词

@@ -1,0 +1,185 @@
+/* pages/plan-words/plan-words.wxss */
+.container {
+  min-height: 100vh;
+  background-color: #F5F5F5;
+  padding-bottom: 120rpx;
+}
+
+.header {
+  background-color: white;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.plan-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.word-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.section {
+  background-color: white;
+  margin-bottom: 20rpx;
+  padding: 30rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-bottom: 15rpx;
+  border-bottom: 2rpx solid #E0E0E0;
+}
+
+.word-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.word-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25rpx;
+  background-color: #F8F9FA;
+  border-radius: 8rpx;
+  border: 2rpx solid #E0E0E0;
+}
+
+.selectable-word-item {
+  cursor: pointer;
+}
+
+.selectable-word-item.selected {
+  background-color: #E8F4FD;
+  border-color: #4A90E2;
+}
+
+.word-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.word-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.word-meaning {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.select-icon {
+  width: 50rpx;
+  height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: #4A90E2;
+  font-weight: bold;
+}
+
+.plan-word-item {
+  background-color: #F0F9FF;
+  border-color: #91D5FF;
+}
+
+.remove-btn {
+  padding: 10rpx 20rpx;
+  background-color: #FF4D4F;
+  color: white;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+  border: none;
+  margin-left: 20rpx;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 0;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #999;
+  margin-bottom: 15rpx;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #CCC;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60rpx 0;
+  font-size: 28rpx;
+  color: #999;
+}
+
+.load-more {
+  margin-top: 30rpx;
+  text-align: center;
+}
+
+.load-more-btn {
+  padding: 20rpx 60rpx;
+  background-color: #F5F5F5;
+  color: #666;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  border: 1rpx solid #E0E0E0;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding: 20rpx 30rpx;
+  box-shadow: 0 -2rpx 8rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+}
+
+.selected-count {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.save-btn {
+  padding: 20rpx 60rpx;
+  background-color: #4A90E2;
+  color: white;
+  border-radius: 8rpx;
+  font-size: 32rpx;
+  border: none;
+}
+
+.save-btn:active {
+  background-color: #357ABD;
+}
+

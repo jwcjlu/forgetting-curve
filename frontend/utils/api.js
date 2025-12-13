@@ -377,6 +377,167 @@ function generateReviewQuestions(wordId, grade) {
   });
 }
 
+/**
+ * 创建复习计划
+ * @param {string} name - 计划名称
+ * @param {string} grade - 年级
+ */
+function createPlan(name, grade) {
+  const studentId = getStudentId();
+  if (!studentId) {
+    return Promise.reject(new Error('请先登录'));
+  }
+
+  return request({
+    url: `/api/v1/students/${studentId}/plans`,
+    method: 'POST',
+    data: {
+      name: name,
+      grade: grade || ''
+    }
+  });
+}
+
+/**
+ * 获取学生的所有计划
+ */
+function getPlans() {
+  const studentId = getStudentId();
+  if (!studentId) {
+    return Promise.reject(new Error('请先登录'));
+  }
+
+  return request({
+    url: `/api/v1/students/${studentId}/plans`,
+    method: 'GET'
+  });
+}
+
+/**
+ * 选择计划（设置为当前激活的计划）
+ * @param {number} planId - 计划ID
+ */
+function selectPlan(planId) {
+  const studentId = getStudentId();
+  if (!studentId) {
+    return Promise.reject(new Error('请先登录'));
+  }
+
+  return request({
+    url: `/api/v1/students/${studentId}/plans/${planId}/select`,
+    method: 'POST'
+  });
+}
+
+/**
+ * 添加单词到计划
+ * @param {number} planId - 计划ID
+ * @param {Array<number>} wordIds - 单词ID列表
+ */
+function addWordsToPlan(planId, wordIds) {
+  const studentId = getStudentId();
+  if (!studentId) {
+    return Promise.reject(new Error('请先登录'));
+  }
+
+  return request({
+    url: `/api/v1/students/${studentId}/plans/${planId}/words`,
+    method: 'POST',
+    data: {
+      word_ids: wordIds
+    }
+  });
+}
+
+/**
+ * 从计划中移除单词
+ * @param {number} planId - 计划ID
+ * @param {number} wordId - 单词ID
+ */
+function removeWordsFromPlan(planId, wordId) {
+  const studentId = getStudentId();
+  if (!studentId) {
+    return Promise.reject(new Error('请先登录'));
+  }
+
+  return request({
+    url: `/api/v1/students/${studentId}/plans/${planId}/words/${wordId}`,
+    method: 'DELETE'
+  });
+}
+
+/**
+ * 获取计划中的单词列表
+ * @param {number} planId - 计划ID
+ */
+function getPlanWords(planId) {
+  const studentId = getStudentId();
+  if (!studentId) {
+    return Promise.reject(new Error('请先登录'));
+  }
+
+  return request({
+    url: `/api/v1/students/${studentId}/plans/${planId}/words`,
+    method: 'GET'
+  });
+}
+
+/**
+ * 更新计划
+ * @param {number} planId - 计划ID
+ * @param {string} name - 计划名称
+ * @param {string} grade - 年级
+ */
+function updatePlan(planId, name, grade) {
+  const studentId = getStudentId();
+  if (!studentId) {
+    return Promise.reject(new Error('请先登录'));
+  }
+
+  return request({
+    url: `/api/v1/students/${studentId}/plans/${planId}`,
+    method: 'PUT',
+    data: {
+      name: name,
+      grade: grade || ''
+    }
+  });
+}
+
+/**
+ * 删除计划
+ * @param {number} planId - 计划ID
+ */
+function deletePlan(planId) {
+  const studentId = getStudentId();
+  if (!studentId) {
+    return Promise.reject(new Error('请先登录'));
+  }
+
+  return request({
+    url: `/api/v1/students/${studentId}/plans/${planId}`,
+    method: 'DELETE'
+  });
+}
+
+/**
+ * 获取计划的今日单词（根据艾宾浩斯曲线）
+ * @param {number} planId - 计划ID
+ * @param {string} date - 日期（可选，格式：YYYY-MM-DD）
+ */
+function getPlanTodayWords(planId, date) {
+  const studentId = getStudentId();
+  if (!studentId) {
+    return Promise.reject(new Error('请先登录'));
+  }
+
+  const url = `/api/v1/students/${studentId}/plans/${planId}/words/today${date ? '?date=' + date : ''}`;
+  return request({
+    url: url,
+    method: 'GET'
+  });
+}
+
 module.exports = {
   getStudentId,
   setStudentId,
@@ -395,5 +556,14 @@ module.exports = {
   updateWordReviewData,
   recognizeWordsFromImage,
   generateReviewQuestions,
+  createPlan,
+  getPlans,
+  selectPlan,
+  updatePlan,
+  addWordsToPlan,
+  removeWordsFromPlan,
+  getPlanWords,
+  deletePlan,
+  getPlanTodayWords,
   API_BASE_URL
 };

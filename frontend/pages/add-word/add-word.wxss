@@ -1,4 +1,52 @@
 /* pages/add-word/add-word.wxss */
+.no-plan-card {
+  margin-bottom: 20rpx;
+  background-color: #FFFBE6;
+  border: 2rpx solid #FFE58F;
+}
+
+.no-plan-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 40rpx;
+  text-align: center;
+}
+
+.no-plan-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15rpx;
+}
+
+.no-plan-hint {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+}
+
+.go-plan-btn {
+  padding: 20rpx 60rpx;
+  background-color: #4A90E2;
+  color: white;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+.plan-info-card {
+  margin-bottom: 20rpx;
+  background-color: #E8F4FD;
+  padding: 20rpx 30rpx;
+}
+
+.plan-info-text {
+  font-size: 28rpx;
+  color: #4A90E2;
+  font-weight: 500;
+}
+
 .container {
   padding: 20rpx;
   box-sizing: border-box;

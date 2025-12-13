@@ -81,6 +81,296 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/plans:
+        get:
+            tags:
+                - StudentService
+            description: 获取学生的所有计划
+            operationId: StudentService_GetPlans
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetPlansReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - StudentService
+            description: 创建复习计划
+            operationId: StudentService_CreatePlan
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreatePlanRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreatePlanReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/plans/{planId}:
+        put:
+            tags:
+                - StudentService
+            description: 更新计划
+            operationId: StudentService_UpdatePlan
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: planId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdatePlanRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdatePlanReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - StudentService
+            description: 删除计划
+            operationId: StudentService_DeletePlan
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: planId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeletePlanReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/plans/{planId}/select:
+        post:
+            tags:
+                - StudentService
+            description: 选择计划（设置为当前激活的计划）
+            operationId: StudentService_SelectPlan
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: planId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SelectPlanRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SelectPlanReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/plans/{planId}/words:
+        get:
+            tags:
+                - StudentService
+            description: 获取计划中的单词列表
+            operationId: StudentService_GetPlanWords
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: planId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetPlanWordsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - StudentService
+            description: 添加单词到计划
+            operationId: StudentService_AddWordsToPlan
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: planId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AddWordsToPlanRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AddWordsToPlanReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/plans/{planId}/words/today:
+        get:
+            tags:
+                - StudentService
+            description: 获取计划的今日需要背诵的单词（根据艾宾浩斯曲线）
+            operationId: StudentService_GetPlanTodayWords
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: planId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: date
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetPlanTodayWordsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/students/{studentId}/plans/{planId}/words/{wordId}:
+        delete:
+            tags:
+                - StudentService
+            description: 从计划中移除单词
+            operationId: StudentService_RemoveWordsFromPlan
+            parameters:
+                - name: studentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: planId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: wordId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RemoveWordsFromPlanReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/v1/students/{studentId}/words:
         get:
             tags:
@@ -194,6 +484,10 @@ paths:
                   schema:
                     type: string
                 - name: date
+                  in: query
+                  schema:
+                    type: string
+                - name: planId
                   in: query
                   schema:
                     type: string
@@ -472,6 +766,25 @@ components:
                     type: string
                 confusedWordId:
                     type: string
+        AddWordsToPlanReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                addedCount:
+                    type: integer
+                    format: int32
+        AddWordsToPlanRequest:
+            type: object
+            properties:
+                studentId:
+                    type: string
+                planId:
+                    type: string
+                wordIds:
+                    type: array
+                    items:
+                        type: string
         BaseResponse:
             type: object
             properties:
@@ -503,6 +816,22 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/WordItem'
+        CreatePlanReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                plan:
+                    $ref: '#/components/schemas/Plan'
+        CreatePlanRequest:
+            type: object
+            properties:
+                studentId:
+                    type: string
+                name:
+                    type: string
+                grade:
+                    type: string
         CreateStudentReply:
             type: object
             properties:
@@ -517,6 +846,11 @@ components:
                     type: string
                 studentNo:
                     type: string
+        DeletePlanReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
         GenerateReviewQuestionsReply:
             type: object
             properties:
@@ -562,6 +896,38 @@ components:
                     type: string
                 name:
                     type: string
+        GetPlanTodayWordsReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                date:
+                    type: string
+                count:
+                    type: integer
+                    format: int32
+                words:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Word'
+        GetPlanWordsReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                words:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Word'
+        GetPlansReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                plans:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Plan'
         GetStudentReply:
             type: object
             properties:
@@ -637,7 +1003,30 @@ components:
                     type: string
                 wordId:
                     type: string
+        Plan:
+            type: object
+            properties:
+                id:
+                    type: string
+                studentId:
+                    type: string
+                name:
+                    type: string
+                grade:
+                    type: string
+                isActive:
+                    type: boolean
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+            description: 复习计划相关消息
         RemoveConfusedWordReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+        RemoveWordsFromPlanReply:
             type: object
             properties:
                 ret:
@@ -664,6 +1053,20 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/Word'
+        SelectPlanReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                plan:
+                    $ref: '#/components/schemas/Plan'
+        SelectPlanRequest:
+            type: object
+            properties:
+                studentId:
+                    type: string
+                planId:
+                    type: string
         Status:
             type: object
             properties:
@@ -694,6 +1097,24 @@ components:
                 createdAt:
                     type: string
                 updatedAt:
+                    type: string
+        UpdatePlanReply:
+            type: object
+            properties:
+                ret:
+                    $ref: '#/components/schemas/BaseResponse'
+                plan:
+                    $ref: '#/components/schemas/Plan'
+        UpdatePlanRequest:
+            type: object
+            properties:
+                studentId:
+                    type: string
+                planId:
+                    type: string
+                name:
+                    type: string
+                grade:
                     type: string
         UpdateWordReviewDataReply:
             type: object

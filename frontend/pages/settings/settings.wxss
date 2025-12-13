@@ -103,6 +103,18 @@
   margin-left: 20rpx;
 }
 
+.plan-section {
+  margin-top: 40rpx;
+  padding-top: 40rpx;
+  border-top: 1rpx solid #E0E0E0;
+}
+
+.plan-btn {
+  background-color: #4A90E2;
+  color: white;
+  margin-top: 20rpx;
+}
+
 .api-config-section {
   margin-top: 30rpx;
   padding-top: 30rpx;

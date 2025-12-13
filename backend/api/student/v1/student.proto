@@ -45,6 +45,13 @@ service StudentService {
     };
   }
 
+  // 获取计划的今日需要背诵的单词（根据艾宾浩斯曲线）
+  rpc GetPlanTodayWords (GetPlanTodayWordsRequest) returns (GetPlanTodayWordsReply) {
+    option (google.api.http) = {
+      get: "/api/v1/students/{student_id}/plans/{plan_id}/words/today"
+    };
+  }
+
   // 标记单词为已复习
   rpc MarkWordReviewed (MarkWordReviewedRequest) returns (MarkWordReviewedReply) {
     option (google.api.http) = {
@@ -111,6 +118,66 @@ service StudentService {
     option (google.api.http) = {
       post: "/api/v1/students/{student_id}/words/{word_id}/review-questions"
       body: "*"
+    };
+  }
+
+  // 创建复习计划
+  rpc CreatePlan (CreatePlanRequest) returns (CreatePlanReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students/{student_id}/plans"
+      body: "*"
+    };
+  }
+
+  // 获取学生的所有计划
+  rpc GetPlans (GetPlansRequest) returns (GetPlansReply) {
+    option (google.api.http) = {
+      get: "/api/v1/students/{student_id}/plans"
+    };
+  }
+
+  // 选择计划（设置为当前激活的计划）
+  rpc SelectPlan (SelectPlanRequest) returns (SelectPlanReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students/{student_id}/plans/{plan_id}/select"
+      body: "*"
+    };
+  }
+
+  // 添加单词到计划
+  rpc AddWordsToPlan (AddWordsToPlanRequest) returns (AddWordsToPlanReply) {
+    option (google.api.http) = {
+      post: "/api/v1/students/{student_id}/plans/{plan_id}/words"
+      body: "*"
+    };
+  }
+
+  // 从计划中移除单词
+  rpc RemoveWordsFromPlan (RemoveWordsFromPlanRequest) returns (RemoveWordsFromPlanReply) {
+    option (google.api.http) = {
+      delete: "/api/v1/students/{student_id}/plans/{plan_id}/words/{word_id}"
+    };
+  }
+
+  // 获取计划中的单词列表
+  rpc GetPlanWords (GetPlanWordsRequest) returns (GetPlanWordsReply) {
+    option (google.api.http) = {
+      get: "/api/v1/students/{student_id}/plans/{plan_id}/words"
+    };
+  }
+
+  // 更新计划
+  rpc UpdatePlan (UpdatePlanRequest) returns (UpdatePlanReply) {
+    option (google.api.http) = {
+      put: "/api/v1/students/{student_id}/plans/{plan_id}"
+      body: "*"
+    };
+  }
+
+  // 删除计划
+  rpc DeletePlan (DeletePlanRequest) returns (DeletePlanReply) {
+    option (google.api.http) = {
+      delete: "/api/v1/students/{student_id}/plans/{plan_id}"
     };
   }
 }
@@ -197,10 +264,24 @@ message GetStudentWordsReply {
 message GetTodayWordsRequest {
   int64 student_id = 1;
   string date = 2; // 可选，格式：YYYY-MM-DD，默认为今天
+  int64 plan_id = 3; // 计划ID（可选，如果提供则只返回该计划的单词）
 }
 
 message GetTodayWordsReply {
   BaseResponse ret =1;
+  string date = 2;
+  int32 count = 3;
+  repeated Word words = 4;
+}
+
+message GetPlanTodayWordsRequest {
+  int64 student_id = 1;
+  int64 plan_id = 2;
+  string date = 3; // 可选，格式：YYYY-MM-DD，默认为今天
+}
+
+message GetPlanTodayWordsReply {
+  BaseResponse ret = 1;
   string date = 2;
   int32 count = 3;
   repeated Word words = 4;
@@ -328,5 +409,98 @@ message RecognizedWord {
   string meaning = 2;     // 识别的释义（如果有，可能为空）
   float confidence = 3;   // 识别置信度（0-1）
   bool auto_added = 4;    // 是否已自动添加到单词列表
+}
+
+// 复习计划相关消息
+message Plan {
+  int64 id = 1;
+  int64 student_id = 2;
+  string name = 3;
+  string grade = 4;
+  bool is_active = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
+
+message CreatePlanRequest {
+  int64 student_id = 1;
+  string name = 2;
+  string grade = 3;
+}
+
+message CreatePlanReply {
+  BaseResponse ret = 1;
+  Plan plan = 2;
+}
+
+message GetPlansRequest {
+  int64 student_id = 1;
+}
+
+message GetPlansReply {
+  BaseResponse ret = 1;
+  repeated Plan plans = 2;
+}
+
+message SelectPlanRequest {
+  int64 student_id = 1;
+  int64 plan_id = 2;
+}
+
+message SelectPlanReply {
+  BaseResponse ret = 1;
+  Plan plan = 2;
+}
+
+message AddWordsToPlanRequest {
+  int64 student_id = 1;
+  int64 plan_id = 2;
+  repeated int64 word_ids = 3;
+}
+
+message AddWordsToPlanReply {
+  BaseResponse ret = 1;
+  int32 added_count = 2;
+}
+
+message RemoveWordsFromPlanRequest {
+  int64 student_id = 1;
+  int64 plan_id = 2;
+  int64 word_id = 3;
+}
+
+message RemoveWordsFromPlanReply {
+  BaseResponse ret = 1;
+}
+
+message GetPlanWordsRequest {
+  int64 student_id = 1;
+  int64 plan_id = 2;
+}
+
+message GetPlanWordsReply {
+  BaseResponse ret = 1;
+  repeated Word words = 2;
+}
+
+message UpdatePlanRequest {
+  int64 student_id = 1;
+  int64 plan_id = 2;
+  string name = 3;
+  string grade = 4;
+}
+
+message UpdatePlanReply {
+  BaseResponse ret = 1;
+  Plan plan = 2;
+}
+
+message DeletePlanRequest {
+  int64 student_id = 1;
+  int64 plan_id = 2;
+}
+
+message DeletePlanReply {
+  BaseResponse ret = 1;
 }
 

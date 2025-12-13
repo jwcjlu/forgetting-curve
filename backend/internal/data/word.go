@@ -62,3 +62,17 @@ func (r *wordRepo) Update(ctx context.Context, word *biz.Word) (*biz.Word, error
 	}
 	return word, nil
 }
+
+// GetByIDs 根据ID列表获取单词
+func (r *wordRepo) GetByIDs(ctx context.Context, wordIDs []int64) ([]*biz.Word, error) {
+	if len(wordIDs) == 0 {
+		return []*biz.Word{}, nil
+	}
+	var words []*biz.Word
+	if err := r.data.db.WithContext(ctx).
+		Where("id IN ?", wordIDs).
+		Find(&words).Error; err != nil {
+		return nil, err
+	}
+	return words, nil
+}

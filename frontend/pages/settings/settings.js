@@ -179,6 +179,15 @@ Page({
   /**
    * 保存API地址
    */
+  /**
+   * 跳转到计划管理页面
+   */
+  goToPlans() {
+    wx.navigateTo({
+      url: '/pages/plan/plan'
+    });
+  },
+
   saveApiUrl() {
     const apiUrl = this.data.apiUrl.trim();
     if (!apiUrl) {

@@ -4,7 +4,10 @@
     <view class="header-content">
       <view class="header-left">
         <text class="date-title">{{todayDate}}</text>
-        <text class="count-text">今日需背诵：{{todayWords.length}} 个单词</text>
+        <text class="count-text" wx:if="{{hasActivePlan}}">
+          计划：{{activePlanName}} | 今日需背诵：{{todayWords.length}} 个单词
+        </text>
+        <text class="count-text" wx:else>请先选择复习计划</text>
       </view>
       <view class="header-right">
         <button class="settings-btn" bindtap="goToSettings" size="mini">设置</button>
@@ -12,8 +15,17 @@
     </view>
   </view>
 
-  <view wx:if="{{todayWords.length === 0}}" class="empty-state">
+  <!-- 没有激活计划的提示 -->
+  <view wx:if="{{!hasActivePlan}}" class="empty-state no-plan-state">
+    <text class="empty-text">请先选择复习计划</text>
+    <text class="empty-hint">只有选择了复习计划才能查看今日背诵任务</text>
+    <button class="go-plan-btn" bindtap="goToPlans">去选择计划</button>
+  </view>
+
+  <!-- 有激活计划但没有单词 -->
+  <view wx:elif="{{hasActivePlan && todayWords.length === 0}}" class="empty-state">
     <text class="empty-text">今天没有需要背诵的单词</text>
+    <text class="empty-hint">当前计划：{{activePlanName}}</text>
     <text class="empty-hint">去添加单词开始学习吧！</text>
   </view>
 

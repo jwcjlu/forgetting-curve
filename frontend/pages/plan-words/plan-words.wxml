@@ -1,0 +1,69 @@
+<!--pages/plan-words/plan-words.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="plan-name">{{planName}}</text>
+    <text class="word-count">已添加：{{planWords.length}} 个单词</text>
+  </view>
+
+  <!-- 已添加的单词列表 -->
+  <view class="section" wx:if="{{planWords.length > 0}}">
+    <view class="section-title">计划中的单词</view>
+    <view class="word-list">
+      <view class="word-item plan-word-item" wx:for="{{planWords}}" wx:key="id">
+        <view class="word-content">
+          <text class="word-text">{{item.word}}</text>
+          <text class="word-meaning">{{item.meaning}}</text>
+        </view>
+        <button class="remove-btn" bindtap="removeWordFromPlan" data-word-id="{{item.id}}">
+          移除
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加单词列表 -->
+  <view class="section">
+    <view class="section-title">选择要添加的单词</view>
+    <view class="word-list" wx:if="{{!loading && words.length > 0}}">
+      <view 
+        class="word-item selectable-word-item {{selectedWordIds.indexOf(item.id) >= 0 ? 'selected' : ''}}" 
+        wx:for="{{words}}" 
+        wx:key="id"
+        bindtap="toggleWordSelect"
+        data-word-id="{{item.id}}"
+      >
+        <view class="word-content">
+          <text class="word-text">{{item.word}}</text>
+          <text class="word-meaning">{{item.meaning}}</text>
+        </view>
+        <view class="select-icon">
+          <text wx:if="{{selectedWordIds.indexOf(item.id) >= 0}}">✓</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{!loading && words.length === 0}}">
+      <text class="empty-text">还没有添加任何单词</text>
+      <text class="empty-hint">去"添加单词"页面添加单词吧</text>
+    </view>
+
+    <view class="loading" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+
+    <view class="load-more" wx:if="{{hasMore && !loading}}">
+      <button class="load-more-btn" bindtap="loadMoreWords" loading="{{loadingMore}}">
+        加载更多
+      </button>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="footer">
+    <text class="selected-count">已选择：{{selectedWordIds.length}} 个单词</text>
+    <button class="save-btn" bindtap="saveWordsToPlan" loading="{{submitting}}">
+      保存到计划
+    </button>
+  </view>
+</view>
+
