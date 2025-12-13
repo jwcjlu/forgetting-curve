@@ -15,13 +15,13 @@ type Student struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	Words     []Word         `gorm:"foreignKey:StudentID" json:"words,omitempty"`
+	Plans     []Plan         `gorm:"foreignKey:StudentID" json:"plans,omitempty"`
 }
 
 // Word 单词模型
 type Word struct {
 	ID             int64  `gorm:"primaryKey;autoIncrement" json:"id"`
-	StudentID      int64  `gorm:"type:bigint;not null;index" json:"student_id"`
+	PlanID         int64  `gorm:"type:bigint;not null;index" json:"plan_id"` // 关联到复习计划
 	Word           string `gorm:"type:varchar(100);not null" json:"word"`
 	Meaning        string `gorm:"type:varchar(500);not null" json:"meaning"`
 	StartDate      string `gorm:"type:varchar(20);not null" json:"start_date"`
@@ -35,7 +35,7 @@ type Word struct {
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
-	Student       Student        `gorm:"foreignKey:StudentID" json:"student,omitempty"`
+	Plan          Plan           `gorm:"foreignKey:PlanID" json:"plan,omitempty"`
 	ConfusedWords []ConfusedWord `gorm:"foreignKey:WordID" json:"confused_words,omitempty"`
 }
 
@@ -51,6 +51,20 @@ type ConfusedWord struct {
 	Confused       Word           `gorm:"foreignKey:ConfusedWordID" json:"confused,omitempty"`
 }
 
+// Plan 复习计划模型
+type Plan struct {
+	ID        int64          `gorm:"primaryKey;autoIncrement" json:"id"`
+	StudentID int64          `gorm:"type:bigint;not null;index" json:"student_id"`
+	Name      string         `gorm:"type:varchar(100);not null" json:"name"`
+	Grade     string         `gorm:"type:varchar(50)" json:"grade"`              // 年级
+	IsActive  bool           `gorm:"type:tinyint(1);default:0" json:"is_active"` // 是否当前激活的计划
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	Student   Student        `gorm:"foreignKey:StudentID" json:"student,omitempty"`
+	Words     []Word         `gorm:"foreignKey:PlanID" json:"words,omitempty"` // 计划下的单词
+}
+
 // TableName 指定表名
 func (Student) TableName() string {
 	return "students"
@@ -64,36 +78,6 @@ func (ConfusedWord) TableName() string {
 	return "confused_words"
 }
 
-// Plan 复习计划模型
-type Plan struct {
-	ID        int64          `gorm:"primaryKey;autoIncrement" json:"id"`
-	StudentID int64          `gorm:"type:bigint;not null;index" json:"student_id"`
-	Name      string         `gorm:"type:varchar(100);not null" json:"name"`
-	Grade     string         `gorm:"type:varchar(50)" json:"grade"`              // 年级
-	IsActive  bool           `gorm:"type:tinyint(1);default:0" json:"is_active"` // 是否当前激活的计划
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	Student   Student        `gorm:"foreignKey:StudentID" json:"student,omitempty"`
-	PlanWords []PlanWord     `gorm:"foreignKey:PlanID" json:"plan_words,omitempty"`
-}
-
-// PlanWord 计划单词关联表
-type PlanWord struct {
-	ID        int64          `gorm:"primaryKey;autoIncrement" json:"id"`
-	PlanID    int64          `gorm:"type:bigint;not null;index" json:"plan_id"`
-	WordID    int64          `gorm:"type:bigint;not null;index" json:"word_id"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	Plan      Plan           `gorm:"foreignKey:PlanID" json:"plan,omitempty"`
-	Word      Word           `gorm:"foreignKey:WordID" json:"word,omitempty"`
-}
-
 func (Plan) TableName() string {
 	return "plans"
-}
-
-func (PlanWord) TableName() string {
-	return "plan_words"
 }

@@ -11,15 +11,15 @@ import (
 
 // WordUsecase 单词业务逻辑接口
 type WordUsecase interface {
-	BatchAddWords(ctx context.Context, studentID int64, words []*WordItem) ([]*Word, error)
-	GetStudentWords(ctx context.Context, studentID int64, page, pageSize int32) ([]*Word, int64, error)
-	GetTodayWords(ctx context.Context, studentID int64, date string, planID *int64) ([]*Word, error)
-	GetWord(ctx context.Context, studentID int64, wordID int64) (*Word, error)
-	MarkWordReviewed(ctx context.Context, studentID int64, wordID int64) (*Word, error)
-	MarkWordForgotten(ctx context.Context, studentID int64, wordID int64) (*Word, error)
-	UpdateWordReviewData(ctx context.Context, studentID int64, wordID int64, thinkTime, difficulty int32, isRemembered bool) (*Word, error)
-	ValidateStudentAccess(ctx context.Context, studentID int64, wordID int64) error
-	GenerateReviewQuestions(ctx context.Context, studentID int64, wordID int64, grade string) ([]*ReviewQuestion, error)
+	BatchAddWords(ctx context.Context, planID int64, words []*WordItem) ([]*Word, error)
+	GetPlanWords(ctx context.Context, planID int64, page, pageSize int32) ([]*Word, int64, error)
+	GetTodayWords(ctx context.Context, planID int64, date string) ([]*Word, error)
+	GetWord(ctx context.Context, planID int64, wordID int64) (*Word, error)
+	MarkWordReviewed(ctx context.Context, planID int64, wordID int64) (*Word, error)
+	MarkWordForgotten(ctx context.Context, planID int64, wordID int64) (*Word, error)
+	UpdateWordReviewData(ctx context.Context, planID int64, wordID int64, thinkTime, difficulty int32, isRemembered bool) (*Word, error)
+	ValidatePlanAccess(ctx context.Context, planID int64, wordID int64) error
+	GenerateReviewQuestions(ctx context.Context, planID int64, wordID int64, grade string) ([]*ReviewQuestion, error)
 }
 
 // WordItem 单词项
@@ -30,30 +30,30 @@ type WordItem struct {
 }
 
 type wordUsecase struct {
-	wordRepo     WordRepo
-	studentRepo  StudentRepo
-	planWordRepo PlanWordRepo
-	llmService   LLMService
-	log          *log.Helper
+	wordRepo    WordRepo
+	planRepo    PlanRepo
+	studentRepo StudentRepo
+	llmService  LLMService
+	log         *log.Helper
 }
 
 // NewWordUsecase 创建单词业务逻辑
-func NewWordUsecase(wordRepo WordRepo, studentRepo StudentRepo, planWordRepo PlanWordRepo, llmService LLMService, logger log.Logger) WordUsecase {
+func NewWordUsecase(wordRepo WordRepo, planRepo PlanRepo, studentRepo StudentRepo, llmService LLMService, logger log.Logger) WordUsecase {
 	return &wordUsecase{
-		wordRepo:     wordRepo,
-		studentRepo:  studentRepo,
-		planWordRepo: planWordRepo,
-		llmService:   llmService,
-		log:          log.NewHelper(logger),
+		wordRepo:    wordRepo,
+		planRepo:    planRepo,
+		studentRepo: studentRepo,
+		llmService:  llmService,
+		log:         log.NewHelper(logger),
 	}
 }
 
-// BatchAddWords 批量添加单词到学生名下
-func (uc *wordUsecase) BatchAddWords(ctx context.Context, studentID int64, words []*WordItem) ([]*Word, error) {
-	// 验证学生是否存在
-	_, err := uc.studentRepo.GetByID(ctx, studentID)
+// BatchAddWords 批量添加单词到计划
+func (uc *wordUsecase) BatchAddWords(ctx context.Context, planID int64, words []*WordItem) ([]*Word, error) {
+	// 验证计划是否存在
+	_, err := uc.planRepo.GetByID(ctx, planID)
 	if err != nil {
-		return nil, errors.New("student not found")
+		return nil, errors.New("plan not found")
 	}
 
 	// 验证输入
@@ -68,7 +68,7 @@ func (uc *wordUsecase) BatchAddWords(ctx context.Context, studentID int64, words
 			continue // 跳过无效的单词
 		}
 		dbWords = append(dbWords, &Word{
-			StudentID:      studentID,
+			PlanID:         planID,
 			Word:           item.Word,
 			Meaning:        item.Meaning,
 			StartDate:      item.StartDate,
@@ -89,12 +89,12 @@ func (uc *wordUsecase) BatchAddWords(ctx context.Context, studentID int64, words
 	return dbWords, nil
 }
 
-// GetStudentWords 获取学生的单词列表
-func (uc *wordUsecase) GetStudentWords(ctx context.Context, studentID int64, page, pageSize int32) ([]*Word, int64, error) {
-	// 验证学生是否存在
-	_, err := uc.studentRepo.GetByID(ctx, studentID)
+// GetPlanWords 获取计划的单词列表
+func (uc *wordUsecase) GetPlanWords(ctx context.Context, planID int64, page, pageSize int32) ([]*Word, int64, error) {
+	// 验证计划是否存在
+	_, err := uc.planRepo.GetByID(ctx, planID)
 	if err != nil {
-		return nil, 0, errors.New("student not found")
+		return nil, 0, errors.New("plan not found")
 	}
 
 	// 设置默认值
@@ -108,15 +108,15 @@ func (uc *wordUsecase) GetStudentWords(ctx context.Context, studentID int64, pag
 		pageSize = 100 // 限制最大页大小
 	}
 
-	return uc.wordRepo.GetByStudentID(ctx, studentID, page, pageSize)
+	return uc.wordRepo.GetByPlanID(ctx, planID, page, pageSize)
 }
 
 // GetTodayWords 获取今日需要背诵的单词（根据艾宾浩斯曲线）
-func (uc *wordUsecase) GetTodayWords(ctx context.Context, studentID int64, date string, planID *int64) ([]*Word, error) {
-	// 验证学生是否存在
-	_, err := uc.studentRepo.GetByID(ctx, studentID)
+func (uc *wordUsecase) GetTodayWords(ctx context.Context, planID int64, date string) ([]*Word, error) {
+	// 验证计划是否存在
+	_, err := uc.planRepo.GetByID(ctx, planID)
 	if err != nil {
-		return nil, errors.New("student not found")
+		return nil, errors.New("plan not found")
 	}
 
 	// 解析日期
@@ -131,34 +131,10 @@ func (uc *wordUsecase) GetTodayWords(ctx context.Context, studentID int64, date 
 		today = parsedDate
 	}
 
-	// 如果指定了计划ID，只获取计划中的单词
-	var allWords []*Word
-	if planID != nil && *planID > 0 {
-		wordIDs, err := uc.planWordRepo.GetWordIDsByPlanID(ctx, *planID)
-		if err != nil {
-			return nil, err
-		}
-		if len(wordIDs) == 0 {
-			return []*Word{}, nil
-		}
-		allWords, err = uc.wordRepo.GetByIDs(ctx, wordIDs)
-		if err != nil {
-			return nil, err
-		}
-		// 过滤出属于该学生的单词
-		var filteredWords []*Word
-		for _, word := range allWords {
-			if word.StudentID == studentID {
-				filteredWords = append(filteredWords, word)
-			}
-		}
-		allWords = filteredWords
-	} else {
-		// 获取该学生的所有单词（分页获取，最多10000条）
-		allWords, _, err = uc.wordRepo.GetByStudentID(ctx, studentID, 1, 10000)
-		if err != nil {
-			return nil, err
-		}
+	// 获取计划中的所有单词
+	allWords, err := uc.wordRepo.GetAllByPlanID(ctx, planID)
+	if err != nil {
+		return nil, err
 	}
 
 	// 使用艾宾浩斯算法过滤出今天需要复习的单词
@@ -178,9 +154,9 @@ func (uc *wordUsecase) GetTodayWords(ctx context.Context, studentID int64, date 
 }
 
 // MarkWordReviewed 标记单词为已复习
-func (uc *wordUsecase) MarkWordReviewed(ctx context.Context, studentID int64, wordID int64) (*Word, error) {
-	// 验证学生是否有权限
-	if err := uc.ValidateStudentAccess(ctx, studentID, wordID); err != nil {
+func (uc *wordUsecase) MarkWordReviewed(ctx context.Context, planID int64, wordID int64) (*Word, error) {
+	// 验证计划是否有权限
+	if err := uc.ValidatePlanAccess(ctx, planID, wordID); err != nil {
 		return nil, err
 	}
 
@@ -208,9 +184,9 @@ func (uc *wordUsecase) MarkWordReviewed(ctx context.Context, studentID int64, wo
 }
 
 // MarkWordForgotten 标记单词为未记住
-func (uc *wordUsecase) MarkWordForgotten(ctx context.Context, studentID int64, wordID int64) (*Word, error) {
-	// 验证学生是否有权限
-	if err := uc.ValidateStudentAccess(ctx, studentID, wordID); err != nil {
+func (uc *wordUsecase) MarkWordForgotten(ctx context.Context, planID int64, wordID int64) (*Word, error) {
+	// 验证计划是否有权限
+	if err := uc.ValidatePlanAccess(ctx, planID, wordID); err != nil {
 		return nil, err
 	}
 
@@ -235,9 +211,9 @@ func (uc *wordUsecase) MarkWordForgotten(ctx context.Context, studentID int64, w
 }
 
 // UpdateWordReviewData 更新单词复习数据（思考时间、难度等）
-func (uc *wordUsecase) UpdateWordReviewData(ctx context.Context, studentID int64, wordID int64, thinkTime, difficulty int32, isRemembered bool) (*Word, error) {
-	// 验证学生是否有权限
-	if err := uc.ValidateStudentAccess(ctx, studentID, wordID); err != nil {
+func (uc *wordUsecase) UpdateWordReviewData(ctx context.Context, planID int64, wordID int64, thinkTime, difficulty int32, isRemembered bool) (*Word, error) {
+	// 验证计划是否有权限
+	if err := uc.ValidatePlanAccess(ctx, planID, wordID); err != nil {
 		return nil, err
 	}
 
@@ -274,9 +250,9 @@ func (uc *wordUsecase) UpdateWordReviewData(ctx context.Context, studentID int64
 }
 
 // GetWord 获取单词（带权限验证）
-func (uc *wordUsecase) GetWord(ctx context.Context, studentID int64, wordID int64) (*Word, error) {
-	// 验证权限
-	if err := uc.ValidateStudentAccess(ctx, studentID, wordID); err != nil {
+func (uc *wordUsecase) GetWord(ctx context.Context, planID int64, wordID int64) (*Word, error) {
+	// 验证权限（通过计划验证）
+	if err := uc.ValidatePlanAccess(ctx, planID, wordID); err != nil {
 		return nil, err
 	}
 
@@ -284,24 +260,10 @@ func (uc *wordUsecase) GetWord(ctx context.Context, studentID int64, wordID int6
 	return uc.wordRepo.GetByID(ctx, wordID)
 }
 
-// ValidateStudentAccess 验证学生是否有权限访问该单词
-func (uc *wordUsecase) ValidateStudentAccess(ctx context.Context, studentID int64, wordID int64) error {
-	word, err := uc.wordRepo.GetByID(ctx, wordID)
-	if err != nil {
-		return errors.New("word not found")
-	}
-
-	if word.StudentID != studentID {
-		return errors.New("access denied: word does not belong to this student")
-	}
-
-	return nil
-}
-
 // GenerateReviewQuestions 生成复习题目
-func (uc *wordUsecase) GenerateReviewQuestions(ctx context.Context, studentID int64, wordID int64, grade string) ([]*ReviewQuestion, error) {
+func (uc *wordUsecase) GenerateReviewQuestions(ctx context.Context, planID int64, wordID int64, grade string) ([]*ReviewQuestion, error) {
 	// 验证权限
-	if err := uc.ValidateStudentAccess(ctx, studentID, wordID); err != nil {
+	if err := uc.ValidatePlanAccess(ctx, planID, wordID); err != nil {
 		return nil, err
 	}
 
@@ -324,4 +286,18 @@ func (uc *wordUsecase) GenerateReviewQuestions(ctx context.Context, studentID in
 	}
 
 	return questions, nil
+}
+
+// ValidatePlanAccess 验证计划是否有权限访问该单词
+func (uc *wordUsecase) ValidatePlanAccess(ctx context.Context, planID int64, wordID int64) error {
+	word, err := uc.wordRepo.GetByID(ctx, wordID)
+	if err != nil {
+		return errors.New("word not found")
+	}
+
+	if word.PlanID != planID {
+		return errors.New("access denied: word does not belong to this plan")
+	}
+
+	return nil
 }

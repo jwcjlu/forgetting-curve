@@ -9,6 +9,5 @@ var ProviderSet = wire.NewSet(
 	NewWordRepo,
 	NewConfusedWordRepo,
 	NewPlanRepo,
-	NewPlanWordRepo,
 	NewUmiOCRClient,
 )

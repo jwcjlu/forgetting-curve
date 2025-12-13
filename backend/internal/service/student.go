@@ -104,7 +104,7 @@ func (s *StudentService) GetStudent(ctx context.Context, req *v1.GetStudentReque
 	}, nil
 }
 
-// BatchAddWords 批量添加单词到学生名下
+// BatchAddWords 批量添加单词到计划
 func (s *StudentService) BatchAddWords(ctx context.Context, req *v1.BatchAddWordsRequest) (*v1.BatchAddWordsReply, error) {
 	// 转换请求数据
 	wordItems := make([]*biz.WordItem, 0, len(req.Words))
@@ -116,8 +116,8 @@ func (s *StudentService) BatchAddWords(ctx context.Context, req *v1.BatchAddWord
 		})
 	}
 
-	// 调用业务逻辑
-	words, err := s.wordUc.BatchAddWords(ctx, req.StudentId, wordItems)
+	// 调用业务逻辑（现在单词直接添加到计划）
+	words, err := s.wordUc.BatchAddWords(ctx, req.PlanId, wordItems)
 	if err != nil {
 		return &v1.BatchAddWordsReply{
 			Ret: &v1.BaseResponse{
@@ -143,8 +143,8 @@ func (s *StudentService) BatchAddWords(ctx context.Context, req *v1.BatchAddWord
 	}, nil
 }
 
-// GetStudentWords 获取学生的单词列表（学生只能看自己的单词）
-func (s *StudentService) GetStudentWords(ctx context.Context, req *v1.GetStudentWordsRequest) (*v1.GetStudentWordsReply, error) {
+// GetPlanWords 获取计划的单词列表
+func (s *StudentService) GetPlanWords(ctx context.Context, req *v1.GetPlanWordsRequest) (*v1.GetPlanWordsReply, error) {
 	// 设置默认分页参数
 	page := req.Page
 	pageSize := req.PageSize
@@ -155,10 +155,10 @@ func (s *StudentService) GetStudentWords(ctx context.Context, req *v1.GetStudent
 		pageSize = 20
 	}
 
-	// 调用业务逻辑（已经验证了学生ID，确保只能看自己的单词）
-	words, total, err := s.wordUc.GetStudentWords(ctx, req.StudentId, page, pageSize)
+	// 调用业务逻辑（通过 PlanUsecase 获取计划下的单词）
+	words, total, err := s.planUc.GetPlanWords(ctx, req.StudentId, req.PlanId, page, pageSize)
 	if err != nil {
-		return &v1.GetStudentWordsReply{
+		return &v1.GetPlanWordsReply{
 			Ret: &v1.BaseResponse{
 				Code:    500,
 				Message: err.Error(),
@@ -172,7 +172,7 @@ func (s *StudentService) GetStudentWords(ctx context.Context, req *v1.GetStudent
 		v1Words = append(v1Words, s.convertWordToV1(word))
 	}
 
-	return &v1.GetStudentWordsReply{
+	return &v1.GetPlanWordsReply{
 		Ret: &v1.BaseResponse{
 			Code:    0,
 			Message: "success",
@@ -186,13 +186,8 @@ func (s *StudentService) GetStudentWords(ctx context.Context, req *v1.GetStudent
 
 // GetTodayWords 获取今日需要背诵的单词（根据艾宾浩斯曲线）
 func (s *StudentService) GetTodayWords(ctx context.Context, req *v1.GetTodayWordsRequest) (*v1.GetTodayWordsReply, error) {
-	var planID *int64
-	// 注意：proto字段名是plan_id，生成的Go代码中应该是PlanId
-	// 如果编译错误，需要先运行 make api 重新生成proto代码
-	if req.PlanId > 0 {
-		planID = &req.PlanId
-	}
-	words, err := s.wordUc.GetTodayWords(ctx, req.StudentId, req.Date, planID)
+	// 现在单词直接属于计划，必须提供计划ID
+	words, err := s.wordUc.GetTodayWords(ctx, req.PlanId, req.Date)
 	if err != nil {
 		return &v1.GetTodayWordsReply{
 			Ret: &v1.BaseResponse{
@@ -227,7 +222,7 @@ func (s *StudentService) GetTodayWords(ctx context.Context, req *v1.GetTodayWord
 
 // MarkWordReviewed 标记单词为已复习
 func (s *StudentService) MarkWordReviewed(ctx context.Context, req *v1.MarkWordReviewedRequest) (*v1.MarkWordReviewedReply, error) {
-	word, err := s.wordUc.MarkWordReviewed(ctx, req.StudentId, req.WordId)
+	word, err := s.wordUc.MarkWordReviewed(ctx, req.PlanId, req.WordId)
 	if err != nil {
 		return &v1.MarkWordReviewedReply{
 			Ret: &v1.BaseResponse{
@@ -314,7 +309,7 @@ func (s *StudentService) GetOrCreateStudentByOpenid(ctx context.Context, req *v1
 
 // AddConfusedWord 添加混淆词AddConfusedWordRequest
 func (s *StudentService) AddConfusedWord(ctx context.Context, req *v1.AddConfusedWordRequest) (*v1.AddConfusedWordReply, error) {
-	err := s.confusedWordUc.AddConfusedWord(ctx, req.StudentId, req.WordId, req.ConfusedWordId)
+	err := s.confusedWordUc.AddConfusedWord(ctx, req.StudentId, req.PlanId, req.WordId, req.ConfusedWordId)
 	if err != nil {
 		return &v1.AddConfusedWordReply{
 			Ret: &v1.BaseResponse{
@@ -336,7 +331,7 @@ func (s *StudentService) AddConfusedWord(ctx context.Context, req *v1.AddConfuse
 	}
 
 	// 获取混淆词列表
-	confusedWords, err := s.confusedWordUc.GetConfusedWords(ctx, req.StudentId, req.WordId)
+	confusedWords, err := s.confusedWordUc.GetConfusedWords(ctx, req.StudentId, req.PlanId, req.WordId)
 	if err != nil {
 		s.log.Warnf("failed to get confused words: %v", err)
 	}
@@ -360,7 +355,7 @@ func (s *StudentService) AddConfusedWord(ctx context.Context, req *v1.AddConfuse
 
 // GetConfusedWords 获取单词的混淆词列表
 func (s *StudentService) GetConfusedWords(ctx context.Context, req *v1.GetConfusedWordsRequest) (*v1.GetConfusedWordsReply, error) {
-	confusedWords, err := s.confusedWordUc.GetConfusedWords(ctx, req.StudentId, req.WordId)
+	confusedWords, err := s.confusedWordUc.GetConfusedWords(ctx, req.StudentId, req.PlanId, req.WordId)
 	if err != nil {
 		return &v1.GetConfusedWordsReply{
 			Ret: &v1.BaseResponse{
@@ -386,7 +381,7 @@ func (s *StudentService) GetConfusedWords(ctx context.Context, req *v1.GetConfus
 
 // RemoveConfusedWord 删除混淆词
 func (s *StudentService) RemoveConfusedWord(ctx context.Context, req *v1.RemoveConfusedWordRequest) (*v1.RemoveConfusedWordReply, error) {
-	err := s.confusedWordUc.RemoveConfusedWord(ctx, req.StudentId, req.WordId, req.ConfusedWordId)
+	err := s.confusedWordUc.RemoveConfusedWord(ctx, req.StudentId, req.PlanId, req.WordId, req.ConfusedWordId)
 	if err != nil {
 		return &v1.RemoveConfusedWordReply{
 			Ret: &v1.BaseResponse{
@@ -406,7 +401,7 @@ func (s *StudentService) RemoveConfusedWord(ctx context.Context, req *v1.RemoveC
 
 // SearchWords 搜索单词（支持正则表达式）
 func (s *StudentService) SearchWords(ctx context.Context, req *v1.SearchWordsRequest) (*v1.SearchWordsReply, error) {
-	words, err := s.confusedWordUc.SearchWords(ctx, req.StudentId, req.Keyword, req.Limit)
+	words, err := s.confusedWordUc.SearchWords(ctx, req.StudentId, req.PlanId, req.Keyword, req.Limit)
 	if err != nil {
 		return &v1.SearchWordsReply{
 			Ret: &v1.BaseResponse{
@@ -432,7 +427,7 @@ func (s *StudentService) SearchWords(ctx context.Context, req *v1.SearchWordsReq
 
 // MarkWordForgotten 标记单词为未记住
 func (s *StudentService) MarkWordForgotten(ctx context.Context, req *v1.MarkWordForgottenRequest) (*v1.MarkWordForgottenReply, error) {
-	word, err := s.wordUc.MarkWordForgotten(ctx, req.StudentId, req.WordId)
+	word, err := s.wordUc.MarkWordForgotten(ctx, req.PlanId, req.WordId)
 	if err != nil {
 		return &v1.MarkWordForgottenReply{
 			Ret: &v1.BaseResponse{
@@ -453,7 +448,8 @@ func (s *StudentService) MarkWordForgotten(ctx context.Context, req *v1.MarkWord
 
 // UpdateWordReviewData 更新单词复习数据
 func (s *StudentService) UpdateWordReviewData(ctx context.Context, req *v1.UpdateWordReviewDataRequest) (*v1.UpdateWordReviewDataReply, error) {
-	word, err := s.wordUc.UpdateWordReviewData(ctx, req.StudentId, req.WordId, req.ThinkTime, req.Difficulty, req.IsRemembered)
+	// 确保使用 plan_id 验证权限
+	word, err := s.wordUc.UpdateWordReviewData(ctx, req.PlanId, req.WordId, req.ThinkTime, req.Difficulty, req.IsRemembered)
 	if err != nil {
 		return &v1.UpdateWordReviewDataReply{
 			Ret: &v1.BaseResponse{
@@ -479,7 +475,7 @@ func (s *StudentService) GenerateReviewQuestions(ctx context.Context, req *v1.Ge
 		grade = req.Grade
 	}
 
-	questions, err := s.wordUc.GenerateReviewQuestions(ctx, req.StudentId, req.WordId, grade)
+	questions, err := s.wordUc.GenerateReviewQuestions(ctx, req.PlanId, req.WordId, grade)
 	if err != nil {
 		return &v1.GenerateReviewQuestionsReply{
 			Ret: &v1.BaseResponse{
@@ -513,7 +509,7 @@ func (s *StudentService) GenerateReviewQuestions(ctx context.Context, req *v1.Ge
 func (s *StudentService) convertWordToV1(word *biz.Word) *v1.Word {
 	v1Word := &v1.Word{
 		Id:             word.ID,
-		StudentId:      word.StudentID,
+		PlanId:         word.PlanID,
 		Word:           word.Word,
 		Meaning:        word.Meaning,
 		StartDate:      word.StartDate,
@@ -630,50 +626,19 @@ func (s *StudentService) SelectPlan(ctx context.Context, req *v1.SelectPlanReque
 	}, nil
 }
 
-// AddWordsToPlan 添加单词到计划
-func (s *StudentService) AddWordsToPlan(ctx context.Context, req *v1.AddWordsToPlanRequest) (*v1.AddWordsToPlanReply, error) {
-	addedCount, err := s.planUc.AddWordsToPlan(ctx, req.StudentId, req.PlanId, req.WordIds)
-	if err != nil {
-		return &v1.AddWordsToPlanReply{
-			Ret: &v1.BaseResponse{
-				Code:    500,
-				Message: err.Error(),
-			},
-		}, nil
+// GetPlanWords 获取计划中的单词列表（通过 PlanUsecase）
+func (s *StudentService) GetPlanWordsViaPlan(ctx context.Context, req *v1.GetPlanWordsRequest) (*v1.GetPlanWordsReply, error) {
+	// 设置默认分页参数
+	page := req.Page
+	pageSize := req.PageSize
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
 	}
 
-	return &v1.AddWordsToPlanReply{
-		Ret: &v1.BaseResponse{
-			Code:    0,
-			Message: "success",
-		},
-		AddedCount: addedCount,
-	}, nil
-}
-
-// RemoveWordsFromPlan 从计划中移除单词
-func (s *StudentService) RemoveWordsFromPlan(ctx context.Context, req *v1.RemoveWordsFromPlanRequest) (*v1.RemoveWordsFromPlanReply, error) {
-	err := s.planUc.RemoveWordsFromPlan(ctx, req.StudentId, req.PlanId, req.WordId)
-	if err != nil {
-		return &v1.RemoveWordsFromPlanReply{
-			Ret: &v1.BaseResponse{
-				Code:    500,
-				Message: err.Error(),
-			},
-		}, nil
-	}
-
-	return &v1.RemoveWordsFromPlanReply{
-		Ret: &v1.BaseResponse{
-			Code:    0,
-			Message: "success",
-		},
-	}, nil
-}
-
-// GetPlanWords 获取计划中的单词列表
-func (s *StudentService) GetPlanWords(ctx context.Context, req *v1.GetPlanWordsRequest) (*v1.GetPlanWordsReply, error) {
-	words, err := s.planUc.GetPlanWords(ctx, req.StudentId, req.PlanId)
+	words, total, err := s.planUc.GetPlanWords(ctx, req.StudentId, req.PlanId, page, pageSize)
 	if err != nil {
 		return &v1.GetPlanWordsReply{
 			Ret: &v1.BaseResponse{
@@ -693,7 +658,10 @@ func (s *StudentService) GetPlanWords(ctx context.Context, req *v1.GetPlanWordsR
 			Code:    0,
 			Message: "success",
 		},
-		Words: v1Words,
+		Words:    v1Words,
+		Total:    int32(total),
+		Page:     page,
+		PageSize: pageSize,
 	}, nil
 }
 
@@ -743,41 +711,5 @@ func (s *StudentService) DeletePlan(ctx context.Context, req *v1.DeletePlanReque
 			Code:    0,
 			Message: "success",
 		},
-	}, nil
-}
-
-// GetPlanTodayWords 获取计划的今日需要背诵的单词
-func (s *StudentService) GetPlanTodayWords(ctx context.Context, req *v1.GetPlanTodayWordsRequest) (*v1.GetPlanTodayWordsReply, error) {
-	planID := req.PlanId
-	words, err := s.wordUc.GetTodayWords(ctx, req.StudentId, req.Date, &planID)
-	if err != nil {
-		return &v1.GetPlanTodayWordsReply{
-			Ret: &v1.BaseResponse{
-				Code:    500,
-				Message: err.Error(),
-			},
-		}, nil
-	}
-
-	// 转换响应数据
-	v1Words := make([]*v1.Word, 0, len(words))
-	for _, word := range words {
-		v1Words = append(v1Words, s.convertWordToV1(word))
-	}
-
-	// 确定日期
-	date := req.Date
-	if date == "" {
-		date = time.Now().Format("2006-01-02")
-	}
-
-	return &v1.GetPlanTodayWordsReply{
-		Ret: &v1.BaseResponse{
-			Code:    0,
-			Message: "success",
-		},
-		Words: v1Words,
-		Date:  date,
-		Count: int32(len(v1Words)),
 	}, nil
 }

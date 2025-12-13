@@ -23,30 +23,23 @@ service StudentService {
     };
   }
 
-  // 批量添加单词到学生名下
+  // 批量添加单词到计划
   rpc BatchAddWords (BatchAddWordsRequest) returns (BatchAddWordsReply) {
     option (google.api.http) = {
-      post: "/api/v1/students/{student_id}/words/batch"
+      post: "/api/v1/students/{student_id}/plans/{plan_id}/words/batch"
       body: "*"
     };
   }
 
-  // 获取学生的单词列表
-  rpc GetStudentWords (GetStudentWordsRequest) returns (GetStudentWordsReply) {
+  // 获取计划的单词列表
+  rpc GetPlanWords (GetPlanWordsRequest) returns (GetPlanWordsReply) {
     option (google.api.http) = {
-      get: "/api/v1/students/{student_id}/words"
-    };
-  }
-
-  // 获取今日需要背诵的单词（根据艾宾浩斯曲线）
-  rpc GetTodayWords (GetTodayWordsRequest) returns (GetTodayWordsReply) {
-    option (google.api.http) = {
-      get: "/api/v1/students/{student_id}/words/today"
+      get: "/api/v1/students/{student_id}/plans/{plan_id}/words"
     };
   }
 
   // 获取计划的今日需要背诵的单词（根据艾宾浩斯曲线）
-  rpc GetPlanTodayWords (GetPlanTodayWordsRequest) returns (GetPlanTodayWordsReply) {
+  rpc GetTodayWords (GetTodayWordsRequest) returns (GetTodayWordsReply) {
     option (google.api.http) = {
       get: "/api/v1/students/{student_id}/plans/{plan_id}/words/today"
     };
@@ -55,7 +48,7 @@ service StudentService {
   // 标记单词为已复习
   rpc MarkWordReviewed (MarkWordReviewedRequest) returns (MarkWordReviewedReply) {
     option (google.api.http) = {
-      post: "/api/v1/students/{student_id}/words/{word_id}/review"
+      post: "/api/v1/students/{student_id}/plans/{plan_id}/words/{word_id}/review"
       body: "*"
     };
   }
@@ -71,7 +64,7 @@ service StudentService {
   // 添加混淆词
   rpc AddConfusedWord (AddConfusedWordRequest) returns (AddConfusedWordReply) {
     option (google.api.http) = {
-      post: "/api/v1/students/{student_id}/words/{word_id}/confused"
+      post: "/api/v1/students/{student_id}/plans/{plan_id}/words/{word_id}/confused"
       body: "*"
     };
   }
@@ -79,28 +72,28 @@ service StudentService {
   // 获取单词的混淆词列表
   rpc GetConfusedWords (GetConfusedWordsRequest) returns (GetConfusedWordsReply) {
     option (google.api.http) = {
-      get: "/api/v1/students/{student_id}/words/{word_id}/confused"
+      get: "/api/v1/students/{student_id}/plans/{plan_id}/words/{word_id}/confused"
     };
   }
 
   // 删除混淆词
   rpc RemoveConfusedWord (RemoveConfusedWordRequest) returns (RemoveConfusedWordReply) {
     option (google.api.http) = {
-      delete: "/api/v1/students/{student_id}/words/{word_id}/confused/{confused_word_id}"
+      delete: "/api/v1/students/{student_id}/plans/{plan_id}/words/{word_id}/confused/{confused_word_id}"
     };
   }
 
   // 搜索单词（用于添加混淆词）
   rpc SearchWords (SearchWordsRequest) returns (SearchWordsReply) {
     option (google.api.http) = {
-      get: "/api/v1/students/{student_id}/words/search"
+      get: "/api/v1/students/{student_id}/plans/{plan_id}/words/search"
     };
   }
 
   // 标记单词为未记住
   rpc MarkWordForgotten (MarkWordForgottenRequest) returns (MarkWordForgottenReply) {
     option (google.api.http) = {
-      post: "/api/v1/students/{student_id}/words/{word_id}/forget"
+      post: "/api/v1/students/{student_id}/plans/{plan_id}/words/{word_id}/forget"
       body: "*"
     };
   }
@@ -108,7 +101,7 @@ service StudentService {
   // 更新单词复习数据（思考时间、难度等）
   rpc UpdateWordReviewData (UpdateWordReviewDataRequest) returns (UpdateWordReviewDataReply) {
     option (google.api.http) = {
-      post: "/api/v1/students/{student_id}/words/{word_id}/review-data"
+      post: "/api/v1/students/{student_id}/plans/{plan_id}/words/{word_id}/review-data"
       body: "*"
     };
   }
@@ -116,7 +109,7 @@ service StudentService {
   // 生成复习题目
   rpc GenerateReviewQuestions (GenerateReviewQuestionsRequest) returns (GenerateReviewQuestionsReply) {
     option (google.api.http) = {
-      post: "/api/v1/students/{student_id}/words/{word_id}/review-questions"
+      post: "/api/v1/students/{student_id}/plans/{plan_id}/words/{word_id}/review-questions"
       body: "*"
     };
   }
@@ -144,25 +137,10 @@ service StudentService {
     };
   }
 
-  // 添加单词到计划
-  rpc AddWordsToPlan (AddWordsToPlanRequest) returns (AddWordsToPlanReply) {
-    option (google.api.http) = {
-      post: "/api/v1/students/{student_id}/plans/{plan_id}/words"
-      body: "*"
-    };
-  }
-
-  // 从计划中移除单词
-  rpc RemoveWordsFromPlan (RemoveWordsFromPlanRequest) returns (RemoveWordsFromPlanReply) {
+  // 从计划中删除单词
+  rpc DeleteWord (DeleteWordRequest) returns (DeleteWordReply) {
     option (google.api.http) = {
       delete: "/api/v1/students/{student_id}/plans/{plan_id}/words/{word_id}"
-    };
-  }
-
-  // 获取计划中的单词列表
-  rpc GetPlanWords (GetPlanWordsRequest) returns (GetPlanWordsReply) {
-    option (google.api.http) = {
-      get: "/api/v1/students/{student_id}/plans/{plan_id}/words"
     };
   }
 
@@ -194,7 +172,7 @@ message Student {
 
 message Word {
   int64 id = 1;
-  int64 student_id = 2;
+  int64 plan_id = 2;  // 关联到复习计划
   string word = 3;
   string meaning = 4;
   string start_date = 5;
@@ -232,7 +210,8 @@ message GetStudentReply {
 
 message BatchAddWordsRequest {
   int64 student_id = 1;
-  repeated WordItem words = 2;
+  int64 plan_id = 2;
+  repeated WordItem words = 3;
 }
 
 message WordItem {
@@ -263,24 +242,11 @@ message GetStudentWordsReply {
 
 message GetTodayWordsRequest {
   int64 student_id = 1;
-  string date = 2; // 可选，格式：YYYY-MM-DD，默认为今天
-  int64 plan_id = 3; // 计划ID（可选，如果提供则只返回该计划的单词）
-}
-
-message GetTodayWordsReply {
-  BaseResponse ret =1;
-  string date = 2;
-  int32 count = 3;
-  repeated Word words = 4;
-}
-
-message GetPlanTodayWordsRequest {
-  int64 student_id = 1;
   int64 plan_id = 2;
   string date = 3; // 可选，格式：YYYY-MM-DD，默认为今天
 }
 
-message GetPlanTodayWordsReply {
+message GetTodayWordsReply {
   BaseResponse ret = 1;
   string date = 2;
   int32 count = 3;
@@ -289,7 +255,8 @@ message GetPlanTodayWordsReply {
 
 message MarkWordReviewedRequest {
   int64 student_id = 1;
-  int64 word_id = 2;
+  int64 plan_id = 2;
+  int64 word_id = 3;
 }
 
 message MarkWordReviewedReply {
@@ -311,8 +278,9 @@ message GetOrCreateStudentByOpenidReply {
 
 message AddConfusedWordRequest {
   int64 student_id = 1;
-  int64 word_id = 2;
-  int64 confused_word_id = 3; // 混淆词的ID
+  int64 plan_id = 2;
+  int64 word_id = 3;
+  int64 confused_word_id = 4; // 混淆词的ID
 }
 
 message AddConfusedWordReply {
@@ -322,7 +290,8 @@ message AddConfusedWordReply {
 
 message GetConfusedWordsRequest {
   int64 student_id = 1;
-  int64 word_id = 2;
+  int64 plan_id = 2;
+  int64 word_id = 3;
 }
 
 message GetConfusedWordsReply {
@@ -332,8 +301,9 @@ message GetConfusedWordsReply {
 
 message RemoveConfusedWordRequest {
   int64 student_id = 1;
-  int64 word_id = 2;
-  int64 confused_word_id = 3;
+  int64 plan_id = 2;
+  int64 word_id = 3;
+  int64 confused_word_id = 4;
 }
 
 message RemoveConfusedWordReply {
@@ -342,8 +312,9 @@ message RemoveConfusedWordReply {
 
 message SearchWordsRequest {
   int64 student_id = 1;
-  string keyword = 2; // 搜索关键词（支持正则表达式）
-  int32 limit = 3;    // 返回数量限制，默认20
+  int64 plan_id = 2;
+  string keyword = 3; // 搜索关键词（支持正则表达式）
+  int32 limit = 4;    // 返回数量限制，默认20
 }
 
 message SearchWordsReply {
@@ -353,7 +324,8 @@ message SearchWordsReply {
 
 message MarkWordForgottenRequest {
   int64 student_id = 1;
-  int64 word_id = 2;
+  int64 plan_id = 2;
+  int64 word_id = 3;
 }
 
 message MarkWordForgottenReply {
@@ -363,10 +335,11 @@ message MarkWordForgottenReply {
 
 message UpdateWordReviewDataRequest {
   int64 student_id = 1;
-  int64 word_id = 2;
-  int32 think_time = 3;     // 思考时间（秒）
-  int32 difficulty = 4;     // 学习难度 (0-10)
-  bool is_remembered = 5;   // 是否记住
+  int64 plan_id = 2;
+  int64 word_id = 3;
+  int32 think_time = 4;     // 思考时间（秒）
+  int32 difficulty = 5;     // 学习难度 (0-10)
+  bool is_remembered = 6;   // 是否记住
 }
 
 message UpdateWordReviewDataReply {
@@ -376,8 +349,9 @@ message UpdateWordReviewDataReply {
 
 message GenerateReviewQuestionsRequest {
   int64 student_id = 1;
-  int64 word_id = 2;
-  string grade = 3;  // 年级（可选）
+  int64 plan_id = 2;
+  int64 word_id = 3;
+  string grade = 4;  // 年级（可选，可以从计划中获取）
 }
 
 message GenerateReviewQuestionsReply {
@@ -452,35 +426,20 @@ message SelectPlanReply {
   Plan plan = 2;
 }
 
-message AddWordsToPlanRequest {
-  int64 student_id = 1;
-  int64 plan_id = 2;
-  repeated int64 word_ids = 3;
-}
-
-message AddWordsToPlanReply {
-  BaseResponse ret = 1;
-  int32 added_count = 2;
-}
-
-message RemoveWordsFromPlanRequest {
-  int64 student_id = 1;
-  int64 plan_id = 2;
-  int64 word_id = 3;
-}
-
-message RemoveWordsFromPlanReply {
-  BaseResponse ret = 1;
-}
 
 message GetPlanWordsRequest {
   int64 student_id = 1;
   int64 plan_id = 2;
+  int32 page = 3;
+  int32 page_size = 4;
 }
 
 message GetPlanWordsReply {
   BaseResponse ret = 1;
-  repeated Word words = 2;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+  repeated Word words = 5;
 }
 
 message UpdatePlanRequest {
@@ -493,6 +452,16 @@ message UpdatePlanRequest {
 message UpdatePlanReply {
   BaseResponse ret = 1;
   Plan plan = 2;
+}
+
+message DeleteWordRequest {
+  int64 student_id = 1;
+  int64 plan_id = 2;
+  int64 word_id = 3;
+}
+
+message DeleteWordReply {
+  BaseResponse ret = 1;
 }
 
 message DeletePlanRequest {

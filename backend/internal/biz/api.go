@@ -14,10 +14,11 @@ type StudentRepo interface {
 // WordRepo 单词数据仓库接口
 type WordRepo interface {
 	BatchCreate(ctx context.Context, words []*Word) error
-	GetByStudentID(ctx context.Context, studentID int64, page, pageSize int32) ([]*Word, int64, error)
+	GetByPlanID(ctx context.Context, planID int64, page, pageSize int32) ([]*Word, int64, error)
 	GetByID(ctx context.Context, id int64) (*Word, error)
 	Update(ctx context.Context, word *Word) (*Word, error)
 	GetByIDs(ctx context.Context, wordIDs []int64) ([]*Word, error)
+	GetAllByPlanID(ctx context.Context, planID int64) ([]*Word, error)
 }
 
 // PlanRepo 计划数据仓库接口
@@ -28,15 +29,6 @@ type PlanRepo interface {
 	GetActivePlanByStudentID(ctx context.Context, studentID int64) (*Plan, error)
 	Update(ctx context.Context, plan *Plan) (*Plan, error)
 	Delete(ctx context.Context, id int64) error
-}
-
-// PlanWordRepo 计划单词关联数据仓库接口
-type PlanWordRepo interface {
-	BatchCreate(ctx context.Context, planWords []*PlanWord) error
-	GetByPlanID(ctx context.Context, planID int64) ([]*PlanWord, error)
-	GetWordIDsByPlanID(ctx context.Context, planID int64) ([]int64, error)
-	DeleteByPlanIDAndWordID(ctx context.Context, planID int64, wordID int64) error
-	DeleteByPlanID(ctx context.Context, planID int64) error
 }
 
 // OCRService OCR识别服务接口

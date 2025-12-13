@@ -22,20 +22,20 @@ func (r *wordRepo) BatchCreate(ctx context.Context, words []*biz.Word) error {
 	return r.data.db.WithContext(ctx).CreateInBatches(words, 100).Error
 }
 
-// GetByStudentID 根据学生ID获取单词列表（分页）
-func (r *wordRepo) GetByStudentID(ctx context.Context, studentID int64, page, pageSize int32) ([]*biz.Word, int64, error) {
+// GetByPlanID 根据计划ID获取单词列表（分页）
+func (r *wordRepo) GetByPlanID(ctx context.Context, planID int64, page, pageSize int32) ([]*biz.Word, int64, error) {
 	var words []*biz.Word
 	var total int64
 
 	// 查询总数
-	if err := r.data.db.WithContext(ctx).Model(&biz.Word{}).Where("student_id = ?", studentID).Count(&total).Error; err != nil {
+	if err := r.data.db.WithContext(ctx).Model(&biz.Word{}).Where("plan_id = ?", planID).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
 	// 分页查询
 	offset := (page - 1) * pageSize
 	if err := r.data.db.WithContext(ctx).
-		Where("student_id = ?", studentID).
+		Where("plan_id = ?", planID).
 		Order("created_at DESC").
 		Offset(int(offset)).
 		Limit(int(pageSize)).
@@ -44,6 +44,18 @@ func (r *wordRepo) GetByStudentID(ctx context.Context, studentID int64, page, pa
 	}
 
 	return words, total, nil
+}
+
+// GetAllByPlanID 根据计划ID获取所有单词（不分页，用于今日单词计算）
+func (r *wordRepo) GetAllByPlanID(ctx context.Context, planID int64) ([]*biz.Word, error) {
+	var words []*biz.Word
+	if err := r.data.db.WithContext(ctx).
+		Where("plan_id = ?", planID).
+		Order("created_at DESC").
+		Find(&words).Error; err != nil {
+		return nil, err
+	}
+	return words, nil
 }
 
 // GetByID 根据ID获取单词

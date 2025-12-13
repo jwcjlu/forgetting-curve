@@ -18,15 +18,16 @@ type ConfusedWordRepo interface {
 
 // ConfusedWordUsecase 混淆词业务逻辑接口
 type ConfusedWordUsecase interface {
-	AddConfusedWord(ctx context.Context, studentID, wordID, confusedWordID int64) error
-	GetConfusedWords(ctx context.Context, studentID, wordID int64) ([]*Word, error)
-	RemoveConfusedWord(ctx context.Context, studentID, wordID, confusedWordID int64) error
-	SearchWords(ctx context.Context, studentID int64, keyword string, limit int32) ([]*Word, error)
+	AddConfusedWord(ctx context.Context, studentID, planID, wordID, confusedWordID int64) error
+	GetConfusedWords(ctx context.Context, studentID, planID, wordID int64) ([]*Word, error)
+	RemoveConfusedWord(ctx context.Context, studentID, planID, wordID, confusedWordID int64) error
+	SearchWords(ctx context.Context, studentID, planID int64, keyword string, limit int32) ([]*Word, error)
 }
 
 type confusedWordUsecase struct {
 	confusedWordRepo ConfusedWordRepo
 	wordRepo         WordRepo
+	planRepo         PlanRepo
 	studentRepo      StudentRepo
 	log              *log.Helper
 }
@@ -35,25 +36,27 @@ type confusedWordUsecase struct {
 func NewConfusedWordUsecase(
 	confusedWordRepo ConfusedWordRepo,
 	wordRepo WordRepo,
+	planRepo PlanRepo,
 	studentRepo StudentRepo,
 	logger log.Logger,
 ) ConfusedWordUsecase {
 	return &confusedWordUsecase{
 		confusedWordRepo: confusedWordRepo,
 		wordRepo:         wordRepo,
+		planRepo:         planRepo,
 		studentRepo:      studentRepo,
 		log:              log.NewHelper(logger),
 	}
 }
 
 // AddConfusedWord 添加混淆词
-func (uc *confusedWordUsecase) AddConfusedWord(ctx context.Context, studentID, wordID, confusedWordID int64) error {
-	// 验证学生权限
-	if err := uc.validateStudentAccess(ctx, studentID, wordID); err != nil {
+func (uc *confusedWordUsecase) AddConfusedWord(ctx context.Context, studentID, planID, wordID, confusedWordID int64) error {
+	// 验证计划权限
+	if err := uc.validatePlanAccess(ctx, studentID, planID, wordID); err != nil {
 		return err
 	}
-	if err := uc.validateStudentAccess(ctx, studentID, confusedWordID); err != nil {
-		return errors.New("confused word does not belong to this student")
+	if err := uc.validatePlanAccess(ctx, studentID, planID, confusedWordID); err != nil {
+		return errors.New("confused word does not belong to this plan")
 	}
 
 	// 检查是否已存在
@@ -80,9 +83,9 @@ func (uc *confusedWordUsecase) AddConfusedWord(ctx context.Context, studentID, w
 }
 
 // GetConfusedWords 获取单词的混淆词列表
-func (uc *confusedWordUsecase) GetConfusedWords(ctx context.Context, studentID, wordID int64) ([]*Word, error) {
-	// 验证学生权限
-	if err := uc.validateStudentAccess(ctx, studentID, wordID); err != nil {
+func (uc *confusedWordUsecase) GetConfusedWords(ctx context.Context, studentID, planID, wordID int64) ([]*Word, error) {
+	// 验证计划权限
+	if err := uc.validatePlanAccess(ctx, studentID, planID, wordID); err != nil {
 		return nil, err
 	}
 
@@ -107,9 +110,9 @@ func (uc *confusedWordUsecase) GetConfusedWords(ctx context.Context, studentID, 
 }
 
 // RemoveConfusedWord 删除混淆词
-func (uc *confusedWordUsecase) RemoveConfusedWord(ctx context.Context, studentID, wordID, confusedWordID int64) error {
-	// 验证学生权限
-	if err := uc.validateStudentAccess(ctx, studentID, wordID); err != nil {
+func (uc *confusedWordUsecase) RemoveConfusedWord(ctx context.Context, studentID, planID, wordID, confusedWordID int64) error {
+	// 验证计划权限
+	if err := uc.validatePlanAccess(ctx, studentID, planID, wordID); err != nil {
 		return err
 	}
 
@@ -117,11 +120,14 @@ func (uc *confusedWordUsecase) RemoveConfusedWord(ctx context.Context, studentID
 }
 
 // SearchWords 搜索单词（支持正则表达式）
-func (uc *confusedWordUsecase) SearchWords(ctx context.Context, studentID int64, keyword string, limit int32) ([]*Word, error) {
-	// 验证学生是否存在
-	_, err := uc.studentRepo.GetByID(ctx, studentID)
+func (uc *confusedWordUsecase) SearchWords(ctx context.Context, studentID, planID int64, keyword string, limit int32) ([]*Word, error) {
+	// 验证计划是否存在且属于该学生
+	plan, err := uc.planRepo.GetByID(ctx, planID)
 	if err != nil {
-		return nil, errors.New("student not found")
+		return nil, errors.New("plan not found")
+	}
+	if plan.StudentID != studentID {
+		return nil, errors.New("plan does not belong to this student")
 	}
 
 	if keyword == "" {
@@ -136,8 +142,8 @@ func (uc *confusedWordUsecase) SearchWords(ctx context.Context, studentID int64,
 		limit = 100
 	}
 
-	// 获取学生的所有单词
-	allWords, _, err := uc.wordRepo.GetByStudentID(ctx, studentID, 1, 10000)
+	// 获取计划中的所有单词
+	allWords, err := uc.wordRepo.GetAllByPlanID(ctx, planID)
 	if err != nil {
 		return nil, err
 	}
@@ -171,15 +177,25 @@ func (uc *confusedWordUsecase) SearchWords(ctx context.Context, studentID int64,
 	return matchedWords, nil
 }
 
-// validateStudentAccess 验证学生是否有权限访问该单词
-func (uc *confusedWordUsecase) validateStudentAccess(ctx context.Context, studentID, wordID int64) error {
+// validatePlanAccess 验证计划是否有权限访问该单词
+func (uc *confusedWordUsecase) validatePlanAccess(ctx context.Context, studentID, planID, wordID int64) error {
+	// 验证计划是否存在且属于该学生
+	plan, err := uc.planRepo.GetByID(ctx, planID)
+	if err != nil {
+		return errors.New("plan not found")
+	}
+	if plan.StudentID != studentID {
+		return errors.New("plan does not belong to this student")
+	}
+
+	// 验证单词是否属于该计划
 	word, err := uc.wordRepo.GetByID(ctx, wordID)
 	if err != nil {
 		return errors.New("word not found")
 	}
 
-	if word.StudentID != studentID {
-		return errors.New("access denied: word does not belong to this student")
+	if word.PlanID != planID {
+		return errors.New("access denied: word does not belong to this plan")
 	}
 
 	return nil
