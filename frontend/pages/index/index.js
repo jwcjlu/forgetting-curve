@@ -407,58 +407,65 @@ Page({
     // 获取当前已有的答案
     const oldValue = (words[index].userAnswers && words[index].userAnswers[qIndex]) || '';
     
-    // 先过滤掉所有非英文字母
-    newValue = newValue.replace(/[^a-zA-Z]/g, '');
+    // 先过滤掉所有非英文字母，并转换为小写（统一处理，避免大小写问题）
+    newValue = newValue.replace(/[^a-zA-Z]/g, '').toLowerCase();
     
     // 防止输入法联想补全的智能处理
     if (oldValue) {
-      const oldLen = oldValue.length;
+      const oldValueLower = oldValue.toLowerCase();
+      const oldLen = oldValueLower.length;
       const newLen = newValue.length;
       
       if (newLen > oldLen + 1) {
         // 输入了多个字符，可能是联想补全
         // 策略：只保留旧值 + 第一个新增的字符（用户实际输入的）
-        if (newValue.indexOf(oldValue) === 0) {
+        if (newValue.indexOf(oldValueLower) === 0) {
           // 新值以旧值开头，提取第一个新增字符
           const firstNewChar = newValue[oldLen];
-          if (firstNewChar && /[a-zA-Z]/.test(firstNewChar)) {
-            newValue = oldValue + firstNewChar;
+          if (firstNewChar && /[a-z]/.test(firstNewChar)) {
+            newValue = oldValueLower + firstNewChar;
           } else {
-            newValue = oldValue;
+            newValue = oldValueLower;
           }
         } else {
           // 新值不以旧值开头，可能是选择了联想词，只保留最后一个字符
           const lastChar = newValue.slice(-1);
-          if (/[a-zA-Z]/.test(lastChar)) {
+          if (/[a-z]/.test(lastChar)) {
             newValue = lastChar;
           } else {
-            newValue = oldValue;
+            newValue = oldValueLower;
           }
         }
       } else if (newLen === oldLen + 1) {
         // 正常输入一个字符
         const addedChar = newValue.slice(oldLen);
-        if (!/[a-zA-Z]/.test(addedChar)) {
-          newValue = oldValue;
+        if (!/[a-z]/.test(addedChar)) {
+          newValue = oldValueLower;
         }
         // 否则 newValue 已经是正确的值
+      } else if (newLen < oldLen) {
+        // 删除操作，保持小写
+        newValue = newValue.toLowerCase();
       }
-      // 如果 newLen <= oldLen，说明是删除操作，newValue 已经是正确的值
+      // 如果 newLen === oldLen，可能是替换，保持小写即可
     } else {
       // 首次输入
       if (newValue.length > 1) {
         // 首次输入多个字符，可能是联想补全，只保留第一个字符
         const firstChar = newValue[0];
-        if (firstChar && /[a-zA-Z]/.test(firstChar)) {
+        if (firstChar && /[a-z]/.test(firstChar)) {
           newValue = firstChar;
         } else {
           newValue = '';
         }
+      } else {
+        // 单个字符，确保是小写
+        newValue = newValue.toLowerCase();
       }
     }
     
-    // 最终确保只包含英文字母
-    newValue = newValue.replace(/[^a-zA-Z]/g, '');
+    // 最终确保只包含小写英文字母
+    newValue = newValue.replace(/[^a-z]/g, '').toLowerCase();
     
     if (!words[index].userAnswers) {
       words[index].userAnswers = [];
@@ -474,7 +481,7 @@ Page({
   },
 
   /**
-   * 填空题失去焦点时，再次清理输入内容
+   * 填空题失去焦点时，再次清理输入内容并转换为小写
    */
   onFillBlankBlur(e) {
     const index = e.currentTarget.dataset.index;
@@ -482,9 +489,9 @@ Page({
     const words = this.data.todayWords;
     
     if (words[index].userAnswers && words[index].userAnswers[qIndex]) {
-      // 确保只包含英文字母
+      // 确保只包含小写英文字母
       let value = words[index].userAnswers[qIndex];
-      value = value.replace(/[^a-zA-Z]/g, '');
+      value = value.replace(/[^a-zA-Z]/g, '').toLowerCase();
       words[index].userAnswers[qIndex] = value;
       
       this.setData({
@@ -590,14 +597,11 @@ Page({
     // 计算正确数量（不区分大小写比较）
     let allCorrect = true; // 所有题目是否都正确
     
-    // 检查所有题目的答案
+    // 检查所有题目的答案（不区分大小写）
     word.questions.forEach((q, qIndex) => {
-      let userAnswer = (word.userAnswers[qIndex] || '').trim().toLowerCase();
-      let correctAnswer = (q.correct_answer || '').trim().toLowerCase();
-      
-      // 移除所有非英文字母字符进行比较
-      userAnswer = userAnswer.replace(/[^a-zA-Z]/g, '');
-      correctAnswer = correctAnswer.replace(/[^a-zA-Z]/g, '');
+      // 先移除所有非英文字母字符，再转换为小写进行比较
+      let userAnswer = (word.userAnswers[qIndex] || '').trim().replace(/[^a-zA-Z]/g, '').toLowerCase();
+      let correctAnswer = (q.correct_answer || '').trim().replace(/[^a-zA-Z]/g, '').toLowerCase();
       
       const isCorrect = userAnswer === correctAnswer;
       
@@ -607,14 +611,11 @@ Page({
       }
     });
     
-    // 计算答对的数量（用于显示）
+    // 计算答对的数量（用于显示，不区分大小写）
     const correctCount = word.questions.filter((q, qIndex) => {
-      let userAnswer = (word.userAnswers[qIndex] || '').trim().toLowerCase();
-      let correctAnswer = (q.correct_answer || '').trim().toLowerCase();
-      
-      // 移除所有非英文字母字符进行比较
-      userAnswer = userAnswer.replace(/[^a-zA-Z]/g, '');
-      correctAnswer = correctAnswer.replace(/[^a-zA-Z]/g, '');
+      // 先移除所有非英文字母字符，再转换为小写进行比较
+      let userAnswer = (word.userAnswers[qIndex] || '').trim().replace(/[^a-zA-Z]/g, '').toLowerCase();
+      let correctAnswer = (q.correct_answer || '').trim().replace(/[^a-zA-Z]/g, '').toLowerCase();
       
       return userAnswer === correctAnswer;
     }).length;

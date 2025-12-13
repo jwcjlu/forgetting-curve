@@ -137,7 +137,7 @@
               <!-- 填空题输入 -->
               <view wx:if="{{question.type === 'fill_blank'}}" class="fill-blank-section">
                 <input 
-                  class="fill-blank-input {{wordItem.showAnswers[qIndex] ? (wordItem.userAnswers[qIndex] === question.correct_answer ? 'input-correct' : 'input-wrong') : ''}}"
+                  class="fill-blank-input {{wordItem.showAnswers[qIndex] ? (wordItem.userAnswers[qIndex].toLowerCase() === question.correct_answer.toLowerCase() ? 'input-correct' : 'input-wrong') : ''}}"
                   type="text" 
                   placeholder="Enter the word (English letters only)"
                   value="{{wordItem.userAnswers[qIndex]}}"
@@ -153,15 +153,16 @@
                   auto-focus="{{false}}"
                   cursor-spacing="{{20}}"
                   style="width: 100%; min-width: 200rpx;"
+                  auto-complete="off"
                 />
                 <text class="input-hint">⚠️ Only English letters are allowed. Please switch to English keyboard to avoid input method suggestions.</text>
               </view>
 
               <!-- 答案反馈 -->
               <view wx:if="{{wordItem.showAnswers[qIndex]}}" class="answer-feedback">
-                <view class="feedback-result {{wordItem.userAnswers[qIndex] === question.correct_answer ? 'feedback-correct' : 'feedback-wrong'}}">
-                  <text class="feedback-icon">{{wordItem.userAnswers[qIndex] === question.correct_answer ? '✓' : '✗'}}</text>
-                  <text class="feedback-text">{{wordItem.userAnswers[qIndex] === question.correct_answer ? '回答正确！' : '回答错误'}}</text>
+                <view class="feedback-result {{(wordItem.userAnswers[qIndex] || '').toLowerCase() === (question.correct_answer || '').toLowerCase() ? 'feedback-correct' : 'feedback-wrong'}}">
+                  <text class="feedback-icon">{{(wordItem.userAnswers[qIndex] || '').toLowerCase() === (question.correct_answer || '').toLowerCase() ? '✓' : '✗'}}</text>
+                  <text class="feedback-text">{{(wordItem.userAnswers[qIndex] || '').toLowerCase() === (question.correct_answer || '').toLowerCase() ? '回答正确！' : '回答错误'}}</text>
                 </view>
                 <view class="correct-answer">
                   <text class="answer-label">正确答案：</text>

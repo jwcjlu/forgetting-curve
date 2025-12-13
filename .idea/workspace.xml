@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0cab91bd-f818-42fe-b944-d38fc3d86d15" name="Changes" comment="添加复习计划，背诵和单词都是计划下面">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/add-word/add-word.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/add-word/add-word.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.wxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/plan-words/plan-words.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/plan-words/plan-words.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/plan/plan.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/plan/plan.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/plan/plan.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/plan/plan.wxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/utils/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/utils/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/utils/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/utils/auth.js" afterDir="false" />
-    </list>
+    <list default="true" id="0cab91bd-f818-42fe-b944-d38fc3d86d15" name="Changes" comment="添加复习计划，背诵和单词都是计划下面" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
