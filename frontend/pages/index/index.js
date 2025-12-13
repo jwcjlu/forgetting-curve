@@ -22,29 +22,43 @@ Page({
   onLoad() {
     this.loadTodayWords();
     // 创建音频上下文
-    this.data.audioContext = wx.createInnerAudioContext();
-    this.data.audioContext.onEnded(() => {
-      this.setData({
-        playingWordId: null
+    try {
+      this.data.audioContext = wx.createInnerAudioContext();
+      if (!this.data.audioContext) {
+        console.error('创建音频上下文失败: 返回 null');
+        return;
+      }
+      this.data.audioContext.onEnded(() => {
+        this.setData({
+          playingWordId: null
+        });
       });
-    });
-    this.data.audioContext.onError((err) => {
-      console.error('音频播放失败:', err);
-      wx.showToast({
-        title: '播放失败',
-        icon: 'none',
-        duration: 1500
+      this.data.audioContext.onError((err) => {
+        console.error('音频播放失败:', err);
+        wx.showToast({
+          title: '播放失败',
+          icon: 'none',
+          duration: 1500
+        });
+        this.setData({
+          playingWordId: null
+        });
       });
-      this.setData({
-        playingWordId: null
-      });
-    });
+    } catch (err) {
+      console.error('初始化音频上下文失败:', err);
+      this.data.audioContext = null;
+    }
   },
 
   onUnload() {
     // 页面卸载时销毁音频上下文
     if (this.data.audioContext) {
-      this.data.audioContext.destroy();
+      try {
+        this.data.audioContext.stop();
+        this.data.audioContext.destroy();
+      } catch (err) {
+        console.error('销毁音频上下文失败:', err);
+      }
       this.data.audioContext = null;
     }
   },
@@ -100,6 +114,8 @@ Page({
       .then(res => {
         // 为每个单词添加拼写模式相关状态
         const wordsWithState = (res.words || []).map(word => {
+          // 检查当天是否已复习
+          const isReviewedToday = word.last_review_date === todayStr;
           // 兼容两种字段名：audio_urls（下划线）和 audioUrls（驼峰）
           const audioUrls = word.audio_urls || word.audioUrls || [];
           
@@ -107,6 +123,24 @@ Page({
           if (audioUrls.length > 0) {
             console.log(`单词 "${word.word}" 有 ${audioUrls.length} 个音频:`, audioUrls);
           }
+          
+          // 生成遮盖的单词和释义
+          // 单词：保留第一个和最后一个字母，中间用下划线遮盖
+          const wordText = word.word || '';
+          let maskedWord = '';
+          if (wordText.length <= 2) {
+            // 如果单词长度小于等于2，全部显示
+            maskedWord = wordText;
+          } else {
+            // 保留第一个和最后一个字母，中间用下划线
+            const firstChar = wordText[0];
+            const lastChar = wordText[wordText.length - 1];
+            const middleChars = '_'.repeat(wordText.length - 2);
+            maskedWord = firstChar + middleChars + lastChar;
+          }
+          // 释义：全部遮盖
+          const meaningText = word.meaning || '';
+          const maskedMeaning = meaningText.replace(/./g, '_');
           
           return {
             id: word.id,
@@ -127,7 +161,16 @@ Page({
             canSubmit: false,
             userAnswer: '',
             showAnswer: false,
-            isCorrect: false
+            isCorrect: false,
+            // 遮盖相关
+            showWord: false, // 是否显示单词（默认遮盖）
+            maskedWord: maskedWord, // 遮盖的单词
+            maskedMeaning: maskedMeaning, // 遮盖的释义
+            // 答题状态
+            hasAnswered: false, // 是否已提交答案
+            allCorrect: false, // 是否全部答对
+            // 复习状态
+            isReviewedToday: isReviewedToday // 当天是否已复习
           };
         });
 
@@ -191,6 +234,27 @@ Page({
         const words = this.data.todayWords;
         words[index].reviewMode = true;
         
+        // 掩盖单词和释义
+        const wordText = words[index].word || '';
+        const meaningText = words[index].meaning || '';
+        
+        // 生成掩盖的单词（用下划线代替字母）
+        // 生成掩盖的单词（保留第一个和最后一个字母）
+        let maskedWord = '';
+        if (wordText.length <= 2) {
+          // 如果单词长度小于等于2，全部显示
+          maskedWord = wordText;
+        } else {
+          // 保留第一个和最后一个字母，中间用下划线
+          const firstChar = wordText[0];
+          const lastChar = wordText[wordText.length - 1];
+          const middleChars = '_'.repeat(wordText.length - 2);
+          maskedWord = firstChar + middleChars + lastChar;
+        }
+        words[index].maskedWord = maskedWord;
+        // 生成掩盖的释义（用下划线代替字符）
+        words[index].maskedMeaning = meaningText.replace(/./g, '_');
+        
         // 处理题目数据，确保字段名正确
         const questions = (res.questions || []).map((q, idx) => {
           const question = {
@@ -219,6 +283,8 @@ Page({
         words[index].showAnswers = [];
         words[index].canSubmit = true; // 可以提交答案
         words[index].spellingMode = false; // 确保spellingMode为false
+        words[index].hasAnswered = false; // 重置答题状态
+        words[index].allCorrect = false; // 重置正确状态
         
         console.log('处理后的题目:', questions);
         console.log('设置reviewMode为true, spellingMode为false');
@@ -354,7 +420,18 @@ Page({
     const index = e.currentTarget.dataset.index;
     const qIndex = e.currentTarget.dataset.qIndex;
     const option = e.currentTarget.dataset.option;
+    
+    if (index === undefined || qIndex === undefined || option === undefined) {
+      console.error('selectOption: 缺少必要参数', { index, qIndex, option });
+      return;
+    }
+    
     const words = this.data.todayWords;
+    
+    if (!words[index]) {
+      console.error('selectOption: 单词不存在', { index, wordsLength: words.length });
+      return;
+    }
     
     // 如果已经显示答案，不允许修改
     if (words[index].showAnswers && words[index].showAnswers[qIndex]) {
@@ -365,6 +442,8 @@ Page({
       words[index].userAnswers = [];
     }
     words[index].userAnswers[qIndex] = option;
+    
+    console.log('选择选项:', { index, qIndex, option, userAnswer: words[index].userAnswers[qIndex] });
     
     // 更新是否可以提交的状态
     this.updateCanSubmitStatus(words, index);
@@ -429,18 +508,18 @@ Page({
     word.canSubmit = false;
     
     // 计算正确数量（不区分大小写比较）
-    let fillBlankCorrect = false; // 填空题（拼写）是否正确
     let allCorrect = true; // 所有题目是否都正确
     
+    // 检查所有题目的答案
     word.questions.forEach((q, qIndex) => {
-      const userAnswer = (word.userAnswers[qIndex] || '').trim().toLowerCase();
-      const correctAnswer = (q.correct_answer || '').trim().toLowerCase();
-      const isCorrect = userAnswer === correctAnswer;
+      let userAnswer = (word.userAnswers[qIndex] || '').trim().toLowerCase();
+      let correctAnswer = (q.correct_answer || '').trim().toLowerCase();
       
-      // 检查填空题（拼写）是否正确
-      if (q.type === 'fill_blank') {
-        fillBlankCorrect = isCorrect;
-      }
+      // 移除所有非英文字母字符进行比较
+      userAnswer = userAnswer.replace(/[^a-zA-Z]/g, '');
+      correctAnswer = correctAnswer.replace(/[^a-zA-Z]/g, '');
+      
+      const isCorrect = userAnswer === correctAnswer;
       
       // 如果任何一题错误，则不是全部正确
       if (!isCorrect) {
@@ -448,6 +527,7 @@ Page({
       }
     });
     
+    // 计算答对的数量（用于显示）
     const correctCount = word.questions.filter((q, qIndex) => {
       let userAnswer = (word.userAnswers[qIndex] || '').trim().toLowerCase();
       let correctAnswer = (q.correct_answer || '').trim().toLowerCase();
@@ -463,6 +543,14 @@ Page({
       todayWords: words
     });
     
+    // 标记是否答错（用于显示重新生成按钮）
+    words[index].hasAnswered = true;
+    words[index].allCorrect = allCorrect;
+    
+    this.setData({
+      todayWords: words
+    });
+    
     // 显示结果
     wx.showToast({
       title: `答对 ${correctCount}/${word.questions.length} 题`,
@@ -470,12 +558,102 @@ Page({
       duration: 2000
     });
     
-    // 如果拼写正确（填空题答对）且所有练习题都正确，自动标记为已复习
-    if (fillBlankCorrect && allCorrect) {
+    // 如果所有题目都答对了，自动标记为已复习
+    if (allCorrect && word.questions.length > 0) {
+      console.log('所有题目都答对了，自动标记为已复习', {
+        wordId: word.id,
+        correctCount: correctCount,
+        totalQuestions: word.questions.length
+      });
       setTimeout(() => {
         this.autoMarkAsReviewed(word.id, index);
       }, 2000); // 等待toast显示完成
+    } else {
+      console.log('答案不正确，不自动标记为已复习', {
+        allCorrect: allCorrect,
+        correctCount: correctCount,
+        totalQuestions: word.questions.length
+      });
     }
+  },
+
+  /**
+   * 重新生成题目
+   */
+  regenerateQuestions(e) {
+    const index = e.currentTarget.dataset.index;
+    const word = this.data.todayWords[index];
+    
+    // 获取年级信息
+    const grade = wx.getStorageSync('grade') || '';
+    
+    wx.showLoading({
+      title: '重新生成题目中...',
+      mask: true
+    });
+
+    // 调用后端API重新生成题目
+    api.generateReviewQuestions(word.id, grade)
+      .then(res => {
+        wx.hideLoading();
+        
+        console.log('重新生成题目API响应:', res);
+        console.log('题目数据:', res.questions);
+        
+        const words = this.data.todayWords;
+        
+        // 处理题目数据，确保字段名正确
+        const questions = (res.questions || []).map((q, idx) => {
+          const question = {
+            type: q.type || q.Type || '',
+            question: q.question || q.Question || '',
+            options: q.options || q.Options || [],
+            correct_answer: q.correct_answer || q.correctAnswer || q.CorrectAnswer || ''
+          };
+          console.log(`题目 ${idx + 1}:`, question);
+          return question;
+        });
+        
+        if (questions.length === 0) {
+          console.error('没有获取到题目数据，原始响应:', res);
+          wx.showToast({
+            title: '未获取到题目',
+            icon: 'none',
+            duration: 2000
+          });
+          return;
+        }
+        
+        // 重置题目相关状态
+        words[index].questions = questions;
+        words[index].currentQuestionIndex = 0;
+        words[index].userAnswers = [];
+        words[index].showAnswers = [];
+        words[index].canSubmit = true; // 可以提交答案
+        words[index].hasAnswered = false; // 重置答题状态
+        words[index].allCorrect = false; // 重置正确状态
+        
+        console.log('重新生成后的题目:', questions);
+        
+        this.setData({
+          todayWords: words
+        });
+        
+        wx.showToast({
+          title: '已重新生成题目',
+          icon: 'success',
+          duration: 1500
+        });
+      })
+      .catch(err => {
+        wx.hideLoading();
+        console.error('重新生成题目失败:', err);
+        wx.showToast({
+          title: err.message || '重新生成题目失败',
+          icon: 'none',
+          duration: 2000
+        });
+      });
   },
 
   /**
@@ -499,11 +677,19 @@ Page({
         // 更新单词状态
         const words = this.data.todayWords;
         if (words[index]) {
+          const today = new Date();
+          const todayStr = ebbinghaus.formatDate(today);
           words[index].review_count = (words[index].review_count || 0) + 1;
-          words[index].last_review_date = new Date().toISOString().split('T')[0];
+          words[index].last_review_date = todayStr;
+          words[index].isReviewedToday = true; // 标记为今日已复习
+          
+          // 立即更新状态，显示"今日已复习"标识
+          this.setData({
+            todayWords: words
+          });
         }
 
-        // 重新加载列表（可选，或者只更新当前单词）
+        // 重新加载列表以获取最新状态
         setTimeout(() => {
           this.loadTodayWords();
         }, 500);
@@ -511,7 +697,11 @@ Page({
       .catch(err => {
         wx.hideLoading();
         console.error('自动标记失败:', err);
-        // 不显示错误提示，避免打扰用户
+        wx.showToast({
+          title: '标记失败: ' + (err.message || '未知错误'),
+          icon: 'none',
+          duration: 2000
+        });
       });
   },
 
@@ -545,6 +735,22 @@ Page({
         title: '拼写错误',
         icon: 'none',
         duration: 1500
+      });
+    }
+  },
+
+  /**
+   * 切换单词显示/隐藏
+   */
+  toggleWordDisplay(e) {
+    const index = e.currentTarget.dataset.index;
+    const words = this.data.todayWords;
+    
+    if (words[index]) {
+      words[index].showWord = !words[index].showWord;
+      
+      this.setData({
+        todayWords: words
       });
     }
   },
@@ -590,6 +796,11 @@ Page({
     words[index].canSubmit = false;
     words[index].userAnswer = '';
     words[index].showAnswer = false;
+    words[index].hasAnswered = false; // 重置答题状态
+    words[index].allCorrect = false; // 重置正确状态
+    // 清除掩盖信息
+    delete words[index].maskedWord;
+    delete words[index].maskedMeaning;
     words[index].isCorrect = false;
     
     this.setData({
@@ -828,9 +1039,36 @@ Page({
       return;
     }
 
+    // 确保 audioContext 已初始化
+    if (!this.data.audioContext) {
+      this.data.audioContext = wx.createInnerAudioContext();
+      this.data.audioContext.onEnded(() => {
+        this.setData({
+          playingWordId: null
+        });
+      });
+      this.data.audioContext.onError((err) => {
+        console.error('音频播放失败:', err);
+        wx.showToast({
+          title: '播放失败',
+          icon: 'none',
+          duration: 1500
+        });
+        this.setData({
+          playingWordId: null
+        });
+      });
+    }
+
     // 如果正在播放同一个单词，则停止播放
-    if (this.data.playingWordId === wordId && this.data.audioContext) {
-      this.data.audioContext.stop();
+    if (this.data.playingWordId === wordId) {
+      if (this.data.audioContext) {
+        try {
+          this.data.audioContext.stop();
+        } catch (err) {
+          console.error('停止音频失败:', err);
+        }
+      }
       this.setData({
         playingWordId: null
       });
@@ -839,7 +1077,11 @@ Page({
 
     // 停止当前播放的音频
     if (this.data.audioContext) {
-      this.data.audioContext.stop();
+      try {
+        this.data.audioContext.stop();
+      } catch (err) {
+        console.error('停止音频失败:', err);
+      }
     }
 
     // 优先选择 Cambridge 字典的音频，否则使用第一个
@@ -862,13 +1104,36 @@ Page({
       return;
     }
     
-    // 设置音频源并播放
-    this.data.audioContext.src = audioUrl;
-    this.data.audioContext.play();
+    // 再次确保 audioContext 存在
+    if (!this.data.audioContext) {
+      console.error('audioContext 未初始化');
+      wx.showToast({
+        title: '音频初始化失败',
+        icon: 'none',
+        duration: 1500
+      });
+      return;
+    }
     
-    this.setData({
-      playingWordId: wordId
-    });
+    // 设置音频源并播放
+    try {
+      this.data.audioContext.src = audioUrl;
+      this.data.audioContext.play();
+      
+      this.setData({
+        playingWordId: wordId
+      });
+    } catch (err) {
+      console.error('播放音频失败:', err);
+      wx.showToast({
+        title: '播放失败',
+        icon: 'none',
+        duration: 1500
+      });
+      this.setData({
+        playingWordId: null
+      });
+    }
   },
 
   /**

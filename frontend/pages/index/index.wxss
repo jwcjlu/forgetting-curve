@@ -84,6 +84,27 @@
   margin-bottom: 20rpx;
 }
 
+.review-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8rpx;
+}
+
+.reviewed-badge {
+  background-color: #52C41A;
+  color: white;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 20rpx;
+}
+
+.badge-text {
+  font-size: 20rpx;
+  color: white;
+  font-weight: 500;
+}
+
 .word-text-container {
   display: flex;
   align-items: center;
@@ -95,6 +116,16 @@
   font-size: 40rpx;
   font-weight: bold;
   color: #333;
+  overflow-x: scroll;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  word-break: keep-all;
+}
+
+.word-text.word-masked {
+  font-family: 'Courier New', monospace;
+  color: #999;
+  letter-spacing: 4rpx;
 }
 
 .audio-btn {
@@ -131,14 +162,58 @@
   border-radius: 20rpx;
 }
 
+.word-meaning-container {
+  position: relative;
+  margin-bottom: 20rpx;
+}
+
 .word-meaning {
   font-size: 32rpx;
   color: #666;
   line-height: 1.6;
-  margin-bottom: 20rpx;
   padding: 20rpx;
   background-color: #F8F9FA;
   border-radius: 8rpx;
+  display: block;
+  overflow-x: scroll;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  word-break: keep-all;
+}
+
+.word-masked {
+  font-family: 'Courier New', monospace;
+  color: #999;
+  letter-spacing: 4rpx;
+  font-weight: bold;
+}
+
+.word-toggle-btn {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  display: flex;
+  align-items: center;
+  gap: 5rpx;
+  padding: 8rpx 15rpx;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1rpx solid #E0E0E0;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #666;
+  z-index: 10;
+}
+
+.word-toggle-btn:active {
+  background-color: #F0F0F0;
+}
+
+.toggle-icon {
+  font-size: 24rpx;
+}
+
+.toggle-text {
+  font-size: 22rpx;
 }
 
 .word-info {
@@ -185,8 +260,48 @@
 }
 
 /* 复习模式样式 */
+.masked-word-info {
+  margin: 30rpx 0;
+  padding: 30rpx;
+  background-color: #F5F5F5;
+  border-radius: 8rpx;
+  text-align: center;
+}
+
+.masked-word {
+  margin-bottom: 20rpx;
+  width: 100%;
+  overflow-x: scroll; /* 允许横向滚动 */
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+}
+
+.masked-meaning {
+  margin-top: 20rpx;
+  width: 100%;
+  overflow-x: scroll; /* 允许横向滚动 */
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+}
+
+.masked-text {
+  font-size: 40rpx;
+  color: #999;
+  letter-spacing: 4rpx;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: scroll; /* 允许横向滚动 */
+  white-space: nowrap; /* 不换行，使用横向滚动 */
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+  word-break: keep-all; /* 保持单词完整 */
+}
+
+/* 复习模式样式 */
 .questions-section {
   margin-bottom: 30rpx;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: visible; /* 允许内容溢出显示 */
 }
 
 .question-item {
@@ -247,6 +362,11 @@
   background-color: #F0F0F0;
 }
 
+.option-selected {
+  background-color: #E8F4FD;
+  border-color: #4A90E2;
+}
+
 .option-correct {
   background-color: #F6FFED;
   border-color: #52C41A;
@@ -271,18 +391,27 @@
 
 .fill-blank-section {
   margin-top: 20rpx;
+  width: 100%;
+  padding: 0;
 }
 
 .fill-blank-input {
   width: 100%;
-  padding: 25rpx;
-  border: 2rpx solid #E0E0E0;
-  border-radius: 8rpx;
-  font-size: 36rpx;
+  min-width: 100%;
+  padding: 30rpx 25rpx;
+  border: 3rpx solid #E0E0E0;
+  border-radius: 12rpx;
+  font-size: 42rpx;
   background-color: white;
   box-sizing: border-box;
-  letter-spacing: 2rpx; /* 增加字母间距，便于阅读 */
+  letter-spacing: 3rpx; /* 增加字母间距，便于阅读 */
   font-family: 'Courier New', monospace; /* 使用等宽字体，便于拼写 */
+  overflow-x: scroll; /* 允许横向滚动 */
+  white-space: nowrap; /* 不换行，使用横向滚动 */
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+  word-break: keep-all; /* 保持单词完整 */
+  min-height: 100rpx; /* 增加最小高度 */
+  line-height: 1.5; /* 增加行高 */
 }
 
 .input-hint {
@@ -485,6 +614,22 @@
 
 .next-btn:active {
   background-color: #389E0D;
+}
+
+.regenerate-btn {
+  background-color: #FF9800;
+  color: white;
+}
+
+.regenerate-btn:active {
+  background-color: #F57C00;
+}
+
+.action-buttons-group {
+  display: flex;
+  gap: 15rpx;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .back-btn {

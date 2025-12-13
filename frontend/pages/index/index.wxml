@@ -19,23 +19,34 @@
 
   <view wx:else>
     <view class="word-list">
-      <view class="word-card card" wx:for="{{todayWords}}" wx:key="id" wx:for-item="wordItem">
+      <view class="word-card card" wx:for="{{todayWords}}" wx:key="id" wx:for-item="wordItem" wx:for-index="wordIndex">
         <!-- 浏览模式 -->
         <view wx:if="{{!wordItem.spellingMode && !wordItem.reviewMode}}">
           <view class="word-header">
             <view class="word-text-container">
-              <text class="word-text">{{wordItem.word}}</text>
+              <text class="word-text {{wordItem.showWord ? '' : 'word-masked'}}">{{wordItem.showWord ? wordItem.word : (wordItem.maskedWord || '____')}}</text>
               <view wx:if="{{wordItem.audio_urls && wordItem.audio_urls.length > 0}}"
                     class="audio-btn {{playingWordId === wordItem.id ? 'audio-playing' : ''}}"
                     bindtap="playAudio" 
                     data-word-id="{{wordItem.id}}" 
-                    data-index="{{index}}">
+                    data-index="{{wordIndex}}">
                 <text class="audio-icon">{{playingWordId === wordItem.id ? '⏸' : '🔊'}}</text>
               </view>
             </view>
-            <text class="review-count">第{{wordItem.review_count + 1}}次复习</text>
+            <view class="review-status">
+              <text class="review-count">第{{wordItem.review_count + 1}}次复习</text>
+              <view wx:if="{{wordItem.isReviewedToday}}" class="reviewed-badge">
+                <text class="badge-text">✓ 今日已复习</text>
+              </view>
+            </view>
           </view>
-          <view class="word-meaning">{{wordItem.meaning}}</view>
+          <view class="word-meaning-container">
+            <text class="word-meaning {{wordItem.showWord ? '' : 'word-masked'}}">{{wordItem.showWord ? wordItem.meaning : (wordItem.maskedMeaning || '____')}}</text>
+            <view class="word-toggle-btn" bindtap="toggleWordDisplay" data-index="{{wordIndex}}">
+              <text class="toggle-icon">{{wordItem.showWord ? '👁️' : '👁️‍🗨️'}}</text>
+              <text class="toggle-text">{{wordItem.showWord ? '隐藏' : '显示'}}</text>
+            </view>
+          </view>
           
           <!-- 混淆词列表 -->
           <view wx:if="{{wordItem.confused_words && wordItem.confused_words.length > 0}}" class="confused-words-section">
@@ -44,7 +55,7 @@
               <view class="confused-word-tag" wx:for="{{wordItem.confused_words}}" wx:key="id" wx:for-item="confusedWord">
                 <text class="confused-word-text">{{confusedWord.word}}</text>
                 <text class="confused-word-meaning">{{confusedWord.meaning}}</text>
-                <text class="confused-word-remove" bindtap="removeConfusedWord" data-word-id="{{wordItem.id}}" data-confused-word-id="{{confusedWord.id}}" data-index="{{index}}">×</text>
+                <text class="confused-word-remove" bindtap="removeConfusedWord" data-word-id="{{wordItem.id}}" data-confused-word-id="{{confusedWord.id}}" data-index="{{wordIndex}}">×</text>
               </view>
             </view>
           </view>
@@ -54,14 +65,11 @@
             <text class="info-text" wx:if="{{wordItem.last_review_date}}">上次复习：{{wordItem.last_review_date}}</text>
           </view>
           <view class="word-actions">
-            <button class="action-btn confused-btn" bindtap="showAddConfusedWord" data-index="{{index}}" data-word-id="{{wordItem.id}}" size="mini">
+            <button class="action-btn confused-btn" bindtap="showAddConfusedWord" data-index="{{wordIndex}}" data-word-id="{{wordItem.id}}" size="mini">
               添加混淆词
             </button>
-            <button class="action-btn spelling-btn" bindtap="startReview" data-index="{{index}}">
+            <button class="action-btn spelling-btn" bindtap="startReview" data-index="{{wordIndex}}">
               开始复习
-            </button>
-            <button class="action-btn review-btn" bindtap="markAsReviewed" data-id="{{wordItem.id}}">
-              已复习
             </button>
           </view>
         </view>
@@ -71,6 +79,16 @@
           <view class="spelling-header">
             <text class="review-count">第{{wordItem.review_count + 1}}次复习</text>
             <text class="spelling-hint">完成以下题目来复习单词</text>
+          </view>
+          
+          <!-- 掩盖的单词信息 -->
+          <view class="masked-word-info">
+            <view class="masked-word">
+              <text class="masked-text">{{wordItem.maskedWord || '____'}}</text>
+            </view>
+            <view class="masked-meaning">
+              <text class="masked-text">{{wordItem.maskedMeaning || '____'}}</text>
+            </view>
           </view>
           
           <!-- 题目列表 -->
@@ -88,16 +106,17 @@
               <!-- 选择题选项 -->
               <view wx:if="{{question.type === 'multiple_choice' && question.options}}" class="options-section">
                 <view 
-                  class="option-item {{wordItem.showAnswers[qIndex] ? (option === question.correct_answer ? 'option-correct' : (wordItem.userAnswers[qIndex] === option ? 'option-wrong' : '')) : ''}}"
+                  class="option-item {{wordItem.showAnswers[qIndex] ? (option === question.correct_answer ? 'option-correct' : (wordItem.userAnswers[qIndex] === option ? 'option-wrong' : '')) : ''}} {{wordItem.showAnswers[qIndex] ? '' : (wordItem.userAnswers[qIndex] === option ? 'option-selected' : '')}}"
                   wx:for="{{question.options}}" 
                   wx:key="*this" 
                   wx:for-item="option"
+                  wx:for-index="optIndex"
                   bindtap="selectOption"
-                  data-index="{{index}}"
+                  data-index="{{wordIndex}}"
                   data-q-index="{{qIndex}}"
                   data-option="{{option}}"
                 >
-                  <text class="option-label">{{String.fromCharCode(65 + index)}}. </text>
+                  <text class="option-label">{{String.fromCharCode(65 + optIndex)}}. </text>
                   <text class="option-text">{{option}}</text>
                 </view>
               </view>
@@ -111,7 +130,7 @@
                   value="{{wordItem.userAnswers[qIndex]}}"
                   bindinput="onFillBlankInput"
                   bindblur="onFillBlankBlur"
-                  data-index="{{index}}"
+                  data-index="{{wordIndex}}"
                   data-q-index="{{qIndex}}"
                   disabled="{{wordItem.showAnswers[qIndex]}}"
                   adjust-position="{{true}}"
@@ -120,6 +139,7 @@
                   hold-keyboard="{{true}}"
                   auto-focus="{{false}}"
                   cursor-spacing="{{20}}"
+                  style="width: 100%; min-width: 200rpx;"
                 />
                 <text class="input-hint">⚠️ Only English letters are allowed. Please switch to English keyboard to avoid input method suggestions.</text>
               </view>
@@ -143,19 +163,28 @@
               wx:if="{{wordItem.canSubmit}}" 
               class="action-btn check-btn" 
               bindtap="checkAllAnswers" 
-              data-index="{{index}}"
+              data-index="{{wordIndex}}"
             >
               提交答案
             </button>
-            <button 
-              wx:else
-              class="action-btn next-btn" 
-              bindtap="backToView" 
-              data-index="{{index}}"
-            >
-              完成复习
-            </button>
-            <button class="action-btn back-btn" bindtap="backToView" data-index="{{index}}">
+            <view wx:else class="action-buttons-group">
+              <button 
+                wx:if="{{!wordItem.allCorrect && wordItem.hasAnswered}}"
+                class="action-btn regenerate-btn" 
+                bindtap="regenerateQuestions" 
+                data-index="{{wordIndex}}"
+              >
+                重新生成题目
+              </button>
+              <button 
+                class="action-btn next-btn" 
+                bindtap="backToView" 
+                data-index="{{wordIndex}}"
+              >
+                完成复习
+              </button>
+            </view>
+            <button class="action-btn back-btn" bindtap="backToView" data-index="{{wordIndex}}">
               返回查看
             </button>
           </view>
