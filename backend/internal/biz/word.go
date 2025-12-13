@@ -169,7 +169,7 @@ func (uc *wordUsecase) MarkWordReviewed(ctx context.Context, planID int64, wordI
 	// 更新复习次数和最后复习日期
 	lastReviewDate := word.LastReviewDate
 	word.LastReviewDate = time.Now().Format("2006-01-02")
-	if word.LastReviewDate == lastReviewDate {
+	if word.LastReviewDate != lastReviewDate {
 		word.ReviewCount++
 	}
 	word.IsRemembered = true
