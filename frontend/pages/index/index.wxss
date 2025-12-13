@@ -278,9 +278,22 @@
   padding: 25rpx;
   border: 2rpx solid #E0E0E0;
   border-radius: 8rpx;
-  font-size: 32rpx;
+  font-size: 36rpx;
   background-color: white;
   box-sizing: border-box;
+  letter-spacing: 2rpx; /* 增加字母间距，便于阅读 */
+  font-family: 'Courier New', monospace; /* 使用等宽字体，便于拼写 */
+}
+
+.input-hint {
+  display: block;
+  font-size: 22rpx;
+  color: #FF9800;
+  margin-top: 10rpx;
+  text-align: center;
+  padding: 8rpx;
+  background-color: #FFF7E6;
+  border-radius: 4rpx;
 }
 
 .input-correct {

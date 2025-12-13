@@ -105,31 +105,39 @@ func (l *llmService) GenerateReviewQuestions(ctx context.Context, word, meaning,
 		gradeHint = fmt.Sprintf("（适合%s水平）", grade)
 	}
 
-	prompt := fmt.Sprintf(`请为单词 "%s"（中文释义：%s）%s生成2道复习题目，要求：
-1. 第一道题：选择题（multiple_choice），包含4个选项，其中只有1个正确答案
-2. 第二道题：填空题（fill_blank），要求填入该单词
-3. 要求二道题都用英文
+	prompt := fmt.Sprintf(`Please generate 2 review questions for the word "%s" (meaning: %s) %s. Requirements:
+1. First question: Multiple choice (multiple_choice) with 4 options, only 1 correct answer
+   - Options can be other words related to this word (such as synonyms, antonyms, related words, etc.)
+   - The correct answer is not necessarily "%s", it can be other related words
+   - The question should test understanding and application of this word
+   - ALL TEXT MUST BE IN ENGLISH (question text, options, everything)
+2. Second question: Fill in the blank (fill_blank), requiring to fill in the word "%s"
+   - The question should test spelling and memory of this word
+   - ALL TEXT MUST BE IN ENGLISH
 
 %s
 
-请严格按照以下JSON格式返回，不要添加任何其他文字说明，只返回JSON：
+Please return strictly in the following JSON format, no other text, only JSON:
 {
   "questions": [
     {
       "type": "multiple_choice",
-      "question": "题目内容（用中文）",
-      "options": ["选项A", "选项B", "选项C", "选项D"],
-      "correct_answer": "正确答案"
+      "question": "Question text in English (test understanding of the word)",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correct_answer": "Correct answer (can be "%s" or other related words)"
     },
     {
       "type": "fill_blank",
-      "question": "题目内容（用中文，用____表示填空位置）",
+      "question": "Question text in English (use ____ to indicate blank, test spelling)",
       "correct_answer": "%s"
     }
   ]
 }
 
-重要：只返回JSON对象，不要使用markdown代码块，不要添加任何解释文字。`, word, meaning, gradeHint, getGradeDifficultyHint(grade), word)
+IMPORTANT: 
+- All question text and options MUST be in English
+- Only return JSON object, do not use markdown code blocks, do not add any explanatory text
+- Do not include any Chinese characters in the question text or options`, word, meaning, gradeHint, word, word, getGradeDifficultyHint(grade), word, word)
 
 	// 构建请求
 	reqBody := OpenAIRequest{
@@ -401,23 +409,23 @@ func removeMarkdownCodeBlock(text string) string {
 	return string(result)
 }
 
-// getGradeDifficultyHint 根据年级获取难度提示
+// getGradeDifficultyHint 根据年级获取难度提示（英文）
 func getGradeDifficultyHint(grade string) string {
 	if grade == "" || grade == "其他" {
-		return "题目难度适中，适合一般英语学习者。"
+		return "Question difficulty should be moderate, suitable for general English learners."
 	}
 
 	if contains(grade, "小学") {
-		return "题目难度要适合小学生，使用简单的词汇和句式，题目描述要清晰易懂。"
+		return "Question difficulty should be suitable for elementary school students, use simple vocabulary and sentence structures, questions should be clear and easy to understand."
 	} else if contains(grade, "初中") {
-		return "题目难度要适合初中生，使用初中水平的词汇和语法知识。"
+		return "Question difficulty should be suitable for middle school students, use middle school level vocabulary and grammar knowledge."
 	} else if contains(grade, "高中") {
-		return "题目难度要适合高中生，可以使用较复杂的句式和词汇。"
+		return "Question difficulty should be suitable for high school students, can use more complex sentence structures and vocabulary."
 	} else if grade == "大学" {
-		return "题目难度可以较高，可以使用较复杂的词汇和句式。"
+		return "Question difficulty can be higher, can use more complex vocabulary and sentence structures."
 	}
 
-	return "题目难度适中，适合一般英语学习者。"
+	return "Question difficulty should be moderate, suitable for general English learners."
 }
 
 // contains 检查字符串是否包含子串

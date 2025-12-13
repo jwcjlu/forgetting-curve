@@ -4,45 +4,10 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0cab91bd-f818-42fe-b944-d38fc3d86d15" name="Changes" comment="前端首次提交">
-      <change beforePath="$PROJECT_DIR$/backend/IMPLEMENTATION_STATUS.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/IMPLEMENTATION_STATUS.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/IMPORTANT_CONFIG.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/IMPORTANT_CONFIG.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/OCR_SETUP.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/OCR_SETUP.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/QUICKSTART.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/QUICKSTART.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/README_DOCKER.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/README_DOCKER.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/TESSERACT_SETUP.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/TESSERACT_SETUP.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/TROUBLESHOOTING.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/TROUBLESHOOTING.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/api/student/v1/openapi.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/api/student/v1/openapi.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/api/student/v1/student.proto" beforeDir="false" afterPath="$PROJECT_DIR$/backend/api/student/v1/student.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/cmd/server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/cmd/server/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/cmd/server/wire.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/cmd/server/wire.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/cmd/server/wire_gen.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/cmd/server/wire_gen.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/backend/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/biz/api.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/biz/confused_word.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/confused_word.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/biz/wire.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/wire.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/biz/word.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/word.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/conf/conf.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/conf/conf.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/conf/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/conf/config.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/service/student.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/service/student.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/service/wire.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/service/wire.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/nginx/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/nginx/README_TENCENT.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/README_TENCENT.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/nginx/certs/.gitkeep" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/certs/.gitkeep" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/nginx/generate-self-signed-cert.bat" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/generate-self-signed-cert.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/nginx/generate-self-signed-cert.sh" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/generate-self-signed-cert.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/scripts/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/init.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/scripts/test-wechat-api.sh" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/test-wechat-api.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/scripts/verify-wechat-config.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/verify-wechat-config.md" afterDir="false" />
+    <list default="true" id="0cab91bd-f818-42fe-b944-d38fc3d86d15" name="Changes" comment="修复解析问题并要时打印日志排查问题">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/biz/llm.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/biz/llm.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.wxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.wxss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/settings/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/settings/settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/settings/settings.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/settings/settings.wxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pages/settings/settings.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/settings/settings.wxss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/utils/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/utils/api.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,27 +57,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
-    &quot;Go Build.go build forgetting-curve/backend/internal/pkg/ocr.executor&quot;: &quot;Debug&quot;,
-    &quot;Go Build.go build main.go.executor&quot;: &quot;Debug&quot;,
-    &quot;Go Build.go build server.executor&quot;: &quot;Debug&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/workspace/github/forgetting-curve/backend&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;D:/workspace/github/forgetting-curve/main.go&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "Go Build.go build forgetting-curve/backend/internal/pkg/ocr.executor": "Debug",
+    "Go Build.go build main.go.executor": "Debug",
+    "Go Build.go build server.executor": "Debug",
+    "Go Test.TestExtractJSON in forgetting-curve/backend/internal/biz.executor": "Run",
+    "Go Test.TestFilterTodayWords in forgetting-curve/backend/internal/biz.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "git-widget-placeholder": "dev",
+    "go.import.settings.migrated": "true",
+    "last_opened_file_path": "D:/workspace/github/forgetting-curve/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "D:/workspace/github/forgetting-curve/main.go"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\workspace\github\forgetting-curve\backend" />
@@ -127,7 +94,7 @@
       <recent name="D:\workspace\github\forgetting-curve\backend\internal\server" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build forgetting-curve/backend/internal/pkg/ocr">
+  <component name="RunManager" selected="Go Test.TestExtractJSON in forgetting-curve/backend/internal/biz">
     <configuration name="go build forgetting-curve/backend/internal/pkg/ocr" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="forgetting-curve" />
       <working_directory value="$PROJECT_DIR$/backend" />
@@ -142,18 +109,47 @@
       <working_directory value="$PROJECT_DIR$/backend" />
       <parameters value="-conf=D:\workspace\github\forgetting-curve\backend\configs" />
       <kind value="FILE" />
+      <package value="forgetting-curve/backend" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$/backend/cmd/server/" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestExtractJSON in forgetting-curve/backend/internal/biz" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="forgetting-curve" />
+      <working_directory value="$PROJECT_DIR$/backend/internal/biz" />
+      <root_directory value="$PROJECT_DIR$/backend" />
+      <kind value="PACKAGE" />
+      <package value="forgetting-curve/backend/internal/biz" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestExtractJSON\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestFilterTodayWords in forgetting-curve/backend/internal/biz" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="forgetting-curve" />
+      <working_directory value="$PROJECT_DIR$/backend/internal/biz" />
+      <root_directory value="$PROJECT_DIR$/backend" />
+      <kind value="PACKAGE" />
+      <package value="forgetting-curve/backend/internal/biz" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestFilterTodayWords\E$" />
       <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Go Build.go build forgetting-curve/backend/internal/pkg/ocr" />
       <item itemvalue="Go Build.go build server" />
+      <item itemvalue="Go Test.TestExtractJSON in forgetting-curve/backend/internal/biz" />
+      <item itemvalue="Go Test.TestFilterTodayWords in forgetting-curve/backend/internal/biz" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build forgetting-curve/backend/internal/pkg/ocr" />
+        <item itemvalue="Go Test.TestExtractJSON in forgetting-curve/backend/internal/biz" />
+        <item itemvalue="Go Test.TestFilterTodayWords in forgetting-curve/backend/internal/biz" />
         <item itemvalue="Go Build.go build server" />
+        <item itemvalue="Go Build.go build forgetting-curve/backend/internal/pkg/ocr" />
       </list>
     </recent_temporary>
   </component>
@@ -184,7 +180,10 @@
     <MESSAGE value="添加发音和ocr识别图片" />
     <MESSAGE value="前端首次提交" />
     <MESSAGE value="加入朗读检查" />
-    <option name="LAST_COMMIT_MESSAGE" value="加入朗读检查" />
+    <MESSAGE value="复习添加大模型生成复习题" />
+    <MESSAGE value="上下设置WithoutCancel" />
+    <MESSAGE value="修复解析问题并要时打印日志排查问题" />
+    <option name="LAST_COMMIT_MESSAGE" value="修复解析问题并要时打印日志排查问题" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

@@ -250,18 +250,74 @@ Page({
   },
 
   /**
-   * 填空题输入
+   * 填空题输入（只允许英文字母，防止输入法联想补全）
    */
   onFillBlankInput(e) {
     const index = e.currentTarget.dataset.index;
     const qIndex = e.currentTarget.dataset.qIndex;
-    const value = e.detail.value;
+    let newValue = e.detail.value;
     const words = this.data.todayWords;
+    
+    // 获取当前已有的答案
+    const oldValue = (words[index].userAnswers && words[index].userAnswers[qIndex]) || '';
+    
+    // 先过滤掉所有非英文字母
+    newValue = newValue.replace(/[^a-zA-Z]/g, '');
+    
+    // 防止输入法联想补全的智能处理
+    if (oldValue) {
+      const oldLen = oldValue.length;
+      const newLen = newValue.length;
+      
+      if (newLen > oldLen + 1) {
+        // 输入了多个字符，可能是联想补全
+        // 策略：只保留旧值 + 第一个新增的字符（用户实际输入的）
+        if (newValue.indexOf(oldValue) === 0) {
+          // 新值以旧值开头，提取第一个新增字符
+          const firstNewChar = newValue[oldLen];
+          if (firstNewChar && /[a-zA-Z]/.test(firstNewChar)) {
+            newValue = oldValue + firstNewChar;
+          } else {
+            newValue = oldValue;
+          }
+        } else {
+          // 新值不以旧值开头，可能是选择了联想词，只保留最后一个字符
+          const lastChar = newValue.slice(-1);
+          if (/[a-zA-Z]/.test(lastChar)) {
+            newValue = lastChar;
+          } else {
+            newValue = oldValue;
+          }
+        }
+      } else if (newLen === oldLen + 1) {
+        // 正常输入一个字符
+        const addedChar = newValue.slice(oldLen);
+        if (!/[a-zA-Z]/.test(addedChar)) {
+          newValue = oldValue;
+        }
+        // 否则 newValue 已经是正确的值
+      }
+      // 如果 newLen <= oldLen，说明是删除操作，newValue 已经是正确的值
+    } else {
+      // 首次输入
+      if (newValue.length > 1) {
+        // 首次输入多个字符，可能是联想补全，只保留第一个字符
+        const firstChar = newValue[0];
+        if (firstChar && /[a-zA-Z]/.test(firstChar)) {
+          newValue = firstChar;
+        } else {
+          newValue = '';
+        }
+      }
+    }
+    
+    // 最终确保只包含英文字母
+    newValue = newValue.replace(/[^a-zA-Z]/g, '');
     
     if (!words[index].userAnswers) {
       words[index].userAnswers = [];
     }
-    words[index].userAnswers[qIndex] = value;
+    words[index].userAnswers[qIndex] = newValue;
     
     // 更新是否可以提交的状态
     this.updateCanSubmitStatus(words, index);
@@ -269,6 +325,26 @@ Page({
     this.setData({
       todayWords: words
     });
+  },
+
+  /**
+   * 填空题失去焦点时，再次清理输入内容
+   */
+  onFillBlankBlur(e) {
+    const index = e.currentTarget.dataset.index;
+    const qIndex = e.currentTarget.dataset.qIndex;
+    const words = this.data.todayWords;
+    
+    if (words[index].userAnswers && words[index].userAnswers[qIndex]) {
+      // 确保只包含英文字母
+      let value = words[index].userAnswers[qIndex];
+      value = value.replace(/[^a-zA-Z]/g, '');
+      words[index].userAnswers[qIndex] = value;
+      
+      this.setData({
+        todayWords: words
+      });
+    }
   },
 
   /**
@@ -352,9 +428,35 @@ Page({
     // 设置为不能提交（已提交）
     word.canSubmit = false;
     
-    // 计算正确数量
+    // 计算正确数量（不区分大小写比较）
+    let fillBlankCorrect = false; // 填空题（拼写）是否正确
+    let allCorrect = true; // 所有题目是否都正确
+    
+    word.questions.forEach((q, qIndex) => {
+      const userAnswer = (word.userAnswers[qIndex] || '').trim().toLowerCase();
+      const correctAnswer = (q.correct_answer || '').trim().toLowerCase();
+      const isCorrect = userAnswer === correctAnswer;
+      
+      // 检查填空题（拼写）是否正确
+      if (q.type === 'fill_blank') {
+        fillBlankCorrect = isCorrect;
+      }
+      
+      // 如果任何一题错误，则不是全部正确
+      if (!isCorrect) {
+        allCorrect = false;
+      }
+    });
+    
     const correctCount = word.questions.filter((q, qIndex) => {
-      return word.userAnswers[qIndex] === q.correct_answer;
+      let userAnswer = (word.userAnswers[qIndex] || '').trim().toLowerCase();
+      let correctAnswer = (q.correct_answer || '').trim().toLowerCase();
+      
+      // 移除所有非英文字母字符进行比较
+      userAnswer = userAnswer.replace(/[^a-zA-Z]/g, '');
+      correctAnswer = correctAnswer.replace(/[^a-zA-Z]/g, '');
+      
+      return userAnswer === correctAnswer;
     }).length;
     
     this.setData({
@@ -364,9 +466,53 @@ Page({
     // 显示结果
     wx.showToast({
       title: `答对 ${correctCount}/${word.questions.length} 题`,
-      icon: correctCount === word.questions.length ? 'success' : 'none',
+      icon: allCorrect ? 'success' : 'none',
       duration: 2000
     });
+    
+    // 如果拼写正确（填空题答对）且所有练习题都正确，自动标记为已复习
+    if (fillBlankCorrect && allCorrect) {
+      setTimeout(() => {
+        this.autoMarkAsReviewed(word.id, index);
+      }, 2000); // 等待toast显示完成
+    }
+  },
+
+  /**
+   * 自动标记为已复习
+   */
+  autoMarkAsReviewed(wordId, index) {
+    wx.showLoading({
+      title: '标记已复习...',
+      mask: true
+    });
+
+    api.markWordReviewed(wordId)
+      .then(res => {
+        wx.hideLoading();
+        wx.showToast({
+          title: '已自动标记为复习',
+          icon: 'success',
+          duration: 1500
+        });
+
+        // 更新单词状态
+        const words = this.data.todayWords;
+        if (words[index]) {
+          words[index].review_count = (words[index].review_count || 0) + 1;
+          words[index].last_review_date = new Date().toISOString().split('T')[0];
+        }
+
+        // 重新加载列表（可选，或者只更新当前单词）
+        setTimeout(() => {
+          this.loadTodayWords();
+        }, 500);
+      })
+      .catch(err => {
+        wx.hideLoading();
+        console.error('自动标记失败:', err);
+        // 不显示错误提示，避免打扰用户
+      });
   },
 
   /**
