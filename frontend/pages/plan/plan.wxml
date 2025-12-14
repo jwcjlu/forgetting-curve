@@ -18,16 +18,20 @@
         </view>
         <view class="plan-actions">
           <button class="action-btn select-btn" bindtap="selectPlan" data-plan-id="{{item.id}}" wx:if="{{!item.is_active}}">
-            选择
+            <text class="btn-icon">✓</text>
+            <text class="btn-text">选择</text>
           </button>
           <button class="action-btn edit-btn" bindtap="editPlan" data-plan-id="{{item.id}}">
-            编辑
+            <text class="btn-icon">✏️</text>
+            <text class="btn-text">编辑</text>
           </button>
           <button class="action-btn manage-btn" bindtap="managePlanWords" data-plan-id="{{item.id}}">
-            添加单词
+            <text class="btn-icon">📚</text>
+            <text class="btn-text">添加单词</text>
           </button>
           <button class="action-btn delete-btn" bindtap="deletePlan" data-plan-id="{{item.id}}">
-            删除
+            <text class="btn-icon">🗑️</text>
+            <text class="btn-text">删除</text>
           </button>
         </view>
       </view>
@@ -66,8 +70,14 @@
       </view>
     </view>
     <view class="modal-footer">
-      <button class="modal-btn cancel-btn" bindtap="hideCreate">取消</button>
-      <button class="modal-btn confirm-btn" bindtap="createPlan">创建</button>
+      <button class="modal-btn cancel-btn" bindtap="hideCreate">
+        <text class="btn-icon">✖️</text>
+        <text class="btn-text">取消</text>
+      </button>
+      <button class="modal-btn confirm-btn" bindtap="createPlan">
+        <text class="btn-icon">✓</text>
+        <text class="btn-text">创建</text>
+      </button>
     </view>
   </view>
 </view>
@@ -94,8 +104,14 @@
       </view>
     </view>
     <view class="modal-footer">
-      <button class="modal-btn cancel-btn" bindtap="hideEdit">取消</button>
-      <button class="modal-btn confirm-btn" bindtap="updatePlan">保存</button>
+      <button class="modal-btn cancel-btn" bindtap="hideEdit">
+        <text class="btn-icon">✖️</text>
+        <text class="btn-text">取消</text>
+      </button>
+      <button class="modal-btn confirm-btn" bindtap="updatePlan">
+        <text class="btn-icon">💾</text>
+        <text class="btn-text">保存</text>
+      </button>
     </view>
   </view>
 </view>

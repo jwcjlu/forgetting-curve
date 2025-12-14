@@ -9,10 +9,6 @@
         </text>
         <text class="count-text" wx:else>请先选择复习计划</text>
       </view>
-      <view class="header-right">
-        <button class="plan-btn" bindtap="goToPlans" size="mini" wx:if="{{hasActivePlan}}">切换计划</button>
-        <button class="settings-btn" bindtap="goToSettings" size="mini">设置</button>
-      </view>
     </view>
   </view>
 
@@ -20,7 +16,10 @@
   <view wx:if="{{!hasActivePlan}}" class="empty-state no-plan-state">
     <text class="empty-text">请先选择复习计划</text>
     <text class="empty-hint">只有选择了复习计划才能查看今日背诵任务</text>
-    <button class="go-plan-btn" bindtap="goToPlans">去选择计划</button>
+    <button class="go-plan-btn" bindtap="goToPlans">
+      <text class="btn-icon">📋</text>
+      <text class="btn-text">去选择计划</text>
+    </button>
   </view>
 
   <!-- 有激活计划但没有单词 -->
@@ -79,10 +78,12 @@
           </view>
           <view class="word-actions">
             <button class="action-btn confused-btn" bindtap="showAddConfusedWord" data-index="{{wordIndex}}" data-word-id="{{wordItem.id}}" size="mini">
-              添加混淆词
+              <text class="btn-icon">🔗</text>
+              <text class="btn-text">添加混淆词</text>
             </button>
             <button class="action-btn spelling-btn" bindtap="startReview" data-index="{{wordIndex}}">
-              开始复习
+              <text class="btn-icon">📚</text>
+              <text class="btn-text">开始复习</text>
             </button>
           </view>
         </view>
@@ -179,7 +180,8 @@
               bindtap="checkAllAnswers" 
               data-index="{{wordIndex}}"
             >
-              提交答案
+              <text class="btn-icon">✅</text>
+              <text class="btn-text">提交答案</text>
             </button>
             <view wx:else class="action-buttons-group">
               <button 
@@ -188,18 +190,21 @@
                 bindtap="regenerateQuestions" 
                 data-index="{{wordIndex}}"
               >
-                重新生成题目
+                <text class="btn-icon">🔄</text>
+                <text class="btn-text">重新生成</text>
               </button>
               <button 
                 class="action-btn next-btn" 
                 bindtap="backToView" 
                 data-index="{{wordIndex}}"
               >
-                完成复习
+                <text class="btn-icon">🎉</text>
+                <text class="btn-text">完成复习</text>
               </button>
             </view>
             <button class="action-btn back-btn" bindtap="backToView" data-index="{{wordIndex}}">
-              返回查看
+              <text class="btn-icon">←</text>
+              <text class="btn-text">返回查看</text>
             </button>
           </view>
         </view>

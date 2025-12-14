@@ -5,7 +5,10 @@
     <view class="no-plan-content">
       <text class="no-plan-title">请先选择复习计划</text>
       <text class="no-plan-hint">只有选择了复习计划才能添加单词</text>
-      <button class="go-plan-btn" bindtap="goToPlans">去选择计划</button>
+      <button class="go-plan-btn" bindtap="goToPlans">
+        <text class="btn-icon">📋</text>
+        <text class="btn-text">去选择计划</text>
+      </button>
     </view>
   </view>
 
@@ -55,7 +58,8 @@
     </view>
 
     <button class="btn submit-btn" bindtap="submitWord" loading="{{submitting}}">
-      添加单词
+      <text class="btn-icon">➕</text>
+      <text class="btn-text">添加单词</text>
     </button>
 
     <view class="divider">
@@ -64,7 +68,8 @@
 
     <view class="ocr-section">
       <button class="btn ocr-btn" bindtap="chooseImage" loading="{{recognizing}}">
-        📷 拍照识别单词
+        <text class="btn-icon">📷</text>
+        <text class="btn-text">拍照识别单词</text>
       </button>
       <text class="ocr-hint">支持拍照或从相册选择图片，自动识别单词</text>
     </view>
@@ -99,9 +104,13 @@
         </view>
       </view>
       <view class="modal-footer">
-        <button class="modal-btn cancel-btn" bindtap="hideOCRResult">取消</button>
+        <button class="modal-btn cancel-btn" bindtap="hideOCRResult">
+          <text class="btn-icon">✖️</text>
+          <text class="btn-text">取消</text>
+        </button>
         <button class="modal-btn confirm-btn" bindtap="addRecognizedWords" disabled="{{recognizedWords.length === 0}}">
-          添加 {{recognizedWords.length}} 个单词
+          <text class="btn-icon">➕</text>
+          <text class="btn-text">添加 {{recognizedWords.length}} 个单词</text>
         </button>
       </view>
     </view>

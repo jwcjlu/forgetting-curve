@@ -58,18 +58,27 @@ async function autoLogin() {
 
     // 3. 调用后端接口获取或创建学生
     const name = userInfo ? userInfo.nickName : '';
-    const result = await api.getOrCreateStudentByOpenid(code, name);
+    console.log('[AutoLogin] 调用登录接口，code 长度:', code ? code.length : 0);
+    
+    const result = await api.getOrCreateStudentByOpenid(null, code, name);
+    console.log('[AutoLogin] 登录接口返回:', result ? JSON.stringify(result).substring(0, 200) : 'null');
 
     // 4. 保存学生ID
-    if (result && result.student) {
+    if (result && result.student && result.student.id) {
       api.setStudentId(result.student.id);
+      console.log('[AutoLogin] 登录成功，学生ID:', result.student.id, 'openid:', result.student.openid);
       return {
         student: result.student,
-        isNew: result.is_new || false
+        isNew: result.is_new || result.isNew || false
       };
     }
 
-    throw new Error('登录失败');
+    // 检查是否有错误信息
+    if (result && result.ret && result.ret.code !== 0) {
+      throw new Error(result.ret.message || '登录失败');
+    }
+
+    throw new Error('登录失败：未返回学生信息');
   } catch (err) {
     console.error('自动登录失败:', err);
     throw err;

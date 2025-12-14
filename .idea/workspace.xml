@@ -4,7 +4,41 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0cab91bd-f818-42fe-b944-d38fc3d86d15" name="Changes" comment="添加复习计划，背诵和单词都是计划下面" />
+    <list default="true" id="0cab91bd-f818-42fe-b944-d38fc3d86d15" name="Changes" comment="添加复习计划，背诵和单词都是计划下面">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/IMPLEMENTATION_STATUS.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/IMPLEMENTATION_STATUS.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/IMPORTANT_CONFIG.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/IMPORTANT_CONFIG.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/OCR_SETUP.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/OCR_SETUP.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/QUICKSTART.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/QUICKSTART.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/README_DOCKER.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/README_DOCKER.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/TESSERACT_SETUP.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/TESSERACT_SETUP.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/TROUBLESHOOTING.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/TROUBLESHOOTING.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/service/wire.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/service/wire.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/nginx/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/nginx/README_TENCENT.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/README_TENCENT.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/nginx/certs/.gitkeep" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/certs/.gitkeep" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/nginx/generate-self-signed-cert.bat" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/generate-self-signed-cert.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/nginx/generate-self-signed-cert.sh" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/generate-self-signed-cert.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/scripts/process-ultimate-json.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/process-ultimate-json.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/scripts/test-wechat-api.sh" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/test-wechat-api.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/scripts/verify-wechat-config.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/verify-wechat-config.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app.wxss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/add-word/add-word.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/add-word/add-word.wxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/add-word/add-word.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/add-word/add-word.wxss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.wxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/index/index.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/index/index.wxss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/plan/plan.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/plan/plan.wxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/plan/plan.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/plan/plan.wxss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/settings/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/settings/settings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/settings/settings.wxml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/settings/settings.wxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pages/settings/settings.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pages/settings/settings.wxss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/utils/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/utils/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/utils/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/utils/auth.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

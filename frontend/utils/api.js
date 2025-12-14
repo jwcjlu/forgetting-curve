@@ -19,6 +19,13 @@ function setStudentId(studentId) {
 }
 
 /**
+ * 清除学生ID（从本地存储）
+ */
+function clearStudentId() {
+  wx.removeStorageSync('studentId');
+}
+
+/**
  * 通用请求方法
  */
 function request(options) {
@@ -60,7 +67,7 @@ function request(options) {
       },
       fail: (err) => {
         const duration = Date.now() - startTime;
-        console.error('[API Request Failed]', err, '耗时:', duration + 'ms');
+        console.error('[API Request Failed]', err, '耗时:', duration + 'ms', 'URL:', options.url);
         
         let errorMsg = '网络请求失败';
         if (err.errMsg) {
@@ -68,7 +75,9 @@ function request(options) {
           if (err.errMsg.indexOf('timeout') !== -1) {
             errorMsg = '请求超时，请检查网络连接';
           } else if (err.errMsg.indexOf('fail') !== -1) {
-            errorMsg = '无法连接到服务器，请检查API地址配置';
+            errorMsg = `无法连接到服务器: ${options.url}。请检查API地址配置是否正确`;
+          } else if (err.errMsg.indexOf('404') !== -1) {
+            errorMsg = `接口不存在 (404): ${options.url}。请检查API地址配置`;
           } else {
             errorMsg = err.errMsg;
           }
@@ -109,6 +118,29 @@ function getOrCreateStudentByOpenid(openid, code, name) {
     url: '/api/v1/students/by-openid',
     method: 'POST',
     data: data
+  }).then(res => {
+    // 检查响应格式
+    if (res && res.ret) {
+      if (res.ret.code === 0 && res.student) {
+        console.log('[API] 登录成功，学生ID:', res.student.id, 'openid:', res.student.openid);
+        return res;
+      } else {
+        console.error('[API] 登录失败，错误码:', res.ret.code, '错误信息:', res.ret.message);
+        throw new Error(res.ret.message || '登录失败');
+      }
+    }
+    // 兼容旧格式
+    if (res && res.student) {
+      return res;
+    }
+    throw new Error('登录失败：未返回学生信息');
+  }).catch(err => {
+    console.error('[API] getOrCreateStudentByOpenid 错误:', err);
+    // 如果是 404 错误，提供更详细的错误信息
+    if (err.message && (err.message.indexOf('404') !== -1 || err.message.indexOf('not found') !== -1)) {
+      throw new Error('登录接口不存在，请检查API地址配置是否正确');
+    }
+    throw err;
   });
 }
 
@@ -582,6 +614,7 @@ function getPlanTodayWords(planId, date) {
 module.exports = {
   getStudentId,
   setStudentId,
+  clearStudentId,
   getOrCreateStudentByOpenid,
   getStudent,
   createStudent,

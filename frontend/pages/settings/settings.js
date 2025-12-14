@@ -7,7 +7,6 @@ Page({
     studentId: '',
     studentName: '',
     studentNo: '',
-    apiUrl: '',
     loading: false,
     isAutoLogin: false,
     grade: '',
@@ -32,7 +31,6 @@ Page({
 
   onLoad() {
     const studentId = api.getStudentId();
-    const apiUrl = wx.getStorageSync('apiUrl') || api.API_BASE_URL;
     const grade = wx.getStorageSync('grade') || '';
     
     // 计算年级索引
@@ -41,14 +39,12 @@ Page({
     if (studentId) {
       this.setData({
         studentId: studentId,
-        apiUrl: apiUrl,
         grade: grade,
         gradeIndex: gradeIndex >= 0 ? gradeIndex : 0
       });
       this.loadStudentInfo();
     } else {
       this.setData({
-        apiUrl: apiUrl,
         grade: grade,
         gradeIndex: gradeIndex >= 0 ? gradeIndex : 0
       });
@@ -120,53 +116,60 @@ Page({
   },
 
   /**
-   * 输入学生ID
+   * 输入学生姓名
    */
-  onStudentIdInput(e) {
+  onStudentNameInput(e) {
     this.setData({
-      studentId: e.detail.value
+      studentName: e.detail.value
     });
   },
 
   /**
-   * 输入API地址
+   * 保存学生姓名
    */
-  onApiUrlInput(e) {
-    this.setData({
-      apiUrl: e.detail.value
-    });
-  },
-
-  /**
-   * 保存学生ID
-   */
-  saveStudentId() {
-    const studentId = this.data.studentId.trim();
-    if (!studentId) {
+  saveStudentName() {
+    const studentName = this.data.studentName.trim();
+    if (!studentName) {
       wx.showToast({
-        title: '请输入学生ID',
+        title: '请输入姓名',
         icon: 'none'
       });
       return;
     }
 
-    // 验证学生是否存在
+    // 通过重新登录来更新姓名（使用现有的openid）
     this.setData({ loading: true });
-    api.getStudent(studentId)
+    
+    // 获取本地存储的openid
+    const openid = api.getOpenid();
+    if (!openid) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none'
+      });
+      this.setData({ loading: false });
+      return;
+    }
+
+    // 调用登录接口更新姓名
+    api.getOrCreateStudentByOpenid(openid, null, studentName)
       .then(res => {
-        api.setStudentId(studentId);
-        this.setData({
-          studentName: res.student.name,
-          studentNo: res.student.student_no
-        });
-        wx.showToast({
-          title: '保存成功',
-          icon: 'success'
-        });
+        if (res && res.student) {
+          this.setData({
+            studentName: res.student.name,
+            studentNo: res.student.student_no
+          });
+          wx.showToast({
+            title: '保存成功',
+            icon: 'success'
+          });
+        } else {
+          throw new Error('更新失败');
+        }
       })
       .catch(err => {
         wx.showToast({
-          title: err.message || '学生不存在',
+          title: err.message || '保存失败',
           icon: 'none'
         });
         console.error(err);
@@ -177,41 +180,12 @@ Page({
   },
 
   /**
-   * 保存API地址
-   */
-  /**
    * 跳转到计划管理页面
    */
   goToPlans() {
     wx.navigateTo({
       url: '/pages/plan/plan'
     });
-  },
-
-  saveApiUrl() {
-    const apiUrl = this.data.apiUrl.trim();
-    if (!apiUrl) {
-      wx.showToast({
-        title: '请输入API地址',
-        icon: 'none'
-      });
-      return;
-    }
-
-    wx.setStorageSync('apiUrl', apiUrl);
-    wx.showToast({
-      title: '保存成功',
-      icon: 'success'
-    });
-    
-    // 提示需要重启应用
-    setTimeout(() => {
-      wx.showModal({
-        title: '提示',
-        content: 'API地址已更新，请重启小程序生效',
-        showCancel: false
-      });
-    }, 1000);
   },
 
   /**

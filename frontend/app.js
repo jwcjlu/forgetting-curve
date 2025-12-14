@@ -12,10 +12,12 @@ App({
    * 自动登录
    */
   async autoLogin() {
-    // 检查是否已有学生ID
-    if (api.getStudentId()) {
-      console.log('[AutoLogin] 已有学生ID，跳过登录');
-      return;
+    // 即使本地有 studentId，也要验证，确保不同设备使用同一个账号
+    const localStudentId = api.getStudentId();
+    if (localStudentId) {
+      console.log('[AutoLogin] 本地已有学生ID:', localStudentId, '，验证登录以确保账号一致性');
+    } else {
+      console.log('[AutoLogin] 本地无学生ID，开始登录...');
     }
 
     try {
@@ -28,6 +30,16 @@ App({
       const result = await auth.autoLogin();
       
       wx.hideLoading();
+      
+      // 检查返回的学生ID是否与本地存储的不同
+      if (result && result.student && result.student.id) {
+        const returnedStudentId = result.student.id;
+        if (localStudentId && localStudentId !== returnedStudentId) {
+          console.warn('[AutoLogin] 检测到学生ID不一致！本地:', localStudentId, '服务器:', returnedStudentId);
+          console.log('[AutoLogin] 已更新为学生ID:', returnedStudentId);
+          // 本地存储的 studentId 会被 auth.autoLogin 中的 setStudentId 更新
+        }
+      }
       
       if (result.isNew) {
         console.log('[AutoLogin] 新用户注册成功', result.student);
@@ -42,6 +54,12 @@ App({
     } catch (err) {
       wx.hideLoading();
       console.error('[AutoLogin] 自动登录失败:', err);
+      
+      // 如果登录失败且本地有 studentId，清除本地存储，下次重新登录
+      if (localStudentId) {
+        console.warn('[AutoLogin] 登录失败，清除本地 studentId，下次重新登录');
+        api.clearStudentId();
+      }
       
       // 显示错误提示
       wx.showModal({

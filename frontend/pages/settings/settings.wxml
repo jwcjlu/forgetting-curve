@@ -13,31 +13,29 @@
     <view wx:if="{{studentId}}" class="student-info-section">
       <view class="info-item">
         <text class="info-label">学生ID：</text>
-        <text class="info-value">{{studentId}}</text>
-      </view>
-      <view class="info-item">
-        <text class="info-label">姓名：</text>
-        <text class="info-value">{{studentName}}</text>
+        <text class="info-value readonly">{{studentId}}</text>
       </view>
       <view class="info-item">
         <text class="info-label">学号：</text>
-        <text class="info-value">{{studentNo}}</text>
+        <text class="info-value readonly">{{studentNo}}</text>
       </view>
     </view>
 
-    <view wx:if="{{studentId}}" class="manual-section">
+    <view wx:if="{{studentId}}" class="name-section">
       <view class="form-item">
-        <text class="label">手动设置学生ID（可选）</text>
+        <text class="label">姓名</text>
         <input 
           class="input" 
-          type="number"
-          placeholder="请输入学生ID"
-          value="{{studentId}}"
-          bindinput="onStudentIdInput"
+          type="text"
+          placeholder="请输入姓名"
+          value="{{studentName}}"
+          bindinput="onStudentNameInput"
+          maxlength="20"
         />
       </view>
-      <button class="btn" bindtap="saveStudentId" loading="{{loading}}">
-        保存
+      <button class="btn" bindtap="saveStudentName" loading="{{loading}}">
+        <text class="btn-icon">💾</text>
+        <text class="btn-text">保存姓名</text>
       </button>
     </view>
 
@@ -62,21 +60,6 @@
       <text class="hint-text">选择年级后，生成的题目会更符合您的学习水平</text>
     </view>
 
-    <view class="api-config-section">
-      <view class="form-item">
-        <text class="label">API地址</text>
-        <input 
-          class="input" 
-          type="text"
-          placeholder="请输入后端API地址"
-          value="{{apiUrl}}"
-          bindinput="onApiUrlInput"
-        />
-      </view>
-      <button class="btn" bindtap="saveApiUrl" loading="{{loading}}">
-        保存API地址
-      </button>
-    </view>
 
     <view class="plan-section">
       <view class="form-item">
@@ -84,7 +67,8 @@
         <text class="hint-text">创建和管理复习计划，选择计划后只显示该计划的单词</text>
       </view>
       <button class="btn plan-btn" bindtap="goToPlans">
-        管理计划
+        <text class="btn-icon">📋</text>
+        <text class="btn-text">管理计划</text>
       </button>
     </view>
   </view>
